@@ -1,0 +1,27 @@
+flowchart TD
+    %% Variables principales
+    PCB[(pcb)]
+    BUF[(buffer)]
+    RCV[(RecvBuffer)]
+    FR[(flag_ready2sent)]
+    FS[(flag_senddata)]
+    DPL[(datos_PL)]
+    DAC[(dac_values / trigger_values)]
+
+    %% Procesos / Conexiones mediante funciones
+    A1([Proceso TCP])
+    A2([Adquisición DMA])
+    A3([Procesamiento de comandos])
+    
+    %% Relaciones
+    PCB -- "gestiona conexión en" --> A1
+    BUF -- "se llena en" --> A2
+    DPL -- "proporciona datos a" --> BUF
+    FR -- "permite envío en" --> A1
+    FS -- "controla ejecución de" --> A1
+    RCV -- "contiene comandos para" --> A3
+    DAC -- "configura salidas en" --> A3
+
+    %% Conexiones entre procesos (Ejemplo en loop)
+    A1 -- "llamado desde" --> A3
+    A2 -- "envía datos a" --> A1

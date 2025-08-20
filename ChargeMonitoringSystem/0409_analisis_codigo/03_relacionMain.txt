@@ -1,0 +1,93 @@
+flowchart TD
+    %% Inicio y Configuración
+    A[Inicio: main]:::function
+    B[Imprime encabezado y configura DMA/timer]
+    C[lwIP_init y setup de interrupciones]
+    D[Agregar interfaz de red: xemac_add]
+    E[Set network up y dhcp_start]
+    F{¿DHCP configurado?}
+    G[Obtener IP e imprimir configuración]
+    H[Configurar IP por defecto: 192.168.1.10]
+    I[start_application]:::function
+    J[setup_system - Inicializa hardware]:::function
+    K[Imprime debug: longitud de buffer, etc.]
+
+    %% Invocación del bucle principal
+    L[Invoca loop_routine]:::function
+
+    %% Bucle principal de loop_routine
+    M{Inicio del loop while 1}
+    N{TcpFastTmrFlag?}
+    O[tcp_fasttmr: Resetea TcpFastTmrFlag]:::function
+    P{TcpSlowTmrFlag?}
+    Q[tcp_slowtmr: Resetea TcpSlowTmrFlag]:::function
+    R{start_send_event && c_glob_ev <=1 && flag_ready2sent?}
+    S[Establece flag_senddata y llama a process_n_send_data]:::function
+    T[Incrementa c_glob_ev]
+    U{flag_senddata && flag_ready2sent?}
+    V[Resetea flags y llama a transfer_data <== buffer]:::function
+    W[xemacif_input <-- echo_netif: Recepción constante]:::function
+    X{Comando `-q` en RecvBuffer?}
+    Y[Prepara mensaje de shutdown y llama a shutdown_all: Break loop]:::function
+    Z[Otros comandos y flags:
+• soft_trigg_en: Toggle soft_trig
+• shutdown: shutdown_all
+• send_cpld: write_CPLD_signals
+• en_busy: Limpia flag y busy_trigger_mask
+• read_GPIO: Lectura de GPIO, ADCLK, LCLK
+• rst_fifo: Control de reset FIFO
+• dac_set: init_DACs y setup_DACs
+• DTAP_meas: Imprime mediciones DTAP
+• rst_system: Reconfigura sistema
+• rst_drs4: DRS4_restart_ROI
+• update_delay: Actualiza delay en GPIO1
+• en_A: Set/Clear en_A_vec]
+    AA[Reinicia iteración del loop]
+
+    %% Fin
+    AB[Fin del loop while]
+    AC[Imprime `Exiting main` y cleanup_platform]:::function
+    AD[Fin: main]
+
+    %% Conexiones del Diagrama
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F -- Sí --> G
+    F -- No --> H
+    H --> G
+    G --> I
+    I --> J
+    J --> K
+    K --> L
+    L --> M
+
+    %% Dentro del loop de loop_routine
+    M --> N
+    N -- Sí --> O
+    N -- No --> P
+    O --> P
+    P -- Sí --> Q
+    P -- No --> U
+    Q --> R
+    R -- Sí --> S
+    S --> T
+    R -- No --> T
+    T --> U
+    U -- Sí --> V
+    U -- No --> W
+    V --> W
+    W --> X
+    X -- Sí --> Y
+    X -- No --> Z
+    Z --> AA
+    AA --> M
+
+    %% Salida del loop
+    M -- Break --> AB
+    AB --> AC
+    AC --> AD
+
+classDef function fill:#ccf,stroke:#333,stroke-width:2px;

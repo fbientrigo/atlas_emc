@@ -1,0 +1,27 @@
+    flowchart TD
+        %% Funciones
+        TDT[**transfer_data**]
+        ACC[**accept_callback**]
+        LOOP[**loop_routine**]
+        PSD[**process_n_send_data**]
+
+        %% Variables
+        PCB[(pcb)]
+        BUF[(buffer)]
+        FR[(flag_ready2sent)]
+        FS[(flag_senddata)]
+        RCV[(RecvBuffer)]
+
+        %% Relaciones: funciones -> variables
+        TDT -- "utiliza" --> BUF
+        TDT -- "verifica" --> FR
+        TDT -- "envía vía" --> PCB
+
+        ACC -- "asigna/conecta" --> PCB
+        ACC -- "habilita" --> FR
+
+        LOOP -- "llama a" --> TDT
+        LOOP -- "controla vía flag" --> FS
+        LOOP -- "procesa comandos de" --> RCV
+
+        PSD -- "copia datos a" --> BUF

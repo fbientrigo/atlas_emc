@@ -1,0 +1,69 @@
+DHCP parece ser lo que no ocurre, la conexion es lo que si ocurre, existe la conexion por ssh
+' ping no funciona por que no esta habilitado, pero es posible |netcat| para enviar comandos por lo que si sirve el TCP/IP, pues le llegan las instrucciones
+
+Pero lo que no hace es el DHCP
+- le llegan 
+
+
+___
+
+El problema segun Mauro parece estar aqui
+
+	// f: Posible problematica ocurre aqui
+	// esot tiene un contador y si supera de tanto tiempo, entonces deja de inentar y pasa a la config defaul
+	// el problema es la comunicacion
+	// pues no tenemos la mascara de red y la puerta de enlace corrrecta, de conectrse alli entonces no tenemos la configde red
+	
+	dhcp_start(echo_netif);
+	dhcp_timoutcntr = 24;
+
+	while(((echo_netif->ip_addr.addr) == 0) && (dhcp_timoutcntr > 0))
+		xemacif_input(echo_netif);
+
+	// f: config default
+	// nunca agarra la de la red que conecta, solo toma esta default
+	if (dhcp_timoutcntr <= 0)
+	{
+		if ((echo_netif->ip_addr.addr) == 0)
+		{
+			xil_printf("DHCP Timeout\r\n");
+			xil_printf("Configuring default IP of 192.168.1.10\r\n");
+			IP4_ADDR(&(echo_netif->ip_addr),  192, 168,   1, 10);
+			IP4_ADDR(&(echo_netif->netmask), 255, 255, 255,  0);
+			IP4_ADDR(&(echo_netif->gw),      192, 168,   1,  1);
+		}
+	}
+
+
+
+Entonces podria estar jugando en un proyecto, agarrar y empezar a ver una conexion por DHCP, crear un pequeno scripte e ir metiendo entonces la libreria
+
+parece haber algo 
+echo_netif
+
+
+existe un concepto importante como lo de gateway o puerta de enlace, el "gw" indica hacia donde nos conectamos y deben tener la ip invertida entre ellas para poder conectar punto a punto, esto fue lo que Mauro hizo para conectar punto a punto
+
+nota: si uno tiene tiene un ruter ocon los datos defaults de direccion,entonces los datos si se evnian
+
+LO QUE NO FUNCIONA ES OBTENER EL IP DE OTRAS REDES
+
+muchas redes tienen un servidor de dhcp, este ve cuando se conecta una computadora y entonces le envia la ip para que asi la otra pc puedea saber cuado enviarle las cosas, normalmente cuando tienes algo que dos computadores tienen la misma ip por error entonces esto lo deshabilita. Entonces el dhcp es un servidor que se encarga de servir las direcciones, ese es el sistema de control el gateway
+
+Lo que hay que hablitar es el dhcp de manera correcta
+
+
+nota: Orlanod vio que los datos dhcp no funcionaban, entonces lo que hizo es que se enviara al puerto UART, lo saco mientras
+
+
+Teoria: netif_set_up
+dhcp_start --> Mauro cree que ese comando no funciona, o falta algun comando en la linea, antes funcionaba, o la libreria no la esta dando
+Tambien puede haber algo al inicio de cliente en el Zynq,
+
+Por ello me pide que haga pruebas con la tarjetita que tengo que estare trabajando en un subconjunto de la libreria
+
+
+____
+
+Detalles finos:
+[] otro problema es que si no hay cable, hay algo que lo detiene, el programa muere! algo bueno es que el programa no se trabe y no sea necesario reiniciar. Debido a que es algo molesto,
