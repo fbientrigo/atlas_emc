@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "20_Documents/EMP_firmware_estimation.md",
+                "file": "logging/0829-radition-BergM.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "EMP_firmware_estimation"
+              "title": "0829-radition-BergM"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 387.5
+    "width": 263.5096130371094
   },
   "right": {
     "id": "4888a1e34a71a970",
@@ -171,20 +171,26 @@
   },
   "active": "79bc9032a7dc8b96",
   "lastOpenFiles": [
-    "20_Documents/B13_p19_1bitporCircuito.md",
-    "20_Documents/Configurar ambiente EMP y cargarle proyecto ejemplo.md",
-    "20_Documents/CMB_circuital_setup.md",
+    "Pasted image 20250829104417.png",
+    "Pasted image 20250829103935.png",
+    "logging/0826-petalinux.md",
+    "logging/0829-radition-BergM.md",
+    "0813-EMC System.md",
     "20_Documents/AXI4-Lite communication between PL and PS.md",
-    "0409_analisis_codigo/02_relacionVariables.svg",
     "20_Documents/TGC-Charge Monitoring System Status Jun 2025.md",
-    "20_Documents/Technical_Design_Report_TGC_ChaMS.md",
     "20_Documents/Technical_Design_Report_TGC_ChaMS (1).md",
-    "20_Documents/Interaction_with_lpgbt.md",
+    "20_Documents/Technical_Design_Report_TGC_ChaMS.md",
     "20_Documents/Instructions to connect Trenz 0715 SoM to computer.md",
-    "20_Documents/Instrucciones para cargar firmware a CPLD.md",
     "20_Documents/Final_report_2024_12_17.md",
     "20_Documents/EMP_firmware_estimation.md",
     "20_Documents/Elink_communication_between_CMB_and_EMCI.md",
+    "20_Documents/Configurar ambiente EMP y cargarle proyecto ejemplo.md",
+    "logging",
+    "20_Documents/B13_p19_1bitporCircuito.md",
+    "20_Documents/CMB_circuital_setup.md",
+    "0409_analisis_codigo/02_relacionVariables.svg",
+    "20_Documents/Interaction_with_lpgbt.md",
+    "20_Documents/Instrucciones para cargar firmware a CPLD.md",
     "_pdf/TGC-Charge Monitoring System Status Jun 2025.pdf",
     "_pdf/Technical_Design_Report_TGC_ChaMS.pdf",
     "_pdf/Technical_Design_Report_TGC_ChaMS (1).pdf",
@@ -194,7 +200,6 @@
     "_pdf/Final_report_2024_12_17.pdf",
     "_pdf/EMP_firmware_estimation.pdf",
     "_pdf/Elink_communication_between_CMB_and_EMCI.pdf",
-    "_pdf/Configurar ambiente EMP y cargarle proyecto ejemplo.pdf",
     "_assets/svg/03_relacionMain.svg",
     "_assets/svg/02_relacionVariables.svg",
     "_assets/svg/01_relacionFunciones.svg",
