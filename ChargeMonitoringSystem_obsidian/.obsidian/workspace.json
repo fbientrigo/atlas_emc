@@ -8,20 +8,75 @@
         "type": "tabs",
         "children": [
           {
-            "id": "79bc9032a7dc8b96",
+            "id": "48b9faf8a72fc30b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "20_Documents/EMP_firmware_estimation.md",
+                "file": "30_Notes/0925_downlinkUserData path.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "EMP_firmware_estimation"
+              "title": "0925_downlinkUserData path"
+            }
+          },
+          {
+            "id": "cb047c1569dbebf5",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "_assets/misc/ch_fpga.png"
+              },
+              "icon": "lucide-image",
+              "title": "ch_fpga"
+            }
+          },
+          {
+            "id": "d36109ccfee7860d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "30_Notes/quick_guides/pins lpgbt.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "pins lpgbt"
+            }
+          },
+          {
+            "id": "cfdeab6618462fab",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "30_Notes/0905-encendidoEMP.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "0905-encendidoEMP"
+            }
+          },
+          {
+            "id": "57bc72ca1741acc8",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "30_Notes/0930-shared-log.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "0930-shared-log"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -78,7 +133,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 387.5
+    "width": 276.5
   },
   "right": {
     "id": "4888a1e34a71a970",
@@ -169,35 +224,53 @@
       "bases:Create new base": false
     }
   },
-  "active": "79bc9032a7dc8b96",
+  "active": "c042509da6fe67d9",
   "lastOpenFiles": [
-    "20_Documents/B13_p19_1bitporCircuito.md",
-    "20_Documents/Configurar ambiente EMP y cargarle proyecto ejemplo.md",
-    "20_Documents/CMB_circuital_setup.md",
-    "20_Documents/AXI4-Lite communication between PL and PS.md",
-    "0409_analisis_codigo/02_relacionVariables.svg",
-    "20_Documents/TGC-Charge Monitoring System Status Jun 2025.md",
-    "20_Documents/Technical_Design_Report_TGC_ChaMS.md",
-    "20_Documents/Technical_Design_Report_TGC_ChaMS (1).md",
-    "20_Documents/Interaction_with_lpgbt.md",
-    "20_Documents/Instructions to connect Trenz 0715 SoM to computer.md",
-    "20_Documents/Instrucciones para cargar firmware a CPLD.md",
-    "20_Documents/Final_report_2024_12_17.md",
-    "20_Documents/EMP_firmware_estimation.md",
-    "20_Documents/Elink_communication_between_CMB_and_EMCI.md",
-    "_pdf/TGC-Charge Monitoring System Status Jun 2025.pdf",
+    "_assets/misc/pigbt_welcome.png",
+    "_assets/misc/pigbt_lpgbt_locked.png",
+    "_assets/misc/pigbt_pattern_4A4C.png",
+    "_assets/misc/pigbt_uplinkoptions.png",
+    "_assets/misc/pigbt_uplink_datarate.png",
+    "_assets/misc/pigbt_pattern.png",
+    "_assets/misc/pigbt_clockps.png",
+    "_assets/misc/pigbt_datarate.png",
+    "_assets/misc/sent_pattenr.png",
+    "_assets/misc/dout_constvalue.png",
+    "_assets/misc/firmware_using.png",
+    "30_Notes/0929-PRBS Signal para lpgbt.md",
+    "30_Notes/0905-encendidoEMP.md",
+    "30_Notes/0930-version 0.2v emp_firmware.md",
+    "30_Notes/0930-LibUIO Implementation.md",
+    "_pdf/Setup EMP development environment & reference project.pdf",
+    "30_Notes/quick_guides/Nombres de Firmware.md",
+    "30_Notes/0930-shared-log.md",
+    "30_Notes/quick_guides/pins lpgbt.md",
+    "30_Notes/0925_downlinkUserData path.md",
+    "30_Notes/0907-TEBF0808 Instalación.md",
+    "30_Notes/quick_guides/CargarXSA_DeviceTree.md",
+    "30_Notes/0910-empFirmware - logs y Warnings.md",
+    "30_Notes/0911-ZynqModel.md",
+    "30_Notes/0910-Clock V.md",
+    "0930-modificar prbs.md",
+    "30_Notes/quick_guides/Buildear_LpGbtSw.md",
+    "_pdf/Configurar ambiente EMP y cargarle proyecto ejemplo.pdf",
+    "30_Notes/0929-ExplorationIRQ.md",
+    "30_Notes/0915b-LpGbtSw en FPGA.md",
+    "30_Notes/0915-xsa to the fpga.md",
+    "30_Notes/0922-Conectando a LPGBT.md",
+    "30_Notes/0923-Testing Master branch firmware.md",
+    "30_Notes/0923_dtree errors.md",
+    "30_Notes/0924-downlink frame y com.md",
+    "30_Notes/0924-getting data out.md",
+    "30_Notes/terminal_text_first_start0905-EMP.md",
+    "30_Notes/TEBF0808-04A.md",
+    "_assets/EMP_Firmware_data/mermaid_interruptFromUplink.txt",
+    "_assets/EMP_Firmware_data/0926_mermaid_downlinkuserdata.txt",
+    "_assets/EMP_Firmware_data",
+    "30_Notes/quick_guides",
     "_pdf/Technical_Design_Report_TGC_ChaMS.pdf",
     "_pdf/Technical_Design_Report_TGC_ChaMS (1).pdf",
-    "_pdf/Interaction_with_lpgbt.pdf",
-    "_pdf/Instructions to connect Trenz 0715 SoM to computer.pdf",
-    "_pdf/Instrucciones para cargar firmware a CPLD.pdf",
-    "_pdf/Final_report_2024_12_17.pdf",
-    "_pdf/EMP_firmware_estimation.pdf",
-    "_pdf/Elink_communication_between_CMB_and_EMCI.pdf",
-    "_pdf/Configurar ambiente EMP y cargarle proyecto ejemplo.pdf",
-    "_assets/svg/03_relacionMain.svg",
-    "_assets/svg/02_relacionVariables.svg",
-    "_assets/svg/01_relacionFunciones.svg",
-    "0409_analisis_codigo/01_relacionFunciones.svg"
+    "_pdf/TGC-Charge Monitoring System Status Jun 2025.pdf",
+    "_pdf/Instrucciones para cargar firmware a CPLD.pdf"
   ]
 }

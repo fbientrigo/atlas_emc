@@ -1,0 +1,3 @@
+- Enviar un caracter conocido cada Y cantidad de tiempo
+- necesitamos ademas ser capaces de leer desde el sistema
+- 

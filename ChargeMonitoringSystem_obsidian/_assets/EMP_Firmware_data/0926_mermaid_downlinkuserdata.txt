@@ -1,0 +1,52 @@
+---
+config:
+  look: neo
+  theme: redux-color
+---
+sequenceDiagram
+  participant emp_lpgbt_u0 as U0
+  participant cdc_tx as cdc_tx_inst
+  participant lpgbtFpga_10g24 as lpgbtFpga_top_inst
+  participant lpgbtfpga_downlink as downlink_inst
+  participant lpgbtfpga_txGearbox as lpgbtfpga_txGearbox
+  participant lpgbtfpga_scrambler as scrambler
+  participant lpgbtfpga_encoder as encoder
+  participant lpgbtfpga_interleaver as interleaver
+
+  emp_lpgbt_root ->> emp_lpgbt_u0: lpgbtfpga_downlinkUserData_i(32)
+  Note over emp_lpgbt_u0:lpgbtfpga_downlinkUserData_s(32)
+  Note over emp_lpgbt_u0:lpgbtfpga_downlinkData_40(36)
+  emp_lpgbt_u0 ->> cdc_tx: lpgbtfpga_downlinkData_40(36)
+  Note over cdc_tx: data_a_i (rsng clk)
+  Note over cdc_tx: data_a_reg  
+  Note over cdc_tx: data_b_reg (rsng clk*8)
+  Note over cdc_tx: data_b_o
+  cdc_tx ->> emp_lpgbt_u0: lpgbtfpga_downlinkData_320(36)
+  emp_lpgbt_u0 ->> lpgbtFpga_10g24: downlinkData_i(36)
+  Note over lpgbtFpga_10g24: downlinkData320
+  lpgbtFpga_10g24 ->> lpgbtfpga_downlink: userData_i(32)
+  Note over lpgbtfpga_downlink:inputData_s(32+2+2)
+  lpgbtfpga_downlink->> lpgbtfpga_scrambler:data_i
+  Note over lpgbtfpga_scrambler:data_o(36)
+  lpgbtfpga_scrambler->> lpgbtfpga_downlink:scrambledData_s(36)
+  lpgbtfpga_downlink ->> lpgbtfpga_encoder:data_i(36)
+  Note over lpgbtfpga_encoder:virtualFrame_C[x](9)
+  lpgbtfpga_encoder ->> lpgbtfpga_downlink:FEC_o(24)
+  lpgbtfpga_downlink->>lpgbtfpga_interleaver:FECData_s(24)
+  Note over lpgbtfpga_interleaver: FEC_i(24)
+  Note over lpgbtfpga_interleaver: interleaved_data(64)
+  lpgbtfpga_interleaver ->> lpgbtfpga_downlink: data_o(64)
+  Note over lpgbtfpga_downlink:encodedFrame_s(64)
+  lpgbtfpga_downlink ->> lpgbtfpga_txGearbox: dat_inFrame_i(coW)
+  Note over lpgbtfpga_txGearbox : in_txFrame_from_frameInverter_s(coW)
+  Note over lpgbtfpga_txGearbox : txFrame_from_frameInverter_pipe_s(coW)
+  Note over lpgbtfpga_txGearbox : txWord_beforeOversampling_s(coWR)
+  Note over lpgbtfpga_txGearbox : txFrame_from_frameInverter_reg_s(coW)
+  lpgbtfpga_txGearbox->> lpgbtfpga_txGearbox:txWord_beforeOversampling_s(coWR)
+  Note over lpgbtfpga_txGearbox : dat_outFrame_s(coW)
+  Note over lpgbtfpga_txGearbox :  dat_outFrame_o(coW)
+  lpgbtfpga_txGearbox ->> lpgbtfpga_downlink : mgt_word_o(coW)
+  lpgbtfpga_downlink ->> lpgbtFpga_10g24 : downlink_mgtword_s(32)
+  Note over lpgbtFpga_10g24 : downlink_mgtword_o(32)
+  lpgbtFpga_10g24 ->> emp_lpgbt_u0: MGT_USRWORD_o(32)
+

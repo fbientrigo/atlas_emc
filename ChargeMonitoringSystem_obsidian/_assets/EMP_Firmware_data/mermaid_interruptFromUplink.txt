@@ -1,0 +1,79 @@
+---
+config:
+  look: neo
+  theme: redux-color
+---
+sequenceDiagram
+  participant MGT_root as MGT
+  participant emp_lpgbt_root as emp_lpgbt
+  participant emp_lpgbt as U0
+  participant cdc_rx as cdc_rx_inst
+  participant emp_lpbgt_ic_clerk_regs as reg_map
+  participant lpgbtFpga_10g24 as lpgbtFpga_top_inst
+  participant lpgbtfpga_uplink as uplink_inst
+  participant lpgbtfpga_rxGearbox as lpgbtfpga_rxGearbox
+  participant lpgbtfpga_deinterleaver as deinterleaver
+  participant lpgbtfpga_decoder as decoder
+  participant lpgbtfpga_descrambler as descrambler
+  participant ic_top as ic_top_inst
+  participant ic_rx as rx_inst
+  participant decserializer as Deserializer
+  participant ic_rx_fifo as ic_rx_fifo_inst
+  MGT_root ->> emp_lpgbt_root: MGT_USRWORD
+  emp_lpgbt_root ->> emp_lpgbt: MGT_USRWORD_i
+  emp_lpgbt ->> lpgbtFpga_10g24: uplink_mgtword_i
+  Note over lpgbtFpga_10g24: uplink_mgtword_s
+  lpgbtFpga_10g24 ->> lpgbtfpga_uplink: mgt_word_i
+  lpgbtfpga_uplink ->> lpgbtfpga_rxGearbox: dat_inFrame_i
+  Note over lpgbtfpga_rxGearbox: dat_inFrame_s
+  Note over lpgbtfpga_rxGearbox: reg0 (32 * clockratio)
+  Note over lpgbtfpga_rxGearbox: reg1
+  Note over lpgbtfpga_rxGearbox: rxFrame_inverted_s
+  Note over lpgbtfpga_rxGearbox: dat_outFrame_s
+  Note over lpgbtfpga_rxGearbox: dat_outFrame_o
+  lpgbtfpga_rxGearbox ->> lpgbtfpga_uplink: gbxFrame_s(256)
+  Note over lpgbtfpga_uplink: gbxFrame_5g12_s
+  Note over lpgbtfpga_uplink: frame_pipelined_s(256)
+  lpgbtfpga_uplink ->> lpgbtfpga_deinterleaver: data_i
+  Note over lpgbtfpga_deinterleaver: fec5_data_10g24_s
+  Note over lpgbtfpga_deinterleaver: mux a fec5_data_s(234) -> fec5_data_o(234)
+  lpgbtfpga_deinterleaver ->> lpgbtfpga_uplink: fec5_data_from_deinterleaver_s
+  lpgbtfpga_uplink ->> lpgbtfpga_decoder: fec5_data_i
+  Note over lpgbtfpga_decoder: fec5_data_s
+  Note over lpgbtfpga_decoder: fec5_data_o
+  lpgbtfpga_decoder ->> lpgbtfpga_uplink: fec5_data_from_decoder_s(234)
+  lpgbtfpga_uplink ->> lpgbtfpga_descrambler: fec5_data_i
+  Note over lpgbtfpga_descrambler: fec5_data_o(234)
+  lpgbtfpga_descrambler ->> lpgbtfpga_uplink: UserData_10g24_s
+  lpgbtfpga_descrambler ->> lpgbtfpga_uplink: UserData_5g12_s
+  Note over lpgbtfpga_uplink: userData_o(230)
+  lpgbtfpga_uplink ->> lpgbtFpga_10g24: uplinkData320(234)
+  Note over lpgbtFpga_10g24: uplinkData_o
+  lpgbtFpga_10g24 ->> emp_lpgbt: lpgbtfpga_uplinkData_320(234
+  emp_lpgbt ->> cdc_rx: data_a_i
+  Note over cdc_rx: data_a_reg
+  Note over cdc_rx: data_b_reg
+  Note over cdc_rx: data_b_o
+  cdc_rx ->> emp_lpgbt: lpgbtfpga_uplinkData_40(234)
+  Note over emp_lpgbt: lpgbtfpga_uplinkUserData_s(230)
+  emp_lpgbt ->> emp_lpgbt_root: lpgbtfpga_uplinkUserData_o
+  Note over emp_lpgbt: lpgbtfpga_uplinkUserData_o
+  Note over emp_lpgbt: lpgbtfpga_uplinkIcData_s
+  emp_lpgbt ->> ic_top: rx_data_i
+  Note over ic_top: data_ic_rx_inv
+  ic_top ->> ic_rx: byte_des
+  ic_rx ->> decserializer: data_i
+  Note over decserializer: data_o
+  decserializer ->> ic_rx: byte_des
+  ic_rx ->> ic_rx_fifo: data_i
+  Note over ic_rx_fifo: mem_arr
+  Note over ic_rx_fifo: data_o
+  ic_rx_fifo ->> ic_rx: data_o
+  ic_rx ->> ic_top: rx_data_from_gbtx_o
+  ic_top ->> emp_lpgbt: data_rx_data_FIFO
+  Note over emp_lpgbt: [[FSM]]
+  emp_lpgbt ->> emp_lpgbt: data_rx_data_FIFO
+  Note over emp_lpgbt: interrupt_flags_ic_resp
+  Note over emp_lpgbt: interrupt_enable_ic_resp
+  emp_lpgbt ->> emp_lpgbt: int_lpgbt_resp
+
