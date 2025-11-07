@@ -9,12 +9,12 @@
 	- las instrucciones indican que debe de presionarse el boton más cercano a la placa TE0790-03
 
 es posible conocer el terminal port:
-![[com8_devices.png]]
+![[assets/interfaces/2024/09/com8-devices.png]]
 
 
 Luego de escuchar el ventilador se ve este mensaje
 
-![[bootingZynq.png]]
+![[assets/firmware/2024/09/bootingzynq.png]]
 
 Luego al entrar con 
 - root

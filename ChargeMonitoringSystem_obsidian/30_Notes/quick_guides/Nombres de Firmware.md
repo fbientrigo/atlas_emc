@@ -20,7 +20,7 @@ entre cada carga de firmware, se reinicia el sistema para evitar cualquier sesgo
 
 ### reading_1006
 Un backup funcional
-![[emp_firmware_lpgbt_connections.png]]
+![[assets/firmware/2024/01/emp-firmware-lpgbt-connections.png]]
 
 - Posee la PRBS para escribir
 - Es la versión que contiene el funcionamiento de loop back si se configura.
@@ -29,7 +29,7 @@ Un backup funcional
 de procesamiento + 
 ## reading_1006_uplinkready
 basado en el backup funcional
-![[emp_firmware_lpgbt_connection_example.png]]
+![[assets/firmware/2024/01/emp-firmware-lpgbt-connection-example.png]]
 
 - es identico solo uplink ready va hacia el mecanismo de lectura
 
@@ -71,7 +71,7 @@ sudo epos/etools/loadFirmare.sh emp_tcl_gen.dtbo
 Read: Register Address: 12e Value: 0x00
 ```
 
-![[firmware_using.png]]
+![[assets/firmware/2024/01/firmware-using.png]]
 
 
 

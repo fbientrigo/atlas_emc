@@ -1,8 +1,8 @@
 Al cargar el firmware observamos LED6 que se activa como
-![[sch_statLED.png|300]]
+![[assets/firmware/2024/09/sch-statled.png|300]]
 
 el LED2 y los demas acabanen la CPLD 
-![[sch_statLED_u39b.png|200]]
+![[assets/firmware/2024/09/sch-statled-u39b.png|200]]
 
 ___
 
@@ -104,32 +104,32 @@ ___
 # PiGbt
 Luego procedimos a realizar las conexiones del PiGBT, tenemos entonces
 
-![[pigbt_welcome.png]]
+![[assets/interfaces/2024/09/pigbt-welcome.png]]
 
-![[pigbt_lpgbt_locked.png]]
+![[assets/interfaces/2024/09/pigbt-lpgbt-locked.png]]
 
 ### test_features
 A lo que se configura un test pattern
-![[pigbt_pattern_4A4C.png]]
+![[assets/interfaces/2024/09/pigbt-pattern-4a4c.png]]
 
 el cual es enviado
-![[pigbt_uplinkoptions.png]]
+![[assets/interfaces/2024/09/pigbt-uplinkoptions.png]]
 
 a lo que tenemos distintos pins en la EMCI carrier board, 
 configuramos un reloj de datarate más lento para poder leerlo
-![[pigbt_uplink_datarate.png]]
+![[assets/interfaces/2024/09/pigbt-uplink-datarate.png]]
 
 
 El reloj se observaba igual en el caso a partir de los pins de RJ45, así que probamos cambiar el test pattern pero especificandpo que era downlink y no uplink
-![[pigbt_pattern.png]]
+![[assets/interfaces/2024/09/pigbt-pattern.png]]
 
 pero no se observó nada.
 
 Pero al modificar el reloj en el apartado, encontramos
-![[pigbt_clockps.png]]
+![[assets/interfaces/2024/09/pigbt-clockps.png]]
 
 En observamos un aumento de la señal de reloj en el osciloscopio
-![[pigbt_datarate.png]]
+![[assets/interfaces/2024/09/pigbt-datarate.png]]
 
 ### Problematica
 Conocer de los 6 elinks, a que canal y grupo pertenecen,

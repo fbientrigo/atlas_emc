@@ -5,7 +5,7 @@ Utilizando AirHDL de base para generar con los registros, entregamos
 
 ___
 el arreglo no es permitido en esta versión de Vivado 
-![[1002_problm_1_slv32array_noexiste.png|400]]
+![[assets/firmware/2024/10/1002-problm-1-slv32array-noexiste.png|400]]
 
 por ello pasamos a modifica e incluir la lista de grupos como se indica arriba
 

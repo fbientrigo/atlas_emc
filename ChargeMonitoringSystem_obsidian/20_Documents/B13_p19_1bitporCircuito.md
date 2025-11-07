@@ -17,7 +17,7 @@ lang: auto
 - Permite usar redundancia para evaluar una FPGA bajo un entorno de radiacion
 - Existe un pequeño sesgo que es cuando el 2 de 3 circuitos fallan, pero se aproxima a nula esa contribución
 - Entender bien que quiere decir esta slide para tener una propuesta clara de como presentar los resultados, usando de base para lo que fue diseñado este circuito
-![[NGMediumResetMask_Results.png]]
+![[assets/firmware/2024/01/ngmediumresetmask-results.png]]
 
 
 # Acciones (0–3)

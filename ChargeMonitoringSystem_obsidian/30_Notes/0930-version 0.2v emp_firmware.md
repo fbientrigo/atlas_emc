@@ -1,3 +1,3 @@
 A que se refiere con
 - Elink memory interface no implementada?
-![[dominiccker_mattermost_02v.png]]
+![[assets/interfaces/2024/09/dominiccker-mattermost-02v.png]]

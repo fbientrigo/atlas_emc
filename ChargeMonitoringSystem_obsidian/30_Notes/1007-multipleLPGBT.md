@@ -1,6 +1,6 @@
 Vamos a leer multiples lpgbts readers, de manera que es necesario tener en consideración el distinto direccionamietno
 
-![[EMP_saturationTest.png]]
+![[assets/mediciones/2024/10/emp-saturationtest.png]]
 
 ___
 
@@ -22,7 +22,7 @@ Estas fueron modificadas a mano en BD y Address editor
 11 0xA019
 12 0xA01A
 
-![[emp_firmware__axis.png]]
+![[assets/firmware/2024/10/emp-firmware-axis.png]]
 
 
 Esa es la primera propuesta para el uso de memoria.

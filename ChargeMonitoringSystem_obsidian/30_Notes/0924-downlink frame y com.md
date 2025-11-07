@@ -1,4 +1,4 @@
-![[sent_pattenr.png]]
+![[assets/firmware/2024/09/sent-pattenr.png]]
 
 Los primeros 2 hexadecimales son del grupo 0, luego 2 hex del grupo 1
 CH:    3   2   1   0

@@ -12,13 +12,13 @@ Este es un sistema que se comunica con los puiertos TCP IP y permite la comunica
 
 EMP lpGBT reference build
 exactamente lo que necesitamos es: 
-![[slide_emplpgbt_referencesol.png]]
+![[assets/firmware/2024/01/slide-emplpgbt-referencesol.png]]
 
 en preciso necesitamos: OpcUaLpGbtServer
 
 
 Con respecto a esa construcción, busque la versión de Quasar con la que deberia funcionar
-![[OPCUA_EMPLPGBT.png]]
+![[assets/interfaces/2024/01/opcua-emplpgbt.png]]
 [Release v1.5.0-rc2 · quasar-team/quasar](https://github.com/quasar-team/quasar/releases/tag/v1.5.0-rc2)
 
 Una vez con esa, lo que se hizo fue descargar la release especifica de github.
@@ -71,7 +71,7 @@ El servidor a construir deberia ser capaz de:
 
 Nota para lo que se debe desarrollar
 Se debe ingresar a Vivado y allí modificar los lpgbt para poder sacar los datos de allí y poder moverlos por el servidor,
-![[emp_firmware_options.png]]
+![[assets/firmware/2024/01/emp-firmware-options.png]]
 
 aqui en source irse a las primeras opciones de Edit in IP Manager
 

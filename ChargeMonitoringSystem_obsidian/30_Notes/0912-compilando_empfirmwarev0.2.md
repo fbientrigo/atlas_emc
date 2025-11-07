@@ -1,6 +1,6 @@
 Esta vez se tomó a partir del tag v0.2 para encontrar si así se tenian los nombres default buscados.
 La polaridad fue modificada como se indicaba para Trenz CarrierBoard
-![[MGT_Polatiry_options_02v.png]]
+![[assets/firmware/2024/09/mgt-polatiry-options-02v.png]]
 
 la compilación acabó con unos avisos
 """

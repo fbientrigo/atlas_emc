@@ -114,7 +114,7 @@ se ha ejecutado sin errores, y el sistema fue reiniciado
 Todo funciona bien
 
 Un detalle interesante es que se encendió el unico LED en la Mezz, tras haber ejecutado el script de loadFirmware, el cual de acuerdo al TMR
-![[On_board_LED.png]]
+![[assets/hardware/2024/09/on-board-led.png]]
 
 Continuando a construir la API
 LpGbtSw

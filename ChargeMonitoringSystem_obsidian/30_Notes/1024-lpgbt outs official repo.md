@@ -1,5 +1,5 @@
 De acuerdo a la repo oficial [gbt-fpga / lpgbt-fpga · GitLab](https://gitlab.cern.ch/gbt-fpga/lpgbt-fpga)
-![[LpGbt_userBandwith.png]]
+![[assets/firmware/2024/10/lpgbt-userbandwith.png]]
 
 Deberiamos tener entonces los 224 de manera correcta
 donde solo 6 bits van a estar desconectados.

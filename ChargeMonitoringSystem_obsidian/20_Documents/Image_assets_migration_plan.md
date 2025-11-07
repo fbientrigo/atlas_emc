@@ -22,21 +22,37 @@ Establecer un proceso estructurado para auditar, reorganizar y documentar todos 
 - Desarrollar scripts para mover y renombrar las imágenes siguiendo la taxonomía aprobada.
 - Actualizar automáticamente las rutas en los archivos Markdown (herramientas sugeridas: `obsidian-export` o scripts personalizados).
 - Verificar que no existan enlaces rotos mediante búsquedas de `![[` y `![]`.
+<<<<<<< HEAD
+- **Estado 2025-11-07:** completado con `scripts/relocate_assets.py`; ver `Image_assets_week2_execution.md`.
+=======
+>>>>>>> main
 
 #### Catálogo maestro (1 día)
 - Generar un índice en `20_Documents/assets_index.md` con una tabla que incluya `imagen`, `uso principal`, `fecha` y `autor`.
 - Completar la tabla al 100 % antes de finalizar la semana.
+<<<<<<< HEAD
+- **Estado 2025-11-07:** `assets_index.md` generado automáticamente desde `logging/2025-week2_assets_catalog.csv`.
+=======
+>>>>>>> main
 
 ### Semana 3
 
 #### Validación cruzada (2 días)
 - Revisar, junto con el plan de migración de notas, que cada evidencia mencionada quede enlazada en la nueva estructura.
 - Documentar cualquier imagen huérfana y decidir si se archiva o se incorpora con la metadata correspondiente.
+<<<<<<< HEAD
+- **Estado 2025-11-07:** consolidado en `Image_assets_week3_validation.md` con lista de pendientes y acciones.
+=======
+>>>>>>> main
 
 #### Normativa futura (continuo)
 - Incorporar en el checklist de creación de notas la obligatoriedad de almacenar imágenes siguiendo la taxonomía.
 - Registrar los metadatos de cada nueva imagen en el catálogo maestro.
 - Programar auditorías trimestrales para detectar archivos fuera de las carpetas oficiales y corregir desviaciones.
+<<<<<<< HEAD
+- **Estado 2025-11-07:** checklist formalizado en `Note_creation_checklist.md`.
+=======
+>>>>>>> main
 
 ## Resultados esperados
 - Inventario completo y confiable de los recursos gráficos.

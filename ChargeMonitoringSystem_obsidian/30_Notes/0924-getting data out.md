@@ -1,6 +1,6 @@
 El const agregado lo dejamos como downlink
 
-![[dout_constvalue.png|700]]
+![[assets/firmware/2024/09/dout-constvalue.png|700]]
 
 Entonces se procede a hacer la compilación
 

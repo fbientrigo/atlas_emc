@@ -52,7 +52,7 @@ Memory mapped at address 0xffff8636e000.
 """
 
 Podría no existir un clock valido u otra cosa
-![[clock_connection.png]]
+![[assets/hardware/2024/09/clock-connection.png]]
 
 El acceso se intentó a su vez mediante codigo en C
 ```c
@@ -105,9 +105,9 @@ int main() {
 Pero tambien acaba resultando en CPU stalls al no obtener respuesta alguna de estas direcciones de memoria.
 
 Sin embargo teorias como un reloj no implementado no son validas
-![[routing_emp_clocl.png]]
+![[assets/firmware/2024/09/routing-emp-clocl.png]]
 Igual que la axi addrs
-![[routing_s_axi_araddr.png]]
+![[assets/firmware/2024/09/routing-s-axi-araddr.png]]
 
 ___
 
