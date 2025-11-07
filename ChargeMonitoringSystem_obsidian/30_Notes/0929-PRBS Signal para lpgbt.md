@@ -1,17 +1,17 @@
 ### PRBS
-![[ip_creation_not_lib.png]]
+![[assets/firmware/2024/09/ip-creation-not-lib.png]]
 
-![[ip_creation.png]]
+![[assets/firmware/2024/09/ip-creation.png]]
 
 Despues de repackage ip
-![[succes_package_prbs.png]]
+![[assets/firmware/2024/09/succes-package-prbs.png]]
 
 Se probo generar denuevo pero sin Lib
 
-![[ip_prbs32_wrn.png]]
+![[assets/firmware/2024/09/ip-prbs32-wrn.png]]
 
 despues de repackage ip
-![[repackaginf_prbs32.png]]
+![[assets/firmware/2024/09/repackaginf-prbs32.png]]
 
 ___
 ## Alternativa 0930
@@ -55,6 +55,6 @@ uio9
 ```
 
 En caso de no funcionar coordinar con el strobe
-![[connection_dataregister_prbs32.png]]
+![[assets/firmware/2024/09/connection-dataregister-prbs32.png]]
 
 

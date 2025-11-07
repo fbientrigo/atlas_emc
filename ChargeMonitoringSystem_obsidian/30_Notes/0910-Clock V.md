@@ -6,21 +6,21 @@ Se vieron
 
 ## J33 -> Es un input coaxial para el reloj MPSoC Module 
 	Este llega luego como IN2_P, IN2_N hasta J3-66 (conectados a Mezz) 
-![[table_clock_inputsPLL.png]]
+![[assets/diagramas/2024/09/table-clock-inputspll.png]]
 
 
 El cual al observar TRM-TE0807 observamos que esta es una freucneica que viene como input al reloj. Lo que quiere decir que esto es que somos capaces de controlar la frecuencia a utilizar.
 En la datasheet Si5345
-![[table_in_sel_delay_modes.png]]
+![[assets/diagramas/2024/09/table-in-sel-delay-modes.png]]
 
 Por lo que en caso de evaluar algun problema con el cristla oscilador que recibe Si5345 podria existir un fallback.
 
 ## Si5345 Outs
 En cuanto al output tiene distintos outputs
-![[Table_outCLK.png]]
+![[assets/diagramas/2024/09/table-outclk.png]]
 
 Ojo que el OUT9 parece ser usado como LoopBack
-![[table_out8out9.png]]
+![[assets/diagramas/2024/09/table-out8out9.png]]
 
 
 Procedo a buscar en conexiones:
@@ -28,7 +28,7 @@ J2-13 -> CLK7_P
 J2-15 -> CLK7_N
 
 Siguiendolas en la pg23/36 seccion CLK
-![[schem_clk7_diff.png]]
+![[assets/diagramas/2024/09/schem-clk7-diff.png]]
 
 Vemos como pasan por aqui  se modifican y reingresan por J3
 B230_CLK1_P -> 61
@@ -56,7 +56,7 @@ Para medir el output de Si5345 antes de llegar a 5338
 Buscamos el IN1 de 5338
 	Se medira a el IN1 de Si53358 (que viene CLK8 de Si5345)
 		se registro un voltaje de 0.5V
-![[schem_clk8_diff.png]]
+![[assets/diagramas/2024/09/schem-clk8-diff.png]]
 
 Se prueba medir justo en la resistencia, lo que entrega un voltaje, proveniente del cristal, sin embargo el Si5345 no entrega señal de reloj, solo fija.
 
@@ -65,7 +65,7 @@ ___
 # Busqueda con los esquematicos de TE0807-03
 
 El reloj de Si5345 tiene varias entradas, para evaluar si el problema viene en alguna de estas, sigamos cada una:
-![[table_pll_clock_gen.png]]
+![[assets/diagramas/2024/09/table-pll-clock-gen.png]]
 
 ## Inputs
 
@@ -75,7 +75,7 @@ Oscilador de 25MHz, U25
 ### IN1
 B2B conector, J2-4, J2-6
 sin embargo esta se encuentra desactivada en la carrier board en uso:
-![[schem_b2b_connections_non.png]]
+![[assets/diagramas/2024/09/schem-b2b-connections-non.png]]
 
 
 
@@ -83,11 +83,11 @@ sin embargo esta se encuentra desactivada en la carrier board en uso:
 Se encuentra en B2B J3-66 y J3-68 del Carrier Board, 
 el cual solo se conecta hacia el J33
 
-![[schem_in2_p_clock.png]]
+![[assets/diagramas/2024/09/schem-in2-p-clock.png]]
 
 ### IN3
 Forma parte de un loop, la salida OUT9 del mismo Si5345 es la que da a la IN3
-![[schem_in3_p.png]]
+![[assets/diagramas/2024/09/schem-in3-p.png]]
 
 ### Question
 Muchas de las interacciones con el Si5345 no son claras, no sabemos si esta funcionado, si tiene o no una input valida y si le enviamos corriente por J33 que ocurriría, por ello es necesario conocer la programación de este.
@@ -124,7 +124,7 @@ Para estos ver paginas TE0807 - PS_GT
 	- D10-, XCZU3EG-1FBV900E
 - B227_CLK0_N
 	- D9-, XCZU3EG-1FBV900E
-- ![[schem_b227_ck0_p.png]]
+- ![[assets/diagramas/2024/09/schem-b227-ck0-p.png]]
 
 - B226_CLK0_P
 - B226_CLK0_N

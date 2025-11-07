@@ -74,7 +74,7 @@ emp_lpgbt_10: int_lpgbt_resp
 
 donde llega al PS y tiene los parametros:
 - NULL:LEVEL_HIGH:LEVEL_HIGH:LEVEL_HIGH:LEVEL_HIGH:LEVEL_HIGH
-![[xlconcat_1.png|250]]
+![[assets/firmware/2024/09/xlconcat-1.png|250]]
 - 
 
 Finalmente se arreglo:

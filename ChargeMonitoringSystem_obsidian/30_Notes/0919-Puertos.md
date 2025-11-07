@@ -2,10 +2,10 @@ Tras la implementación
 TODO:
 Reescribir como una tabla ordenada
 
-![[ch_fpga.png|500]]
+![[assets/hardware/2024/09/ch-fpga.png|500]]
 
-![[ch_fpga2.png|500]]
+![[assets/hardware/2024/09/ch-fpga2.png|500]]
 
 en donde el CH10 y CH11 son los que acaban en SFP
-![[pin_fpga.png|600]]
+![[assets/hardware/2024/09/pin-fpga.png|600]]
 

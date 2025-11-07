@@ -47,11 +47,11 @@ Please check your design and connect them as needed:
 
 Luego run implementation
 
-![[Implementation_Warning_Violation.png]]
+![[assets/firmware/2024/09/implementation-warning-violation.png]]
 
-![[Implementation_CriticalWarning.png]]
+![[assets/firmware/2024/09/implementation-criticalwarning.png]]
 
 El critical Warning más detallado
-![[Implementation_CriticalWarning_detailed.png]]
+![[assets/firmware/2024/09/implementation-criticalwarning-detailed.png]]
 
 

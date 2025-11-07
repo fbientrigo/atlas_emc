@@ -94,9 +94,7 @@ INFO: Renaming hw_desc.xsa to system.xsa
 [INFO] Successfully configured project
 ```
 
-Al finalizar este paso aparece el menú de configuración:
-
-![[petalinux_system_conf.png]]
+Al finalizar este paso aparece el menú de configuración (captura no disponible en el repositorio actual; se registró la referencia `petalinux_system_conf.png` como pendiente de recuperación).
 
 ---
 

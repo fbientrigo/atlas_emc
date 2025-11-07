@@ -75,7 +75,7 @@ map0
 - **Offsets 0x0/0x4/0x8/0xC** están correctamente **alineados** para AXI-Lite de 32 bits. No tienes que “separarlos” más.
 
 Probaremos el acceos directo a los registros:
-![[reg_adress_map.png]]
+![[assets/diagramas/2024/10/reg-adress-map.png]]
 
 ___
 ### confirmaciones
@@ -206,7 +206,7 @@ Ahora mismo se utiliza
 [tgc_cms@trenz-tgc puzzled]$ sudo busybox devmem 0xA00D000C 32 0x00000E00
 ```
 
-![[OsciloscopeSignal.png]]
+![[assets/mediciones/2024/10/osciloscopesignal.png]]
 
 ___
 

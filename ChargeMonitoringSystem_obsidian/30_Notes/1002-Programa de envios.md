@@ -6,7 +6,7 @@ Es importante tener en cuenta que PuzzledWizard tiene una consideración importa
 El firmware quedó con el nombre
 - emp_read_1003.dtbo
 
-![[firmware_readup_1003.png]]
+![[assets/firmware/2024/10/firmware-readup-1003.png]]
 
 Una vez se consigue generar y cargar a firmware correctamente
 comenzamos a orquestar con el PuzzledWizard
@@ -75,7 +75,7 @@ sudo busybox devmem 0xA00E002C 32 0x00000002
 ```
 
 aqui los distintos valores
-![[registerReadingSystem.png]]
+![[assets/firmware/2024/10/registerreadingsystem.png]]
 
 es posible leer el grupo 0 con
 ```
@@ -124,7 +124,7 @@ Sin embargo no ha sido claro o directo como leer los datos que provienen del dow
 Para esto se está modificando
 
 Explorando como se mapean los canales
-![[LpGbt_uplink_channels.png]]
+![[assets/interfaces/2024/10/lpgbt-uplink-channels.png]]
 
 
 

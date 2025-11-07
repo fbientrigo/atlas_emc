@@ -55,7 +55,7 @@ Prueba avanzada:
 Enviar una señal patrón mediante la fibra
 - tiene Lpgbt un patrón?
 	- Es posible configurarlo con PLLGBT 
-	- ![[ProgrammerModule.png]]
+	- ![[assets/firmware/2024/01/programmermodule.png]]
 		- permite programar
 		- mirar el estados
 		- y muy posiblemetne hacer un patrón para enviar atraves de la fibra

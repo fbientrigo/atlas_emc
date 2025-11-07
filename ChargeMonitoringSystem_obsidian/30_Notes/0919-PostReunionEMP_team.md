@@ -52,7 +52,7 @@ ___
 
 Utilizando el software
 
-![[registarmapSimualtorWRN.png]]
+![[assets/diagramas/2024/09/registarmapsimualtorwrn.png]]
 
 
 Se encuentra un problema relacionado a la configuration file

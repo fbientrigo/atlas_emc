@@ -37,7 +37,7 @@ this connecting to the emp_lpgbt_10
 
 The LpGbt and PiGbt are feed by their corresponding voltages and its programmed in a locked state, having the `RDY` LED on.
 
-![[LpGbt_rdy_state.png|300]] 
+![[assets/firmware/2024/09/lpgbt-rdy-state.png|300]] 
 ## Software Configuration
 
 When the only two files are uploaded, this being 

@@ -1,0 +1,103 @@
+image,source,category,year,month,slug,notes
+assets/diagramas/2024/01/schem-b2b-connection-clk7.png,_assets/misc/schem_b2b_connection_clk7.png,diagramas,2024,01,schem-b2b-connection-clk7,—
+assets/diagramas/2024/09/0926-mermaid-downlinkuserdata.svg,_assets/EMP_Firmware_data/0926_mermaid_downlinkUserData.svg,diagramas,2024,09,0926-mermaid-downlinkuserdata,—
+assets/diagramas/2024/09/registarmapsimualtorwrn.png,_assets/misc/registarmapSimualtorWRN.png,diagramas,2024,09,registarmapsimualtorwrn,30_Notes/0919-PostReunionEMP_team.md
+assets/diagramas/2024/09/schem-b227-ck0-p.png,_assets/misc/schem_b227_ck0_p.png,diagramas,2024,09,schem-b227-ck0-p,30_Notes/0910-Clock V.md
+assets/diagramas/2024/09/schem-b2b-connections-non.png,_assets/misc/schem_b2b_connections_non.png,diagramas,2024,09,schem-b2b-connections-non,30_Notes/0910-Clock V.md
+assets/diagramas/2024/09/schem-clk7-diff.png,_assets/misc/schem_clk7_diff.png,diagramas,2024,09,schem-clk7-diff,30_Notes/0910-Clock V.md
+assets/diagramas/2024/09/schem-clk8-diff.png,_assets/misc/schem_clk8_diff.png,diagramas,2024,09,schem-clk8-diff,30_Notes/0910-Clock V.md
+assets/diagramas/2024/09/schem-in2-p-clock.png,_assets/misc/schem_in2_p_clock.png,diagramas,2024,09,schem-in2-p-clock,30_Notes/0910-Clock V.md
+assets/diagramas/2024/09/schem-in3-p.png,_assets/misc/schem_in3_p.png,diagramas,2024,09,schem-in3-p,30_Notes/0910-Clock V.md
+assets/diagramas/2024/09/table-clock-inputspll.png,_assets/misc/table_clock_inputsPLL.png,diagramas,2024,09,table-clock-inputspll,30_Notes/0910-Clock V.md
+assets/diagramas/2024/09/table-in-sel-delay-modes.png,_assets/misc/table_in_sel_delay_modes.png,diagramas,2024,09,table-in-sel-delay-modes,30_Notes/0910-Clock V.md
+assets/diagramas/2024/09/table-out8out9.png,_assets/misc/table_out8out9.png,diagramas,2024,09,table-out8out9,30_Notes/0910-Clock V.md
+assets/diagramas/2024/09/table-outclk.png,_assets/misc/Table_outCLK.png,diagramas,2024,09,table-outclk,30_Notes/0910-Clock V.md
+assets/diagramas/2024/09/table-pll-clock-gen.png,_assets/misc/table_pll_clock_gen.png,diagramas,2024,09,table-pll-clock-gen,30_Notes/0910-Clock V.md
+assets/diagramas/2024/10/lpgbt-bandwiths-table.png,LpGbt_bandwiths_table.png,diagramas,2024,10,lpgbt-bandwiths-table,30_Notes/1013-GettingData elinks.md
+assets/diagramas/2024/10/lpgbt-bitsframe.png,LpGbt_bitsFrame.png,diagramas,2024,10,lpgbt-bitsframe,30_Notes/1024.md
+assets/diagramas/2024/10/lpgbt-diagram.png,LpGbt_diagram.png,diagramas,2024,10,lpgbt-diagram,30_Notes/1013-GettingData elinks.md
+assets/diagramas/2024/10/lpgbt-fec5-framestructure.png,LpGbt_FEC5_frameStructure.png,diagramas,2024,10,lpgbt-fec5-framestructure,30_Notes/1013-GettingData elinks.md
+assets/diagramas/2024/10/lpgbt-table-loopback.png,LpGbt_table_loopback.png,diagramas,2024,10,lpgbt-table-loopback,30_Notes/1024.md
+assets/diagramas/2024/10/reg-adress-map.png,reg_adress_map.png,diagramas,2024,10,reg-adress-map,30_Notes/1001-creando un uio.md
+assets/documentacion/2024/01/bergm-rtax-s-letcross.png,BergM_RTAX-S-LETCross.png,documentacion,2024,01,bergm-rtax-s-letcross,—
+assets/documentacion/2024/01/letvscrosssection.png,LEtVsCrossSection.png,documentacion,2024,01,letvscrosssection,—
+assets/documentacion/2024/10/clps.png,CLPS.png,documentacion,2024,10,clps,30_Notes/1013-GettingData elinks.md
+assets/firmware/2024/01/01-relacionfunciones-v2.svg,_assets/svg/01_relacionFunciones.svg,firmware,2024,01,01-relacionfunciones-v2,—
+assets/firmware/2024/01/01-relacionfunciones.svg,_assets/EMP_Firmware_data/01_relacionFunciones.svg,firmware,2024,01,01-relacionfunciones,—
+assets/firmware/2024/01/02-relacionvariables-v2.svg,_assets/svg/02_relacionVariables.svg,firmware,2024,01,02-relacionvariables-v2,—
+assets/firmware/2024/01/02-relacionvariables.svg,_assets/EMP_Firmware_data/02_relacionVariables.svg,firmware,2024,01,02-relacionvariables,—
+assets/firmware/2024/01/03-relacionmain-v2.svg,_assets/svg/03_relacionMain.svg,firmware,2024,01,03-relacionmain-v2,—
+assets/firmware/2024/01/03-relacionmain.svg,_assets/EMP_Firmware_data/03_relacionMain.svg,firmware,2024,01,03-relacionmain,—
+assets/firmware/2024/01/emp-firmware-lpgbt-connection-example.png,emp_firmware_lpgbt_connection_example.png,firmware,2024,01,emp-firmware-lpgbt-connection-example,30_Notes/quick_guides/Nombres de Firmware.md
+assets/firmware/2024/01/emp-firmware-lpgbt-connections.png,emp_firmware_lpgbt_connections.png,firmware,2024,01,emp-firmware-lpgbt-connections,30_Notes/quick_guides/Nombres de Firmware.md
+assets/firmware/2024/01/emp-firmware-options.png,_assets/misc/emp_firmware_options.png,firmware,2024,01,emp-firmware-options,30_Notes/MISION0910 OPC UA.md
+assets/firmware/2024/01/firmware-using.png,_assets/misc/firmware_using.png,firmware,2024,01,firmware-using,30_Notes/quick_guides/Nombres de Firmware.md
+assets/firmware/2024/01/lpgbt-mgt-user-word-to-rst.svg,10_Modules/emp_firmware_lpgbt/lpgbt_MGT_user_word_to_rst.svg,firmware,2024,01,lpgbt-mgt-user-word-to-rst,—
+assets/firmware/2024/01/mgt-polarity-options-02va.png,_assets/misc/MGT_Polarity_options_02va.png,firmware,2024,01,mgt-polarity-options-02va,—
+assets/firmware/2024/01/mgt-polarity-options.png,_assets/misc/MGT_Polarity_options.png,firmware,2024,01,mgt-polarity-options,—
+assets/firmware/2024/01/ngmediumresetmask-results.png,_assets/misc/NGMediumResetMask_Results.png,firmware,2024,01,ngmediumresetmask-results,—
+assets/firmware/2024/01/output-firmware-emp-gen-tcl.png,_assets/misc/output_firmware_emp_gen_tcl.png,firmware,2024,01,output-firmware-emp-gen-tcl,—
+assets/firmware/2024/01/programmermodule.png,_assets/misc/ProgrammerModule.png,firmware,2024,01,programmermodule,—
+assets/firmware/2024/01/registers-readersystem.png,Registers_readerSystem.png,firmware,2024,01,registers-readersystem,—
+assets/firmware/2024/01/scrambledata.png,_assets/EMP_Firmware_data/ScrambleData.png,firmware,2024,01,scrambledata,—
+assets/firmware/2024/01/slide-emplpgbt-referencesol.png,_assets/misc/slide_emplpgbt_referencesol.png,firmware,2024,01,slide-emplpgbt-referencesol,30_Notes/MISION0910 OPC UA.md
+assets/firmware/2024/01/te0807-03.png,_assets/misc/TE0807-03.png,firmware,2024,01,te0807-03,30_Notes/TE0807-3 FPGA Mezz Connected.md
+assets/firmware/2024/04/01-relacionfunciones.svg,0409_analisis_codigo/01_relacionFunciones.svg,firmware,2024,04,01-relacionfunciones,—
+assets/firmware/2024/04/02-relacionvariables.svg,0409_analisis_codigo/02_relacionVariables.svg,firmware,2024,04,02-relacionvariables,—
+assets/firmware/2024/04/03-relacionmain.svg,0409_analisis_codigo/03_relacionMain.svg,firmware,2024,04,03-relacionmain,—
+assets/firmware/2024/09/bootingzynq.png,_assets/tutorial_img/bootingZynq.png,firmware,2024,09,bootingzynq,30_Notes/0905-encendidoEMP.md
+assets/firmware/2024/09/connection-dataregister-prbs32.png,_assets/misc/connection_dataregister_prbs32.png,firmware,2024,09,connection-dataregister-prbs32,30_Notes/0929-PRBS Signal para lpgbt.md
+assets/firmware/2024/09/dout-constvalue.png,_assets/misc/dout_constvalue.png,firmware,2024,09,dout-constvalue,30_Notes/0924-getting data out.md
+assets/firmware/2024/09/implementation-criticalwarning-detailed.png,_assets/misc/Implementation_CriticalWarning_detailed.png,firmware,2024,09,implementation-criticalwarning-detailed,30_Notes/0910-empFirmware - logs y Warnings.md
+assets/firmware/2024/09/implementation-criticalwarning.png,_assets/misc/Implementation_CriticalWarning.png,firmware,2024,09,implementation-criticalwarning,30_Notes/0910-empFirmware - logs y Warnings.md
+assets/firmware/2024/09/implementation-warning-violation.png,_assets/misc/Implementation_Warning_Violation.png,firmware,2024,09,implementation-warning-violation,30_Notes/0910-empFirmware - logs y Warnings.md
+assets/firmware/2024/09/ip-creation-not-lib.png,_assets/misc/ip_creation_not_lib.png,firmware,2024,09,ip-creation-not-lib,30_Notes/0929-PRBS Signal para lpgbt.md
+assets/firmware/2024/09/ip-creation.png,_assets/misc/ip_creation.png,firmware,2024,09,ip-creation,30_Notes/0929-PRBS Signal para lpgbt.md
+assets/firmware/2024/09/ip-prbs32-wrn.png,_assets/misc/ip_prbs32_wrn.png,firmware,2024,09,ip-prbs32-wrn,30_Notes/0929-PRBS Signal para lpgbt.md
+assets/firmware/2024/09/lpgbt-rdy-state.png,_assets/misc/LpGbt_rdy_state.png,firmware,2024,09,lpgbt-rdy-state,30_Notes/0930-shared-log.md
+assets/firmware/2024/09/mgt-polatiry-options-02v.png,_assets/misc/MGT_Polatiry_options_02v.png,firmware,2024,09,mgt-polatiry-options-02v,30_Notes/0912-compilando_empfirmwarev0.2.md
+assets/firmware/2024/09/repackaginf-prbs32.png,_assets/misc/repackaginf_prbs32.png,firmware,2024,09,repackaginf-prbs32,30_Notes/0929-PRBS Signal para lpgbt.md
+assets/firmware/2024/09/routing-emp-clocl.png,_assets/misc/routing_emp_clocl.png,firmware,2024,09,routing-emp-clocl,30_Notes/0918-AXI Addressing.md
+assets/firmware/2024/09/routing-s-axi-araddr.png,_assets/misc/routing_s_axi_araddr.png,firmware,2024,09,routing-s-axi-araddr,30_Notes/0918-AXI Addressing.md
+assets/firmware/2024/09/sch-statled-u39b.png,_assets/misc/sch_statLED_u39b.png,firmware,2024,09,sch-statled-u39b,30_Notes/0922-Conectando a LPGBT.md
+assets/firmware/2024/09/sch-statled.png,_assets/misc/sch_statLED.png,firmware,2024,09,sch-statled,30_Notes/0922-Conectando a LPGBT.md
+assets/firmware/2024/09/sent-pattenr.png,_assets/misc/sent_pattenr.png,firmware,2024,09,sent-pattenr,30_Notes/0924-downlink frame y com.md
+assets/firmware/2024/09/succes-package-prbs.png,_assets/misc/succes_package_prbs.png,firmware,2024,09,succes-package-prbs,30_Notes/0929-PRBS Signal para lpgbt.md
+assets/firmware/2024/09/xlconcat-1.png,_assets/misc/xlconcat_1.png,firmware,2024,09,xlconcat-1,30_Notes/0929-ExplorationIRQ.md
+assets/firmware/2024/10/1002-problm-1-slv32array-noexiste.png,1002_problm_1_slv32array_noexiste.png,firmware,2024,10,1002-problm-1-slv32array-noexiste,30_Notes/1002-Codigo de recepción.md
+assets/firmware/2024/10/emp-firmware-axis.png,emp_firmware__axis.png,firmware,2024,10,emp-firmware-axis,30_Notes/1007-multipleLPGBT.md
+assets/firmware/2024/10/firmware-readup-1003.png,firmware_readup_1003.png,firmware,2024,10,firmware-readup-1003,30_Notes/1002-Programa de envios.md
+assets/firmware/2024/10/lpgbt-userbandwith.png,LpGbt_userBandwith.png,firmware,2024,10,lpgbt-userbandwith,"30_Notes/1024-lpgbt outs official repo.md, 30_Notes/1028-1031-Testing.md"
+assets/firmware/2024/10/registerreadingsystem.png,registerReadingSystem.png,firmware,2024,10,registerreadingsystem,30_Notes/1002-Programa de envios.md
+assets/hardware/2024/01/ch-fpga3.png,_assets/misc/ch_fpga3.png,hardware,2024,01,ch-fpga3,30_Notes/quick_guides/pins lpgbt.md
+assets/hardware/2024/01/ch-fpga4.png,_assets/misc/ch_fpga4.png,hardware,2024,01,ch-fpga4,30_Notes/quick_guides/pins lpgbt.md
+assets/hardware/2024/01/pinassign.png,docs_hardware/pinassign.png,hardware,2024,01,pinassign,—
+assets/hardware/2024/01/sfp-outs-fpga.png,_assets/misc/sfp_outs_fpga.png,hardware,2024,01,sfp-outs-fpga,30_Notes/quick_guides/pins lpgbt.md
+assets/hardware/2024/01/systemconnection.png,systemConnection.png,hardware,2024,01,systemconnection,—
+assets/hardware/2024/01/tabla-pins-j1.png,docs_hardware/tabla_pins_J1.png,hardware,2024,01,tabla-pins-j1,—
+assets/hardware/2024/01/tabla-pins-j2.png,docs_hardware/tabla_pins_J2.png,hardware,2024,01,tabla-pins-j2,—
+assets/hardware/2024/01/tebf0808-rev04-top-numbered.png,_assets/hardware_img/TEBF0808 REV04 top-numbered.png,hardware,2024,01,tebf0808-rev04-top-numbered,30_Notes/TEBF0808-04A.md
+assets/hardware/2024/09/ch-fpga.png,_assets/misc/ch_fpga.png,hardware,2024,09,ch-fpga,30_Notes/0919-Puertos.md
+assets/hardware/2024/09/ch-fpga2.png,_assets/misc/ch_fpga2.png,hardware,2024,09,ch-fpga2,30_Notes/0919-Puertos.md
+assets/hardware/2024/09/clock-connection.png,_assets/misc/clock_connection.png,hardware,2024,09,clock-connection,30_Notes/0918-AXI Addressing.md
+assets/hardware/2024/09/on-board-led.png,_assets/misc/On_board_LED.png,hardware,2024,09,on-board-led,30_Notes/0915-xsa to the fpga.md
+assets/hardware/2024/09/pin-fpga.png,_assets/misc/pin_fpga.png,hardware,2024,09,pin-fpga,30_Notes/0919-Puertos.md
+assets/hardware/2024/10/sweepclock-running.png,sweepclock_running.png,hardware,2024,10,sweepclock-running,30_Notes/1006-Tenemos lectura.md
+assets/interfaces/2024/01/opcua-emplpgbt.png,_assets/misc/OPCUA_EMPLPGBT.png,interfaces,2024,01,opcua-emplpgbt,30_Notes/MISION0910 OPC UA.md
+assets/interfaces/2024/09/0916-mermaid-interruptfromuplink.svg,_assets/EMP_Firmware_data/0916_mermaid_interruptFromUplink.svg,interfaces,2024,09,0916-mermaid-interruptfromuplink,—
+assets/interfaces/2024/09/com8-devices.png,_assets/tutorial_img/com8_devices.png,interfaces,2024,09,com8-devices,30_Notes/0905-encendidoEMP.md
+assets/interfaces/2024/09/dominiccker-mattermost-02v.png,_assets/misc/dominiccker_mattermost_02v.png,interfaces,2024,09,dominiccker-mattermost-02v,30_Notes/0930-version 0.2v emp_firmware.md
+assets/interfaces/2024/09/pigbt-clockps.png,_assets/misc/pigbt_clockps.png,interfaces,2024,09,pigbt-clockps,30_Notes/0922-Conectando a LPGBT.md
+assets/interfaces/2024/09/pigbt-datarate.png,_assets/misc/pigbt_datarate.png,interfaces,2024,09,pigbt-datarate,30_Notes/0922-Conectando a LPGBT.md
+assets/interfaces/2024/09/pigbt-lpgbt-locked.png,_assets/misc/pigbt_lpgbt_locked.png,interfaces,2024,09,pigbt-lpgbt-locked,30_Notes/0922-Conectando a LPGBT.md
+assets/interfaces/2024/09/pigbt-pattern-4a4c.png,_assets/misc/pigbt_pattern_4A4C.png,interfaces,2024,09,pigbt-pattern-4a4c,30_Notes/0922-Conectando a LPGBT.md
+assets/interfaces/2024/09/pigbt-pattern.png,_assets/misc/pigbt_pattern.png,interfaces,2024,09,pigbt-pattern,30_Notes/0922-Conectando a LPGBT.md
+assets/interfaces/2024/09/pigbt-uplink-datarate.png,_assets/misc/pigbt_uplink_datarate.png,interfaces,2024,09,pigbt-uplink-datarate,30_Notes/0922-Conectando a LPGBT.md
+assets/interfaces/2024/09/pigbt-uplinkoptions.png,_assets/misc/pigbt_uplinkoptions.png,interfaces,2024,09,pigbt-uplinkoptions,30_Notes/0922-Conectando a LPGBT.md
+assets/interfaces/2024/09/pigbt-welcome.png,_assets/misc/pigbt_welcome.png,interfaces,2024,09,pigbt-welcome,30_Notes/0922-Conectando a LPGBT.md
+assets/interfaces/2024/10/lpgbt-uplink-channels.png,LpGbt_uplink_channels.png,interfaces,2024,10,lpgbt-uplink-channels,30_Notes/1002-Programa de envios.md
+assets/interfaces/2024/10/lpgbt-uplinkdatarates.png,LpGbt_UplinkDataRates.png,interfaces,2024,10,lpgbt-uplinkdatarates,30_Notes/1013-GettingData elinks.md
+assets/interfaces/2024/10/lpgbt-uplinkframe.png,LpGbt_UplinkFrame.png,interfaces,2024,10,lpgbt-uplinkframe,30_Notes/1013-GettingData elinks.md
+assets/interfaces/2024/10/tgc-readuplink-regs.png,tgc_readUplink_regs.png,interfaces,2024,10,tgc-readuplink-regs,"30_Notes/1013-GettingData elinks.md, 30_Notes/1028-1031-Testing.md"
+assets/mediciones/2024/10/emp-saturationtest.png,EMP_saturationTest.png,mediciones,2024,10,emp-saturationtest,30_Notes/1007-multipleLPGBT.md
+assets/mediciones/2024/10/osciloscopesignal.png,OsciloscopeSignal.png,mediciones,2024,10,osciloscopesignal,30_Notes/1001-creando un uio.md
