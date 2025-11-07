@@ -7,9 +7,9 @@ Expresa una normalización por la fluencia
 - Errors cross section $\sigma$: Numero de errores normalizado por fluencia $\sigma [cm^2/bit]$
 - Se calcula la cross sección de errores para distintos valores de LET $[MeV cm^2/mg]$, ver de esa forma el espectro de la particula. (Esta es la principal diferencia, pues aqui no tenemos información del LET, si no que tenemos HEH, TID y un binning hecho con el tiempo equivalente que depende de la cantidad de Fluencia en un intervalo de tiempo sea igual, pues el beam a veces cambia los valores)
 
-![[Pasted image 20250829103935.png]]
+![[LEtVsCrossSection.png]]
 
 Aqui otra presentación
-![[Pasted image 20250829104417.png]]
+![[BergM_RTAX-S-LETCross.png]]
 
 Además M.Berg dicta la importancia de especificar que es lo que se utiliza a la hora

@@ -8,75 +8,89 @@
         "type": "tabs",
         "children": [
           {
-            "id": "48b9faf8a72fc30b",
+            "id": "cb047c1569dbebf5",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "30_Notes/0925_downlinkUserData path.md",
+                "file": "30_Notes/1002-Programa de envios.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "0925_downlinkUserData path"
+              "title": "1002-Programa de envios"
             }
           },
           {
-            "id": "cb047c1569dbebf5",
+            "id": "c3ca176f70457bc7",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "30_Notes/quick_guides/Nombres de Firmware.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Nombres de Firmware"
+            }
+          },
+          {
+            "id": "f31d2829daf30a2a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "30_Notes/1013-GettingData elinks.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "1013-GettingData elinks"
+            }
+          },
+          {
+            "id": "bc2fcfaec8207f1a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "30_Notes/1028-1031-Testing.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "1028-1031-Testing"
+            }
+          },
+          {
+            "id": "5c440aaac1e5b2a2",
             "type": "leaf",
             "state": {
               "type": "image",
               "state": {
-                "file": "_assets/misc/ch_fpga.png"
+                "file": "LpGbt_diagram.png"
               },
               "icon": "lucide-image",
-              "title": "ch_fpga"
+              "title": "LpGbt_diagram"
             }
           },
           {
-            "id": "d36109ccfee7860d",
+            "id": "64f2ef67b7b11080",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "30_Notes/quick_guides/pins lpgbt.md",
+                "file": "30_Notes/1024.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "pins lpgbt"
-            }
-          },
-          {
-            "id": "cfdeab6618462fab",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "30_Notes/0905-encendidoEMP.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "0905-encendidoEMP"
-            }
-          },
-          {
-            "id": "57bc72ca1741acc8",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "30_Notes/0930-shared-log.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "0930-shared-log"
+              "title": "1024"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 4
       }
     ],
     "direction": "vertical"
@@ -133,7 +147,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 276.5
+    "width": 348.5
   },
   "right": {
     "id": "4888a1e34a71a970",
@@ -226,51 +240,51 @@
   },
   "active": "c042509da6fe67d9",
   "lastOpenFiles": [
-    "_assets/misc/pigbt_welcome.png",
-    "_assets/misc/pigbt_lpgbt_locked.png",
-    "_assets/misc/pigbt_pattern_4A4C.png",
-    "_assets/misc/pigbt_uplinkoptions.png",
-    "_assets/misc/pigbt_uplink_datarate.png",
-    "_assets/misc/pigbt_pattern.png",
-    "_assets/misc/pigbt_clockps.png",
-    "_assets/misc/pigbt_datarate.png",
-    "_assets/misc/sent_pattenr.png",
-    "_assets/misc/dout_constvalue.png",
-    "_assets/misc/firmware_using.png",
-    "30_Notes/0929-PRBS Signal para lpgbt.md",
-    "30_Notes/0905-encendidoEMP.md",
-    "30_Notes/0930-version 0.2v emp_firmware.md",
-    "30_Notes/0930-LibUIO Implementation.md",
-    "_pdf/Setup EMP development environment & reference project.pdf",
-    "30_Notes/quick_guides/Nombres de Firmware.md",
-    "30_Notes/0930-shared-log.md",
-    "30_Notes/quick_guides/pins lpgbt.md",
-    "30_Notes/0925_downlinkUserData path.md",
-    "30_Notes/0907-TEBF0808 Instalación.md",
-    "30_Notes/quick_guides/CargarXSA_DeviceTree.md",
-    "30_Notes/0910-empFirmware - logs y Warnings.md",
-    "30_Notes/0911-ZynqModel.md",
-    "30_Notes/0910-Clock V.md",
+    "CLPS.png",
+    "emp_firmware__axis.png",
+    "EMP_saturationTest.png",
+    "sweepclock_running.png",
+    "LpGbt_uplink_channels.png",
+    "OsciloscopeSignal.png",
+    "LpGbt_bandwiths_table.png",
+    "LpGbt_UplinkFrame.png",
+    "tgc_readUplink_regs.png",
+    "LpGbt_FEC5_frameStructure.png",
+    "LpGbt_UplinkDataRates.png",
     "0930-modificar prbs.md",
-    "30_Notes/quick_guides/Buildear_LpGbtSw.md",
-    "_pdf/Configurar ambiente EMP y cargarle proyecto ejemplo.pdf",
-    "30_Notes/0929-ExplorationIRQ.md",
-    "30_Notes/0915b-LpGbtSw en FPGA.md",
-    "30_Notes/0915-xsa to the fpga.md",
-    "30_Notes/0922-Conectando a LPGBT.md",
-    "30_Notes/0923-Testing Master branch firmware.md",
-    "30_Notes/0923_dtree errors.md",
+    "0813-EMC System.md",
+    "30_Notes/1028-1031-Testing.md",
+    "30_Notes/1024.md",
+    "30_Notes/1024-lpgbt outs official repo.md",
+    "30_Notes/1028-Pruebas de envio de constante.md",
+    "30_Notes/quick_guides/reading1006_basic_configs.md",
+    "30_Notes/1021-Loopback real.md",
+    "30_Notes/1013-GettingData elinks.md",
+    "30_Notes/1002-Programa de envios.md",
+    "30_Notes/1001-creando un uio.md",
+    "30_Notes/1002-Codigo de recepción.md",
+    "30_Notes/0930-version 0.2v emp_firmware.md",
+    "30_Notes/0925_downlinkUserData path.md",
     "30_Notes/0924-downlink frame y com.md",
     "30_Notes/0924-getting data out.md",
-    "30_Notes/terminal_text_first_start0905-EMP.md",
-    "30_Notes/TEBF0808-04A.md",
-    "_assets/EMP_Firmware_data/mermaid_interruptFromUplink.txt",
-    "_assets/EMP_Firmware_data/0926_mermaid_downlinkuserdata.txt",
-    "_assets/EMP_Firmware_data",
-    "30_Notes/quick_guides",
-    "_pdf/Technical_Design_Report_TGC_ChaMS.pdf",
+    "30_Notes/0929-ExplorationIRQ.md",
+    "30_Notes/0929-PRBS Signal para lpgbt.md",
+    "30_Notes/quick_guides/Nombres de Firmware.md",
+    "30_Notes/0923_dtree errors.md",
+    "30_Notes/0923-Testing Master branch firmware.md",
+    "30_Notes/0930-LibUIO Implementation.md",
+    "30_Notes/0930-shared-log.md",
+    "30_Notes/1006-Tenemos lectura.md",
+    "30_Notes/1006-UnderstandSignal_UplinkReady.md",
+    "_pdf/Setup EMP development environment & reference project.pdf",
+    "_pdf/Configurar ambiente EMP y cargarle proyecto ejemplo.pdf",
+    "_pdf/Elink_communication_between_CMB_and_EMCI.pdf",
+    "_pdf/EMP_firmware_estimation.pdf",
+    "_pdf/Final_report_2024_12_17.pdf",
+    "_pdf/Instrucciones para cargar firmware a CPLD.pdf",
+    "_pdf/Instructions to connect Trenz 0715 SoM to computer.pdf",
+    "_pdf/Interaction_with_lpgbt.pdf",
     "_pdf/Technical_Design_Report_TGC_ChaMS (1).pdf",
-    "_pdf/TGC-Charge Monitoring System Status Jun 2025.pdf",
-    "_pdf/Instrucciones para cargar firmware a CPLD.pdf"
+    "_pdf/TGC-Charge Monitoring System Status Jun 2025.pdf"
   ]
 }

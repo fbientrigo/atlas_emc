@@ -28,6 +28,7 @@ mv /mnt/c/emp_firmware_02/emp-firmware-2023.2/*.xsa .
 puede cambiar dependiendo del folder que se elija, por ejemplo, esto es desde un backup
 ```bash
 mv /mnt/c/backup/emp_firmware_02_generateAll/emp-firmware-2023.2/*.xsa .
+mv /mnt/c/vivado_code/emp_firmware_02_generateAll/emp-firmware-2023.2/*.xsa .
 ```
 
 Entonces se procede a ejecutar esto

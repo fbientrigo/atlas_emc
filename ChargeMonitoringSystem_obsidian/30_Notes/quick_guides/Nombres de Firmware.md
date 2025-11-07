@@ -14,6 +14,27 @@ sudo LpGbtSw/build/Demonstrators/LpGbtRegister/lpGbtRegister -a lpgbt-uio://emp_
 ```
 
 entre cada carga de firmware, se reinicia el sistema para evitar cualquier sesgo
+
+
+# Funcionales
+
+### reading_1006
+Un backup funcional
+![[emp_firmware_lpgbt_connections.png]]
+
+- Posee la PRBS para escribir
+- Es la versión que contiene el funcionamiento de loop back si se configura.
+- requiere configurar el registro del reloj
++--> este se usa para el test de conexión fisica, pues modificaremos el barrido de reloj
+de procesamiento + 
+## reading_1006_uplinkready
+basado en el backup funcional
+![[emp_firmware_lpgbt_connection_example.png]]
+
+- es identico solo uplink ready va hacia el mecanismo de lectura
+
+___ 
+# Archivo
 ##  emp_fw_TE0807_wrapper.dtbo
 - version del firmware desconocida, este archivo se encontraba desde el inicio
 - compilador xsa desconocido
