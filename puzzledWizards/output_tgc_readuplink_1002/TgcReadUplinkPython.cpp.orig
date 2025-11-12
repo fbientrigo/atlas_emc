@@ -1,0 +1,9 @@
+#include <boost/python.hpp>
+using namespace boost::python;
+
+#include <TgcReadUplink.hpp>
+
+BOOST_PYTHON_MODULE(TgcReadUplink)
+{
+  class_<TgcReadUplink>("TgcReadUplink", init<unsigned int>());
+}

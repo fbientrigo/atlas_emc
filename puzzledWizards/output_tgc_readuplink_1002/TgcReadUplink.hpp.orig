@@ -1,0 +1,34 @@
+#pragma once
+#include <stdint.h>
+#include <string> // std::to_string
+
+struct uio_info_t; // forward-decl
+
+// for register map: tgc_readUplink
+
+class TgcReadUplink
+{
+
+public:
+  /** Opens uio-mapped component by uio device number */
+  TgcReadUplink (unsigned int devnum);
+  /** Opens uio-mapped component by uio device name */
+  TgcReadUplink (const std::string& uioDeviceName);
+  
+  virtual ~TgcReadUplink ();
+
+  
+    // at register: magic
+                  uint32_t readMagicValue ();
+                
+  
+    // at register: data_groups
+                  uint32_t readDataGroupsValue ();
+                    void writeDataGroupsValue (uint32_t value);
+          
+  
+private:
+  uio_info_t* m_uioInfo;
+                                    uint32_t _isolateBitsForRead(uint32_t value, uint32_t bitWidth, uint8_t bitOffset);
+  uint32_t _isolateBitsForWrite(uint32_t value, uint32_t bitWidth, uint8_t bitOffset, uint32_t oldValue);
+};

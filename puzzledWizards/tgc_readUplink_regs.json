@@ -1,0 +1,256 @@
+{
+  "jsonVersion": 2,
+  "registerMap": {
+    "name": "tgc_readUplink",
+    "description": "Read the uplink data, using internally a checker that looks at the header in order to differentiate data from garbage",
+    "width": 32,
+    "baseAddress": 2685272064,
+    "addrWidthBits": 32,
+    "registers": [
+      {
+        "type": "Register",
+        "name": "magic",
+        "description": "simple identifier",
+        "access": "READ_ONLY",
+        "addressOffset": 0,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_group_0",
+        "description": "Data group its where will store the different read values from the uplink frame",
+        "access": "READ_ONLY",
+        "addressOffset": 4,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_group_1",
+        "description": "",
+        "access": "READ_ONLY",
+        "addressOffset": 8,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_group_2",
+        "description": "",
+        "access": "READ_ONLY",
+        "addressOffset": 12,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_group_3",
+        "description": "",
+        "access": "READ_ONLY",
+        "addressOffset": 16,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_group_4",
+        "description": "",
+        "access": "READ_ONLY",
+        "addressOffset": 20,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_group_5",
+        "description": "",
+        "access": "READ_ONLY",
+        "addressOffset": 24,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_group_6",
+        "description": "",
+        "access": "READ_ONLY",
+        "addressOffset": 28,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_group_7",
+        "description": "",
+        "access": "READ_ONLY",
+        "addressOffset": 32,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_group_8",
+        "description": "",
+        "access": "READ_ONLY",
+        "addressOffset": 36,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_header",
+        "description": "Allows for a header check to be passed",
+        "access": "READ_ONLY",
+        "addressOffset": 40,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "clk_thresh",
+        "description": "",
+        "access": "READ_WRITE",
+        "addressOffset": 44,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      }
+    ],
+    "revision": 27,
+    "generateRecordPorts": false,
+    "generatePackedStructs": false,
+    "disableTimestamps": false
+  }
+}

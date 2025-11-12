@@ -1,0 +1,58 @@
+{
+  "jsonVersion": 2,
+  "registerMap": {
+    "name": "tgc_readUplink",
+    "description": "Read the uplink data, using internally a checker that looks at the header in order to differentiate data from garbage",
+    "width": 32,
+    "baseAddress": 2685272064,
+    "addrWidthBits": 32,
+    "registers": [
+      {
+        "type": "Register",
+        "name": "magic",
+        "description": "simple identifier",
+        "access": "READ_ONLY",
+        "addressOffset": 0,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "RegisterArray",
+        "arrayLength": 8,
+        "genericArrayLength": false,
+        "name": "data_groups",
+        "description": "Contains the data frames from different groups",
+        "access": "READ_WRITE",
+        "addressOffset": 4,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      }
+    ],
+    "revision": 5,
+    "generateRecordPorts": false,
+    "generatePackedStructs": false,
+    "disableTimestamps": false
+  }
+}

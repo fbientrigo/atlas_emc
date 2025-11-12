@@ -1,0 +1,96 @@
+{
+  "jsonVersion": 2,
+  "registerMap": {
+    "name": "Read_PRBS",
+    "description": "Used so one can write data for the PRBS",
+    "width": 32,
+    "baseAddress": 2685206528,
+    "addrWidthBits": 32,
+    "registers": [
+      {
+        "type": "Register",
+        "name": "magic",
+        "description": "",
+        "access": "READ_ONLY",
+        "addressOffset": 0,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "control",
+        "description": "",
+        "access": "WRITE_ONLY",
+        "addressOffset": 4,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "status",
+        "description": "",
+        "access": "READ_ONLY",
+        "addressOffset": 8,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "data_prbs",
+        "description": "Used to give a base word for the PRBS feeding the DownlinkData",
+        "access": "READ_WRITE",
+        "addressOffset": 12,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      }
+    ],
+    "revision": 9,
+    "generateRecordPorts": false,
+    "generatePackedStructs": false,
+    "disableTimestamps": false
+  }
+}
