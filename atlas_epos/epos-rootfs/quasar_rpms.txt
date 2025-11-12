@@ -1,0 +1,9 @@
+git
+make
+cmake
+boost-devel
+boost-regex
+boost-thread
+boost-program-options
+boost-system
+boost-filesystem
