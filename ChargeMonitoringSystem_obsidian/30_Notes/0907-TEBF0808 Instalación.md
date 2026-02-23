@@ -164,13 +164,13 @@ sudo ip route add default via 192.168.1.1
 
 # 6) *Double‑check* (Setup EMP ↔ TRM TEBF0808)
 
-| Ítem | Setup EMP/EPOS | TRM TEBF0808 | Nota |
-|---|---|---|---|
-| **Slots SD** | SD (front) soportado; **también microSD (back)** | **MicroSD/MMC bootable** | Coherente; usar uno a la vez. |
-| **Puertos serie** | Trenz: **2 conversores** (JTAG=ttyUSB0, **UART=ttyUSB1**), 115200 | JTAG/UART headers y micro‑USB disponibles | Mapeo host práctico añadido aquí. |
-| **Alimentación** | Requiere suministro estable antes de boot | **ATX‑24** y **12V jack** | Igual; priorizar ATX‑24 si usas muchas cargas. |
-| **MAC** | Leída de **eMMC** y aplicada al DT | eMMC a bordo (4 GB) | Implica registrar MAC para red gestionada. |
-| **Versionado** | **Vivado/PetaLinux 2023.2** | — | Mantener versiones alineadas. |
+| Ítem              | Setup EMP/EPOS                                                    | TRM TEBF0808                              | Nota                                           |
+| ----------------- | ----------------------------------------------------------------- | ----------------------------------------- | ---------------------------------------------- |
+| **Slots SD**      | SD (front) soportado; **también microSD (back)**                  | **MicroSD/MMC bootable**                  | Coherente; usar uno a la vez.                  |
+| **Puertos serie** | Trenz: **2 conversores** (JTAG=ttyUSB0, **UART=ttyUSB1**), 115200 | JTAG/UART headers y micro‑USB disponibles | Mapeo host práctico añadido aquí.              |
+| **Alimentación**  | Requiere suministro estable antes de boot                         | **ATX‑24** y **12V jack**                 | Igual; priorizar ATX‑24 si usas muchas cargas. |
+| **MAC**           | Leída de **eMMC** y aplicada al DT                                | eMMC a bordo (4 GB)                       | Implica registrar MAC para red gestionada.     |
+| **Versionado**    | **Vivado/PetaLinux 2023.2**                                       | —                                         | Mantener versiones alineadas.                  |
 
 ---
 

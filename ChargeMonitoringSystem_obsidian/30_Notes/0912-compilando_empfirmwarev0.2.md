@@ -27,4 +27,4 @@ asumo que debido a como esta configurado, osea es un proyecto base para desarrol
 	- claramente lo será cuando conectemos más partes
 
 Luego se procede a correr Implementación hasta tener el Hardware Description con el bitstream
-[[0915-xsa to the fpga]]
+[[0915-G-xsa to the fpga]]

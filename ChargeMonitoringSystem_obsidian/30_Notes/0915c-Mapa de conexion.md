@@ -1,184 +1,290 @@
-Aqui el reporte de busqueda de variables de hoy:
-"""
-Comenzamos con la busqueda de encontrar una señal que interactuara con el IQR, 
-tras hacer un mapeo y encontrar condiciones, se halló que habia una condición para activarla, la cual era cuando la memoria se llenaba.
-Sin embargo encontramos que la forma de activarlo solo ocurre cuando llenamos la memoria
+## Objetivo de la sesión
 
-Por tanto buscamos donde se llena data_i
-Partimos por el modulo visible
+Encontrar **qué señal activa el IQR / interrupt** y bajo qué condición, para poder reproducir y depurar el comportamiento.
 
+---
 
-emp_fw_TE0807 (lpgbtfpga_downlinkUserData_i) -> U0 (lpgbtfpga_downlinkUserData_i)
-U0(lpgbtfpga_downlinkUserData_i) -> U0(lpgbtfpga_downlinkUserData_s)
+## Hallazgo principal
 
-	lpgbtfpga_downlinkData_40 <= lpgbtfpga_downlinkIcData_s & lpgbtfpga_downlinkEcData_s & lpgbtfpga_downlinkUserData_s;
+Durante el mapeo de señales y condiciones se observó que:
 
-U0(lpgbtfpga_downlinkData_40) -> cdc_tx_inst(data_a_i)
+- Existe una condición que **activa la señal** (asociada a IQR/interrupt).
+- Esa condición ocurre **cuando la memoria se llena**.
+- Por ahora, **la activación solo se reproduce llenando la memoria** (no se encontró un gatillante alternativo).
 
-	  data_a_reg     <= data_a_i   when rising_edge(clk_a_i);
-	data_b_reg <= data_a_reg
-	data_b_o   <= data_b_reg
+---
 
-cdc_tx_inst(data_b_o) -> U0(lpgbtfpga_downlinkData_320)
-	-> lpgbtFpga_top_inst(downlinkData_i)
-		-> downlinkData320
+## Hipótesis operativa
 
-aqui se divide en varios, en
-			userData_i          => downlinkData320(31 downto 0),
-			ECData_i            => downlinkData320(33 downto 32),
-			ICData_i            => downlinkData320(35 downto 34),
+> La activación del interrupt está correlacionada con la lógica de FIFO/memoria: cuando el buffer alcanza cierto nivel (ej. `FIFO_cnt = 7`), se levanta un flag de respuesta/interrupt.
 
-Lo cual llega hasta allí.
+---
 
-Por otro lado sabemos que hay modificaciones del FIFO en
-- rd_ptr
+# 1) Dónde se llena `data_i` (camino downlink → CDC → top)
 
-donde en ic_rx_fifo_inst llega a data_o
-donde se extrae desde
-- mem_arr
-	- en este mismo modulo, esta tiene modificaciones, pues es usada
-		- mem_arr(wr_ptr) <= data_i
-	- data_i viene del Descerializer
+## Cadena de señales (tracking “desde lo visible”)
 
+1) **Top-level**
+- `emp_fw_TE0807 (lpgbtfpga_downlinkUserData_i)`  
+  → `U0 (lpgbtfpga_downlinkUserData_i)`
 
+2) Dentro de `U0`
+- `U0(lpgbtfpga_downlinkUserData_i)` → `U0(lpgbtfpga_downlinkUserData_s)`
 
-## Lower to top
-comencemos a buscar desde el top hasta abajo como se generó el reset
+3) Concatenación a 40-bit downlink
+- `lpgbtfpga_downlinkData_40 <= lpgbtfpga_downlinkIcData_s & lpgbtfpga_downlinkEcData_s & lpgbtfpga_downlinkUserData_s;`
 
-En 
-int_lpgbt_resp
-lo que nos lleva a U0
-en donde se modifica por
-int_lpgbt_resp <= interrupt_flags_ic_resp(0) and interrupt_enable_ic_resp(0);
+4) CDC TX
+- `U0(lpgbtfpga_downlinkData_40)` → `cdc_tx_inst(data_a_i)`
 
-lo cual nos lleva a reg_map[interrupt_enable_ic_resp]
+Registro en CDC:
+- `data_a_reg <= data_a_i when rising_edge(clk_a_i);`
+- `data_b_reg <= data_a_reg`
+- `data_b_o   <= data_b_reg`
 
-se conecta a s_reg_interrupt_enable_ic_resp_r
+5) 320-bit downlink
+- `cdc_tx_inst(data_b_o)` → `U0(lpgbtfpga_downlinkData_320)`
+  → `lpgbtFpga_top_inst(downlinkData_i)`
+  → `downlinkData320`
 
-donde es conectado a:
-- s_axi_wdata_reg_r(0)
-	- 93 matchs para todo
-	- 8 matches si vamos con el (0)
-		- -- register 'data_tx' at address offset 0x10
-			- s_reg_data_tx_data_r(0) <= s_axi_wdata_reg_r(0); -- data(0)
-		- -- register 'register_addr' at address offset 0x14
-			-  s_reg_register_addr_addr_r(0) <= s_axi_wdata_reg_r(0); -- addr(0)
-		- -- register 'lpGBT_addr' at address offset 0x18
-			- s_reg_lpgbt_addr_addr_r(0) <= s_axi_wdata_reg_r(0); -- addr(0)
-		- -- register 'interrupt_enable' at address offset 0x1C
-			- s_reg_interrupt_enable_ic_resp_r(0) <= s_axi_wdata_reg_r(0); -- IC_resp(0)
-		- -- register 'interrupt_clear' at address offset 0x24
-			-  s_reg_interrupt_clear_ic_resp_r(0) <= s_axi_wdata_reg_r(0); -- IC_resp(0)
-		-  -- register 'reset' at address offset 0x28
-			- s_reg_reset_reset_r(0) <= s_axi_wdata_reg_r(0); -- reset(0)
-		- -- register 'counter_lhc_clock' at address offset 0x100
-			-  s_reg_counter_lhc_clock_value_r(0) <= s_axi_wdata_reg_r(0); -- value(0)
-		-  -- register 'control' at address offset 0x4
-			- s_reg_control_fifoctrl_r(0) <= s_axi_wdata_reg_r(0); -- FIFOCtrl(0)
-- INTERRUPT_ENABLE_IC_RESP_RESET
-	- conectada a nada tal parece
+6) Split de `downlinkData320`
+- `userData_i => downlinkData320(31 downto 0)`
+- `ECData_i   => downlinkData320(33 downto 32)`
+- `ICData_i   => downlinkData320(35 downto 34)`
 
-y para interrupt_flags_ic_resp
-	ocurre cuando FIFO_cnt =7
-		lo que se relaciona a when reading_FIFO (FSM de U0)
-	ocurre si
-		when waiting_resp =>
-			IC_tx_start_write_s <= '0';
-			IC_tx_start_read_s  <= '0';
-			lpgbt_resp_timeout  := lpgbt_resp_timeout - 1;
-			if status_empty_flag(0) = '0' and (data_rx_data_FIFO = x"E0" or data_rx_data_FIFO = x"E1") then -- start reading FIFO
-				IC_rx_rd_s               <= '1'; --start pulling from FIFO
-				FIFO_cnt                 <= 0;
-				next_FIFO_byte_available <= 0;
-				parity_check             <= x"00";
-				lpgbt_resp_timeout       := 100000000;
-				fsm_state_ic             <= reading_FIFO;
-	por tanto 
+**Hasta aquí llega el tracking del tramo downlink.**
 
+---
 
-conecta U0 a ic_top_inst mediante 
-	rx_data_from_gbtx_o => data_rx_data_FIFO, --! Data from the FIFO
+# 2) Observación: FIFO / memoria (`ic_rx_fifo_inst`) y `mem_arr`
 
-en ic_top_inst buscamos rx_data_from_gbtx_o
-lo que se conecta al modulo rx_inst con puerto data_o
+Sabemos que hay modificaciones relevantes en:
 
-ic_top_inst(data_o) -> ic_rx_fifo_inst(data_o)
+- `rd_ptr`
+- lectura/escritura de RAM interna `mem_arr`
 
-dentro de ic_rx_fifo_inst
-"""
-    ram_proc_rd: process(reset_i, rd_clk_i)
-    begin
-        if reset_i = '1' then
-            rd_ptr              <= 0;
-            rx_empty_o          <= '1';
+En `ic_rx_fifo_inst`:
 
-        elsif rising_edge(rd_clk_i) then
-            if read_i = '1' and rd_ptr < word_in_mem_size then
-                rd_ptr          <= rd_ptr + 1;
-            end if;
+- `data_o` se extrae de `mem_arr(rd_ptr)`
+- `mem_arr(wr_ptr) <= data_i`
+- `data_i` proviene del **Deserializer**
 
-            if word_in_mem_size > rd_ptr then
-                rx_empty_o         <= '0';
-            else
-                rx_empty_o         <= '1';
-            end if;
+Modelo mental:
+- **write-side**: `data_i` → `mem_arr(wr_ptr)`
+- **read-side**: `mem_arr(rd_ptr)` → `data_o`
+- el estado “lleno/vacío” está controlado por contadores (`word_in_mem_size`, `rd_ptr`, flags)
 
-            data_o          <= mem_arr(rd_ptr);
-        end if;
-    end process;
-"""
+---
 
-donde mem_arr
-- recibe: data_i con wr_ptr
-- escribe: data_o con rd_prt
+# 3) Lower → Top: buscar el reset / interrupt desde arriba hacia abajo
 
+## 3.1 Interrupt en `int_lpgbt_resp`
 
-Ahora estamos en lo más bajo, queda encontrar quien instancia ic_rx_fifo_inst(data_i)
-subiendo a mod: ic_top_inst
-encuentro la referencia de ic_rx como rx_inst
+En `int_lpgbt_resp` llegamos a `U0`, donde:
 
-en rx_inst(byte_des) ->byte_des
+- `int_lpgbt_resp <= interrupt_flags_ic_resp(0) and interrupt_enable_ic_resp(0);`
 
-byte_des es una señal:
+Esto lleva a:
+- `reg_map[interrupt_enable_ic_resp]`
+- conectado a `s_reg_interrupt_enable_ic_resp_r`
 
-Deserializer_inst(data_o) -> rx_inst(byte_des)
+### Escritura por AXI (mapa rápido)
 
-dentro
-Deserializer_inst(data_o) <-> reg <-> Deserializer_inst(data_i)
+`S_reg_interrupt_enable_ic_resp_r(0)` viene de:
+- `s_axi_wdata_reg_r(0)`
 
-donde
-Deserializer_inst(data_i) -> rx_inst(rx_data_i)
+Matches relevantes (con `(0)`):
 
-se conecta a
-rx_inst(rx_data_i) -> ic_top_inst(data_ic_rx_inv)
+- `data_tx` @ `0x10`
+  - `s_reg_data_tx_data_r(0) <= s_axi_wdata_reg_r(0);`
+- `register_addr` @ `0x14`
+  - `s_reg_register_addr_addr_r(0) <= s_axi_wdata_reg_r(0);`
+- `lpGBT_addr` @ `0x18`
+  - `s_reg_lpgbt_addr_addr_r(0) <= s_axi_wdata_reg_r(0);`
+- `interrupt_enable` @ `0x1C`
+  - `s_reg_interrupt_enable_ic_resp_r(0) <= s_axi_wdata_reg_r(0);`
+- `interrupt_clear` @ `0x24`
+  - `s_reg_interrupt_clear_ic_resp_r(0) <= s_axi_wdata_reg_r(0);`
+- `reset` @ `0x28`
+  - `s_reg_reset_reset_r(0) <= s_axi_wdata_reg_r(0);`
+- `counter_lhc_clock` @ `0x100`
+  - `s_reg_counter_lhc_clock_value_r(0) <= s_axi_wdata_reg_r(0);`
+- `control` @ `0x4`
+  - `s_reg_control_fifoctrl_r(0) <= s_axi_wdata_reg_r(0);`
 
-donde 
-"""
-    gbtx_connectivity: if g_ToLpGBT = 0 generate
-        tx_data_o(0)            <= data_ic_tx_inv(1);
-        tx_data_o(1)            <= data_ic_tx_inv(0);
-        data_ic_rx_inv(0)       <= rx_data_i(1);
-        data_ic_rx_inv(1)       <= rx_data_i(0);
-    end generate;
+Nota:
+- `INTERRUPT_ENABLE_IC_RESP_RESET` parece no estar conectado a nada (por ahora).
 
-    lpgbt_connectivity: if g_ToLpGBT = 1 generate
-        tx_data_o       <= data_ic_tx_inv;
-        data_ic_rx_inv  <= rx_data_i;
-    end generate;
-"""
+---
 
-luego en modulo arriba
-U0 busqué ic_top_inst
+## 3.2 ¿Cuándo se levanta `interrupt_flags_ic_resp`?
 
-en donde se conecta mediante
-lpgbtfpga_uplinkIcData_s
+Se observó que:
+- ocurre cuando `FIFO_cnt = 7`
+- relacionado con el estado `reading_FIFO` del FSM de `U0`
 
-osea:
-ic_top_inst(rx_data_i) -> U0(lpgbtfpga_uplinkIcData_s)
+Condición crítica encontrada:
 
-aqui
-U0(lpgbtfpga_uplinkIcData_s) <-> U0(lpgbtfpga_uplinkData_40)
+```vhdl
+when waiting_resp =>
+  IC_tx_start_write_s <= '0';
+  IC_tx_start_read_s  <= '0';
+  lpgbt_resp_timeout  := lpgbt_resp_timeout - 1;
 
-seguir buscando las conexiones dentro de U0
-- data_b_o
-"""
+  if status_empty_flag(0) = '0' and (data_rx_data_FIFO = x"E0" or data_rx_data_FIFO = x"E1") then -- start reading FIFO
+    IC_rx_rd_s               <= '1'; --start pulling from FIFO
+    FIFO_cnt                 <= 0;
+    next_FIFO_byte_available <= 0;
+    parity_check             <= x"00";
+    lpgbt_resp_timeout       := 100000000;
+    fsm_state_ic             <= reading_FIFO;
+  end if;
+```
+
+Interpretación:
+
+- Si `status_empty_flag(0) = '0'` (no vacío) y el byte leido es `E0/E1`,  
+    entonces se entra a `reading_FIFO` y comienza la extracción.
+    
+- El conteo `FIFO_cnt` crece durante lectura y al llegar a `7` se dispara el flag.
+    
+
+---
+
+# 4) Conectividad hacia el FIFO: `ic_top_inst` → `ic_rx_fifo_inst`
+
+Conectividad entre módulos:
+
+- `U0` conecta con `ic_top_inst` mediante:
+    
+    - `rx_data_from_gbtx_o => data_rx_data_FIFO` (Data desde el FIFO)
+        
+
+En `ic_top_inst`, buscando `rx_data_from_gbtx_o`:
+
+- se conecta al módulo `rx_inst` como puerto `data_o`
+    
+
+Cadena:
+
+- `ic_top_inst(data_o)` → `ic_rx_fifo_inst(data_o)`
+    
+
+---
+
+# 5) Detalle interno en `ic_rx_fifo_inst` (lectura)
+
+Código observado:
+
+```vhdl
+ram_proc_rd: process(reset_i, rd_clk_i)
+begin
+  if reset_i = '1' then
+    rd_ptr     <= 0;
+    rx_empty_o <= '1';
+
+  elsif rising_edge(rd_clk_i) then
+    if read_i = '1' and rd_ptr < word_in_mem_size then
+      rd_ptr <= rd_ptr + 1;
+    end if;
+
+    if word_in_mem_size > rd_ptr then
+      rx_empty_o <= '0';
+    else
+      rx_empty_o <= '1';
+    end if;
+
+    data_o <= mem_arr(rd_ptr);
+  end if;
+end process;
+```
+
+Resumen:
+
+- `data_o` siempre sale de `mem_arr(rd_ptr)`
+    
+- `rd_ptr` avanza si `read_i=1` y hay data (`rd_ptr < word_in_mem_size`)
+    
+- flag `rx_empty_o` depende de `word_in_mem_size > rd_ptr`
+    
+
+---
+
+# 6) Subiendo: ¿quién alimenta `ic_rx_fifo_inst(data_i)`?
+
+En `ic_top_inst` se ve `ic_rx` referenciado como `rx_inst`.
+
+`rx_inst(byte_des)` y `Deserializer_inst`:
+
+- `Deserializer_inst(data_o)` → `rx_inst(byte_des)`
+    
+- `Deserializer_inst(data_o)` ↔ regs ↔ `Deserializer_inst(data_i)`
+    
+- `Deserializer_inst(data_i)` → `rx_inst(rx_data_i)`
+    
+
+Luego:
+
+- `rx_inst(rx_data_i)` → `ic_top_inst(data_ic_rx_inv)`
+    
+
+---
+
+# 7) Mapeo de conectividad (gbtx vs lpgbt)
+
+Bloque observado:
+
+```vhdl
+gbtx_connectivity: if g_ToLpGBT = 0 generate
+  tx_data_o(0)      <= data_ic_tx_inv(1);
+  tx_data_o(1)      <= data_ic_tx_inv(0);
+  data_ic_rx_inv(0) <= rx_data_i(1);
+  data_ic_rx_inv(1) <= rx_data_i(0);
+end generate;
+
+lpgbt_connectivity: if g_ToLpGBT = 1 generate
+  tx_data_o      <= data_ic_tx_inv;
+  data_ic_rx_inv <= rx_data_i;
+end generate;
+```
+
+Luego, en el módulo arriba (`U0`):
+
+- se conecta mediante `lpgbtfpga_uplinkIcData_s`
+    
+
+Cadena:
+
+- `ic_top_inst(rx_data_i)` → `U0(lpgbtfpga_uplinkIcData_s)`
+    
+
+y después:
+
+- `U0(lpgbtfpga_uplinkIcData_s)` ↔ `U0(lpgbtfpga_uplinkData_40)`
+    
+
+---
+
+# 8) Pendiente / Próximo paso
+
+## Pendiente inmediato
+
+- Seguir buscando las conexiones dentro de `U0`, especialmente el tramo:
+    
+    - `uplinkData_40` / `data_b_o` y cómo se propaga hacia la lógica de flags/interrupt.
+        
+
+## Pregunta guía
+
+- ¿Qué evento exacto incrementa `word_in_mem_size` y `wr_ptr` hasta “llenar memoria”?
+    
+- ¿Quién controla `read_i` y en qué condiciones se llega consistentemente a `FIFO_cnt = 7`?
+    
+
+---
+
+## Notas rápidas
+
+- El comportamiento observado sugiere que el interrupt ligado a `interrupt_flags_ic_resp` depende del “nivel” del FIFO.
+    
+- La condición `E0/E1` en `data_rx_data_FIFO` parece ser el marcador de inicio de lectura (handshake / framing).
