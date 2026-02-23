@@ -8,6 +8,8 @@
 - Se instala el programa PuTTY para conexión serial
 	- las instrucciones indican que debe de presionarse el boton más cercano a la placa TE0790-03
 
+![[Pasted image 20251209153631.png]]
+
 es posible conocer el terminal port:
 ![[assets/interfaces/2024/09/com8-devices.png]]
 
@@ -92,6 +94,13 @@ Apr 30 00:00:07 trenz-tgc systemd[1]: systemd-programclock.service: Deactivated>
 
 
 Vamos a probar apagar y cender a ver si el reloj se resetea
+
+___
+
+# Claves
+root : EMPaina
+tgc_cms : saphir
+
 
 ___
 
