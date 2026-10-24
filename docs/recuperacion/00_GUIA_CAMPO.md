@@ -159,6 +159,8 @@ El responsable local debe verificar y autorizar las condiciones de la lectura. E
 
 **Bloqueo de esta investigación:** el Block Design recuperado no contiene `tgc_readUplink_regs` ni `Read_PRBS_regs`; tampoco se encontró el RTL de captura en el árbol de la revisión consultada. El JSON declara registros de lectura, pero no demuestra su implementación. Se necesita la exportación del diseño que generó el firmware de lectura. [F6, F7]
 
+**Conflicto de direcciones confirmado:** en `design.addressing` de ese BD, `0xA00D0000` corresponde a `axi_intc_1`, y `0xA00E0000` a `axi_intc_2`, ambos con rango 64 KiB. Los scripts históricos asignan esas mismas bases al generador y al lector. Son mapas de diseños diferentes; ejecutar sus escrituras sobre el diseño del BD podría modificar un controlador de interrupción. La recomendación histórica «usar 0xA, no 0xB» tampoco es una regla de la plataforma: este BD asigna el debughub a `0xB0000000`. [F7, F9]
+
 ## Etapa B — Diagnosticar el enlace
 
 **Objetivo.** Separar transporte óptico/alineación de procedencia y calidad del payload.
@@ -243,7 +245,7 @@ done
 
 **Riesgos.** Lecturas no atómicas: cada acceso AXI ocurre en otro instante. Nueve palabras no equivalen a un snapshot de 288 bits ni a un evento. No concatenarlas como frame; tampoco asumir 230 bits útiles, orden de bytes, huecos o mapeo e-link sin el RTL de captura. `volatile` obliga al acceso del compilador; no aporta coherencia de frames. [F1, F2]
 
-**Siguiente decisión.** Si el nombre no coincide, identificar un lector existente que admita el nombre real. La variante `test_uio/readuio.c` admite `readuio NOMBRE_UIO OFFSET...` y accede a map0; la de `libuio/readuio.c` es otro programa: no intercambiar opciones por nombre de archivo. Utilizar la primera solo si se identifica su ejecutable y se verifican offsets y efectos del diseño. No se requiere escribir un lector nuevo. [F12]
+**Siguiente decisión.** Si el nombre no coincide, identificar un lector existente que admita el nombre real. Tanto `test_uio/readuio.c` como `libuio/readuio.c` admiten `readuio NOMBRE_UIO OFFSET...` y acceden a map0. La primera imprime hexadecimal; la segunda, decimal. Usarlas solo si se identifica el ejecutable y se verifican offsets y efectos del diseño. No se requiere escribir un lector nuevo. [F12]
 
 **Intento de refutación.** Trece bases históricas `0xA00E0000 + N*0x10000` son trece instancias, no trece palabras de esta CLI. La nota `Memory Directions` mezcla esa familia con `control/status/data prbs` en `+4/+8/+C`, incompatible con F1. No usar esos offsets como control del lector. [F5, F11]
 

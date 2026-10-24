@@ -1,0 +1,277 @@
+[
+  {
+    "id": "B01",
+    "title": "CLI de payload",
+    "path": "read_all_lpgbt/tgc_readuplink_cli.cpp",
+    "origin": "backup",
+    "sha256": "03cb6c414059ab55e2fcdcb162faed1287d00c8afd0b5cac434acf1836c098d3",
+    "url": null,
+    "excerpts": [
+      {
+        "start": 18,
+        "end": 62,
+        "text": "18: int main() {\n19:     try {\n20:         // Abrir por nombre de dispositivo UIO\n21:         TgcReadUplink dev(\"tgc_readUplink_regs\");\n22: \n23:         // Lecturas básicas\n24:         uint32_t magic = dev.readMagicValue();\n25:         print_hex32(\"magic:\", magic);\n26: \n27:         // data_group_0 .. data_group_8 usando punteros a método\n28:         using ReadFn = uint32_t (TgcReadUplink::*)();\n29:         const std::array<ReadFn, 9> groupFns = {\n30:             &TgcReadUplink::readDataGroup0Value,\n31:             &TgcReadUplink::readDataGroup1Value,\n32:             &TgcReadUplink::readDataGroup2Value,\n33:             &TgcReadUplink::readDataGroup3Value,\n34:             &TgcReadUplink::readDataGroup4Value,\n35:             &TgcReadUplink::readDataGroup5Value,\n36:             &TgcReadUplink::readDataGroup6Value,\n37:             &TgcReadUplink::readDataGroup7Value,\n38:             &TgcReadUplink::readDataGroup8Value\n39:         };\n40: \n41:         for (size_t i = 0; i < groupFns.size(); ++i) {\n42:             uint32_t val = (dev.*groupFns[i])();\n43:             std::string label = \"data_group_\" + std::to_string(i) + \":\";\n44:             print_hex32(label.c_str(), val);\n45:         }\n46: \n47:         // data_header\n48:         uint32_t header = dev.readDataHeaderValue();\n49:         print_hex32(\"data_header:\", header);\n50: \n51:         // clk_thresh\n52:         uint32_t clk = dev.readClkThreshValue();\n53:         print_hex32(\"clk_thresh:\", clk);\n54: \n55: \tstd::cout << clk << std::endl;\n56:         // Nota: si luego quieres escribir clk_thresh:\n57:         // dev.writeClkThreshValue(0x000000AB);\n58: \n59:         return 0;\n60:     } catch (const std::exception& e) {\n61:         std::cerr << \"[ERROR] \" << e.what() << '\\n';\n62:         return 1;"
+      }
+    ]
+  },
+  {
+    "id": "B02",
+    "title": "Getters de payload",
+    "path": "read_all_lpgbt/TgcReadUplink.cpp",
+    "origin": "backup",
+    "sha256": "0bbd3f71777adcaa7b7400dd2fca5987e1faebc1088509cf3a45a28d341db7dd",
+    "url": null,
+    "excerpts": [
+      {
+        "start": 25,
+        "end": 37,
+        "text": "25: TgcReadUplink::TgcReadUplink (const std::string& uioDeviceName)\n26: {\n27:     char* c_string;\n28:     c_string = strdup(uioDeviceName.c_str());\n29:     m_uioInfo = uio_find_by_uio_name(c_string);\n30:     if (!m_uioInfo)\n31:         throw std::runtime_error(\"uio_find_by_uio_name with device name \" + uioDeviceName + \" failed.\");\n32: \n33:     std::cout << \"TgcReadUplink ctr. \"\n34:               << \"Found requested device with ids: \" << uio_get_major(m_uioInfo) << \",\" << uio_get_minor(m_uioInfo) << std::endl;\n35:     if (uio_open(m_uioInfo))\n36:         throw std::runtime_error(\"uio_open failed.\");\n37: }"
+      },
+      {
+        "start": 65,
+        "end": 79,
+        "text": "65: uint32_t TgcReadUplink::readDataGroup0Value ()\n66: {\n67:     uint32_t value (0);\n68:     if (uio_read32 (\n69:                 m_uioInfo,\n70:                 0 /*map*/,\n71:                 4 /* address offset */,\n72:                 &value))\n73:     {\n74:         throw std::runtime_error(\"uio_read32 failed\");\n75:     };\n76:     uint32_t bitWidth = 32;\n77:     uint8_t bitOffset = 0;\n78:     return(_isolateBitsForRead(value, bitWidth, bitOffset));\n79: }"
+      },
+      {
+        "start": 236,
+        "end": 269,
+        "text": "236: uint32_t TgcReadUplink::readDataHeaderValue ()\n237: {\n238:     uint32_t value (0);\n239:     if (uio_read32 (\n240:                 m_uioInfo,\n241:                 0 /*map*/,\n242:                 40 /* address offset */,\n243:                 &value))\n244:     {\n245:         throw std::runtime_error(\"uio_read32 failed\");\n246:     };\n247:     uint32_t bitWidth = 32;\n248:     uint8_t bitOffset = 0;\n249:     return(_isolateBitsForRead(value, bitWidth, bitOffset));\n250: }\n251: \n252: \n253: \n254: // at register: clk_thresh\n255: uint32_t TgcReadUplink::readClkThreshValue ()\n256: {\n257:     uint32_t value (0);\n258:     if (uio_read32 (\n259:                 m_uioInfo,\n260:                 0 /*map*/,\n261:                 44 /* address offset */,\n262:                 &value))\n263:     {\n264:         throw std::runtime_error(\"uio_read32 failed\");\n265:     };\n266:     uint32_t bitWidth = 32;\n267:     uint8_t bitOffset = 0;\n268:     return(_isolateBitsForRead(value, bitWidth, bitOffset));\n269: }"
+      },
+      {
+        "start": 297,
+        "end": 311,
+        "text": "297: uint32_t TgcReadUplink::_isolateBitsForRead(uint32_t value, uint32_t bitWidth, uint8_t bitOffset) {\n298:     // Patched: safe mask generation\n299:     uint64_t bitMask = ((1ULL << bitWidth) - 1ULL);\n300:     if (bitWidth >= 32) bitMask = 0xFFFFFFFFULL;\n301:     bitMask <<= bitOffset;\n302:     return static_cast<uint32_t>((value & bitMask) >> bitOffset);\n303: }\n304: \n305: // Takes and old value and replaces the specified bits defined by value, bitWidth and bitOffset.\n306: uint32_t TgcReadUplink::_isolateBitsForWrite(uint32_t value, uint32_t bitWidth, uint8_t bitOffset, uint32_t oldValue) {\n307:     // Patched: safe mask generation\n308:     uint64_t bitMask = ((1ULL << bitWidth) - 1ULL);\n309:     if (bitWidth >= 32) bitMask = 0xFFFFFFFFULL;\n310:     bitMask <<= bitOffset;\n311:     return static_cast<uint32_t>((oldValue & ~bitMask) | ((static_cast<uint64_t>(value) << bitOffset) & bitMask));"
+      }
+    ]
+  },
+  {
+    "id": "B03",
+    "title": "Acceso MMIO volatile",
+    "path": "libuio/mem.c",
+    "origin": "backup",
+    "sha256": "8389dcd2dbf901b128acfaa7dd88bffc6151b45d5ce1bcb23623b3497c73099c",
+    "url": null,
+    "excerpts": [
+      {
+        "start": 209,
+        "end": 222,
+        "text": "209: int uio_read32 (struct uio_info_t* info, int map_num, unsigned long offset,\n210: \t       uint32_t *val)\n211: {\n212: \tvoid *ptr;\n213: \n214: \tif (!info || !val)\n215: \t\treturn -1;\n216: \n217: \tptr = info->maps [map_num].map + info->maps [map_num].offset + offset;\n218: \n219: \t*val = *(volatile uint32_t *) ptr;\n220: \n221: \treturn 0;\n222: }"
+      }
+    ]
+  },
+  {
+    "id": "B04",
+    "title": "Lookup y mmap UIO",
+    "path": "libuio/base.c",
+    "origin": "backup",
+    "sha256": "1d0bd3d6b57d6b8a7679d7955ebe1c324af9c2a5f94219ece97101a4569fadd3",
+    "url": null,
+    "excerpts": [
+      {
+        "start": 246,
+        "end": 271,
+        "text": "246: struct uio_info_t *uio_find_by_uio_name (char *uio_name)\n247: {\n248: \tstruct uio_info_t *info = NULL, **list, **uio_list;\n249: \tchar *name;\n250: \n251: \tif (!uio_name)\n252: \t\treturn NULL;\n253: \n254: \tuio_list = uio_find_devices ();\n255: \tif (!uio_list)\n256: \t\treturn NULL;\n257: \n258: \tfor (list = uio_list; *list; list++)\n259: \t{\n260: \t\tstruct uio_info_t *candidate = *list;\n261: \n262: \t\tname = uio_get_name (candidate);\n263: \n264: \t\tif (!strcmp (name, uio_name)) {\n265: \t\t\tinfo = candidate;\n266: \t\t\tbreak;\n267: \t\t}\n268: \t}\n269: \tfree (uio_list);\n270: \n271: \treturn info;"
+      },
+      {
+        "start": 344,
+        "end": 378,
+        "text": "344: int uio_open_fix (struct uio_info_t* info, void *ptr)\n345: {\n346: \tint fd, i;\n347: \n348: \tif (!info)\n349: \t{\n350: \t\terrno = EINVAL;\n351: \t\tg_warning (_(\"uio_open: %s\\n\"), g_strerror (errno));\n352: \t\treturn -1;\n353: \t}\n354: \n355: \tfd = open (info->devname, O_RDWR);\n356: \tif (fd < 0)\n357: \t{\n358: \t\tg_warning (_(\"open: %s\\n\"), g_strerror (errno));\n359: \t\treturn -1;\n360: \t}\n361: \n362: \tfor (i = 0; i < info->maxmap; i++)\n363: \t{\n364: \t\tinfo->maps [i].map = mmap (ptr, info->maps [i].size,\n365: \t\t\t\t\t   PROT_READ | PROT_WRITE,\n366: \t\t\t\t\t   MAP_SHARED, fd, i * getpagesize());\n367: \t\tif (info->maps[i].map == MAP_FAILED) {\n368: \t\t\twhile (--i >= 0)\n369: \t\t\t\tuio_unmap (&info->maps [i]);\n370: \t\t\tg_warning (_(\"mmap: %s\\n\"), g_strerror (errno));\n371: \t\t\treturn -1;\n372: \t\t}\n373: \t\tif (ptr)\n374: \t\t\tptr += info->maps [i].size;\n375: \t}\n376: \tinfo->fd = fd;\n377: \n378: \treturn 0;"
+      }
+    ]
+  },
+  {
+    "id": "B05",
+    "title": "Tabla del monitor",
+    "path": "emp-tools/empTools/fwStatus/fwStatus.cpp",
+    "origin": "backup",
+    "sha256": "8cca295f177e0d9ada056f2c2932e5c16770e578fa51291df37d56bdfe71c3ea",
+    "url": null,
+    "excerpts": [
+      {
+        "start": 84,
+        "end": 115,
+        "text": "84: std::vector<std::string> get_emp_lpgbt_data (int channel, std::vector<std::bitset<32>> status) {\n85:     std::vector<std::string> line_i;\n86:     line_i.push_back(std::to_string(channel));           \n87:     line_i.push_back(status[5].test(channel) ? \"ok\" : \"-\");\n88:     line_i.push_back(status[6].test(channel) ? \"ok\" : \"-\");\n89:     line_i.push_back(status[0].test(channel) ? \"ok\" : \"-\");\n90:     line_i.push_back(status[3].test(channel) && status[4].test(channel) ? \"ok\" : \"-\");\n91:     return line_i;\n92: }\n93: \n94: std::vector<std::vector<std::string>> data_selection(ProgConfig pconfig, std::vector<std::bitset<32>> status) {\n95: \n96:     std::smatch match;\n97:     std::vector<std::vector<std::string>> data;\n98:     data.push_back(std::vector<std::string>{\"emp_lpgbt\", \"RX locked\", \"TX ready\", \"TX aligned\", \"XCVR Ready\"});\n99:     if (pconfig.id == -1) {\n100:         for(int i = 0; i <= 12; i++)\n101:             data.push_back(get_emp_lpgbt_data(i, status));\n102:     } else if (0 <= pconfig.id && pconfig.id <= 12) {  \n103:         data.push_back(get_emp_lpgbt_data(pconfig.id, status));\n104:     }\n105:     return data;\n106: }\n107: \n108: int main (int argc, char* argv[]) {\n109: \n110:     ProgConfig pconfig = parseProgramOptions(argc, argv);\n111:     FwMonitor::FwMonitorBackend sw_backend;\n112:     \n113:     printPrettyTable(data_selection(pconfig, sw_backend.fw_status()));\n114: \n115:     return 0;"
+      }
+    ]
+  },
+  {
+    "id": "B06",
+    "title": "Control IC activo",
+    "path": "LpGbtSw/LpGbtUioBackend/LpGbtUioBackend.cpp",
+    "origin": "backup",
+    "sha256": "d416be9f64a29ae2e71dc1f340d4b8d7b5c65cf209cebfc3ac67407286ef70de",
+    "url": null,
+    "excerpts": [
+      {
+        "start": 16,
+        "end": 28,
+        "text": "16: LpGbtUioBackend::LpGbtUioBackend (std::string_view uioDeviceAddress):\n17: \t\t\t\t\t\t\tm_uioDeviceAddress(uioDeviceAddress),\n18: \t\t\t\t\t\t\tm_uio(LpGbtUio::initUio(m_uioDeviceAddress))\n19: {\n20: \n21: \tLOG(Log::INF) << \"Initializing uio device '\" << m_uioDeviceAddress << \"'\";\n22: \n23: \tauto magicNumber = LpGbtUio::readMagicNumber(m_uio);\n24: \tLOG(Log::INF) << \"The magic number for this uio device is: \" << std::hex << magicNumber;\n25: \t\n26: \tLpGbtUio::setupUio(m_uio);\n27: \tuio_write32(m_uio, 0, LpGbtUio::registerAddr, 0x00);\n28: "
+      },
+      {
+        "start": 38,
+        "end": 64,
+        "text": "38: RegisterValue LpGbtUioBackend::readRegister (RegisterAddress registerId)\n39: {\n40: \n41: \tLOG(Log::DBG) << \"Start readRegister with address \" << (int)registerId;\n42: \n43: \tLpGbtUio::writeLpgbtRegisterAddress(m_uio, (uint32_t)registerId);\n44: \n45: \tLpGbtUio::clearIntr(m_uio, LpGbtUio::interruptClearValue, 0x1, 0x0);\n46:     LpGbtUio::enableIntr(m_uio, LpGbtUio::interruptEnableValue, 0x1, 0x0);\n47: \n48: \tLpGbtUio::writeNbytesIcRxFifo(m_uio, 0x10004);\n49: \n50: \tLpGbtUio::waitIntr(m_uio, 1); // that is in ms\n51: \tLOG(Log::TRC) << \"Reply received for register \" << (int)registerId;\n52: \t\n53: \t// Read IC Rx FIFO up to empty\n54: \tstd::vector<uint32_t>readValues = LpGbtUio::readICRxFifo(m_uio);\n55: \n56: \tLOG(Log::TRC) << \"Reply payload: \" << LpGbtUio::vectorToHexString<uint32_t>(readValues);\n57: \n58: \tLpGbtUio::disableIntr(m_uio);\n59: \n60: \t// TODO: The part of the reply packet that corresponds to the data, \n61: \t// is at position 7 currently. That should be validated and possibly change\n62: \t// in the future\n63: \treturn readValues[6];\n64: \t"
+      }
+    ]
+  },
+  {
+    "id": "B07",
+    "title": "Offsets del controlador IC",
+    "path": "LpGbtSw/include/LpGbtUioBackend/AxiRegisterDefinitions.h",
+    "origin": "backup",
+    "sha256": "2eebdfa8608aa066fdb52b2e380534fa5feb35c05d6396ff748f6ea1367e391e",
+    "url": null,
+    "excerpts": [
+      {
+        "start": 1,
+        "end": 25,
+        "text": "1: #pragma once\n2: \n3: namespace LpGbtUio\n4: {\n5: \n6: // Addresses:\n7: const uint32_t magicAddr = 0x0;\n8: const uint32_t ctrlAddr = 0x4;\n9: const uint32_t statusAddr = 0x8;\n10: const uint32_t dataRxAddr = 0xC;\n11: const uint32_t dataTxAddr = 0x10;\n12: const uint32_t registerAddr = 0x14;\n13: const uint32_t lpgbtAddr = 0x18;\n14: const uint32_t interruptEnableAddr = 0x1C;\n15: const uint32_t interruptFlagsAddr = 0x20;\n16: const uint32_t interruptClearAddr = 0x24;\n17: \n18: // Const values:\n19: const uint32_t lpgbtAddrValue = 0x70;\n20: const uint32_t registerAddrValue = 0x1;\n21: const uint32_t interruptEnableValue = 0x1;\n22: const uint32_t interruptDisableValue = 0x0;\n23: const uint32_t interruptClearValue = 0x1;\n24: \n25: }"
+      }
+    ]
+  },
+  {
+    "id": "B08",
+    "title": "Ayuda y acciones ReadPRBS",
+    "path": "puzzled_working/readprbs_cli.cpp",
+    "origin": "backup",
+    "sha256": "04c46f8beedb36853c173f1ed21d0391f20779c9dd40f060674a20d2d5c6f071",
+    "url": null,
+    "excerpts": [
+      {
+        "start": 50,
+        "end": 74,
+        "text": "50: static void print_usage(const char* prog) {\n51:     std::cerr <<\n52: R\"(readprbs_cli — pruebas de UIO ReadPRBS\n53: \n54: Selección de dispositivo (elige una):\n55:   --by-name <UIO_NAME>         Abrir por nombre (e.g., \"Read_PRBS\")\n56:   --by-num  <UIO_NUM>          Abrir por número de /dev/uio (e.g., 0)\n57: \n58: Acciones (puedes combinar varias):\n59:   --read-magic                 Lee registro 'magic' (offset 0)\n60:   --read-status                Lee registro 'status' (offset 8)\n61:   --read-data                  Lee registro 'data_prbs' (offset 12)\n62:   --write-data <VAL>           Escribe 'data_prbs' (uint32)\n63:   --write-control <VAL>        Escribe 'control' (uint32)\n64:   --write-sequence <FILE>      Escribe valores de archivo (uno por línea, hex o decimal)\n65:   --selftest                   Ejecuta prueba integral rápida\n66: \n67: Repetición / salida:\n68:   --repeat <N>                 Repite N veces (por defecto 1)\n69:   --sleep-ms <MS>              Espera MS milisegundos entre repeticiones o entre valores de secuencia\n70:   --json                       Salida en JSON (máquina)\n71:   --verbose                    Mensajes adicionales\n72:   --help                       Esta ayuda\n73: )\";\n74: }"
+      }
+    ]
+  },
+  {
+    "id": "B09",
+    "title": "Máscara corregida ReadPRBS",
+    "path": "puzzled_working/ReadPRBS.cpp",
+    "origin": "backup",
+    "sha256": "8b9c20426548a898c43e03e5324f39b36710fdc81356dd73c465e5b79e613022",
+    "url": null,
+    "excerpts": [
+      {
+        "start": 142,
+        "end": 159,
+        "text": "142: static inline uint32_t make_mask(uint32_t width, uint32_t offset) {\n143:     // Cubre también width > 32 de forma defensiva\n144:     if (width >= 32) return 0xFFFFFFFFu;\n145:     // Asegura el 1 como unsigned de 32 bits y evita UB\n146:     return ((uint32_t{1} << width) - 1u) << offset;\n147: }\n148: \n149: uint32_t ReadPRBS::_isolateBitsForRead(uint32_t value, uint32_t bitWidth, uint8_t bitOffset) {\n150:     const uint32_t mask = make_mask(bitWidth, bitOffset);\n151:     return (value & mask) >> bitOffset;\n152: }\n153: \n154: uint32_t ReadPRBS::_isolateBitsForWrite(uint32_t value, uint32_t bitWidth, uint8_t bitOffset, uint32_t oldValue) {\n155:     const uint32_t mask = make_mask(bitWidth, bitOffset);\n156:     // Evita overflow al desplazar y recorta al mask\n157:     const uint32_t shifted = (bitOffset == 0) ? value : (value << bitOffset);\n158:     return (oldValue & ~mask) | (shifted & mask);\n159: }"
+      }
+    ]
+  },
+  {
+    "id": "R01",
+    "title": "Ruta de UserData y CDC",
+    "path": "epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/new/emp_lpgbt.vhd",
+    "origin": "repo",
+    "sha256": "fbc7c32ed26b8e3c03960ca6b51b8988598979f21468a8e9090885aae2d29dc5",
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/new/emp_lpgbt.vhd",
+    "excerpts": [
+      {
+        "start": 421,
+        "end": 437,
+        "text": "421: \tlpgbtfpga_mgtrxclk_s <= MGT_RXUSRCLK_i;\n422: \tlpgbtfpga_mgttxclk_s <= MGT_TXUSRCLK_i;\n423: \n424: \tMGT_RXSlide_o <= lpgbtfpga_mgt_rxslide;\n425: \n426: \tMGT_USRWORD_o    <= downlink_mgtword_s;\n427: \tuplink_mgtword_s <= MGT_USRWORD_i;\n428: \n429: \t-- lpGBT data\n430: \tlpgbtfpga_uplinkUserData_o <= lpgbtfpga_uplinkUserData_s;\n431: \tlpgbtfpga_uplinkEcData_o   <= lpgbtfpga_uplinkEcData_s;\n432: \tlpgbtfpga_uplinkIcData_o   <= lpgbtfpga_uplinkIcData_s;\n433: \n434: \tlpgbtfpga_downlinkUserData_s <= lpgbtfpga_downlinkUserData_i;\n435: \tlpgbtfpga_downlinkEcData_s   <= \"11\"; \n436: \t\n437: \tuplinkReady_o                <= uplinkReady_s;"
+      },
+      {
+        "start": 473,
+        "end": 498,
+        "text": "473: \tcdc_rx_inst : cdc_rx\n474: \t\tgeneric map(\n475: \t\t\tg_CLOCK_A_RATIO => 8,       --! Frequency ratio between slow and fast frequencies (>4)\n476: \t\t\tg_PHASE_SIZE    => 3        --! log2(g_CLOCK_A_RATIO)\n477: \t\t)\n478: \t\tport map(\n479: \t\t\t-- Interface A (latch - from where data comes)\n480: \t\t\treset_a_i     => lpgbtfpga_uplinkrst_cdc,\n481: \t\t\tclk_a_i       => lpgbtfpga_mgtrxclk_s,\n482: \t\t\tdata_a_i      => lpgbtfpga_uplinkData_320,\n483: \t\t\tstrobe_a_i    => uplinkStrobe320,\n484: \t\t\t-- Interface B (capture_a - to where data goes) \n485: \t\t\tclk_b_i       => logicclk40,\n486: \t\t\tdata_b_o      => lpgbtfpga_uplinkData_40,\n487: \t\t\tstrobe_b_i    => '1',\n488: \t\t\tready_b_o     => cdc_rx_ready,\n489: \t\t\t-- Only relevant for fixed-phase operation\n490: \t\t\tphase_o       => open,\n491: \t\t\tphase_calib_i => (others => '0'),\n492: \t\t\tphase_force_i => '0'\n493: \t\t);\n494: \t\t\n495: \t\tlpgbtfpga_uplinkUserData_s <= lpgbtfpga_uplinkData_40(229 downto 0); --! Uplink data (user)\n496: \t\tlpgbtfpga_uplinkEcData_s   <= lpgbtfpga_uplinkData_40(231 downto 230); --! Uplink EC field\n497:         lpgbtfpga_uplinkIcData_s   <= lpgbtfpga_uplinkData_40(233 downto 232); --! Uplink IC field\n498:         uplinkReady_s              <= cdc_rx_ready;"
+      },
+      {
+        "start": 567,
+        "end": 609,
+        "text": "567: \tmagic_value <= x\"656D7049\";\n568:     \n569:     -- Clocks  are now divided within own MMCM I\n570:     logicclk40 <= logicCLK40_i;\n571: \n572: \t-- LpGBT FPGA\n573: \tlpgbtFpga_top_inst : lpgbtFpga_10g24\n574: \t\tgeneric map(\n575: \t\t\tFEC => FEC5\n576: \t\t)\n577: \t\tport map(\n578: \t\t\t-- Clocks\n579: \t\t\tdownlinkClk_i               => lpgbtfpga_mgttxclk_s,\n580: \t\t\tuplinkClk_i                 => lpgbtfpga_mgtrxclk_s,\n581: \t\t\tdownlinkRst_i               => lpgbtfpga_downlinkrst_s,\n582: \t\t\tuplinkRst_i                 => lpgbtfpga_uplinkrst_s,\n583: \t\t\t-- Down link\n584:             downlinkData_i              => lpgbtfpga_downlinkData_320,\n585:             downlinkStrobe_i            => downlinkStrobe320,\n586:             cdc_downlink_ready          => cdc_tx_ready,\n587: \t\t\tdownLinkBypassInterleaver_i => '0',\n588: \t\t\tdownLinkBypassFECEncoder_i  => '0',\n589: \t\t\tdownLinkBypassScrambler_i   => '0',\n590: \t\t\tdownlinkReady_o             => status_emp_lpgbt_o(1), --Debug\n591: \t\t\t-- Up link\n592: \t\t\tuplinkData_o                => lpgbtfpga_uplinkData_320,         \n593:             uplinkStrobe_o              => uplinkStrobe320,\n594:             cdc_uplink_reset            => lpgbtfpga_uplinkrst_cdc,\n595: \t\t\tuplinkBypassInterleaver_i   => '0',\n596: \t\t\tuplinkBypassFECEncoder_i    => '0',\n597: \t\t\tuplinkBypassScrambler_i     => '0',\n598: \t\t\tuplinkFECCorrectedClear_i   => '0',\n599: \t\t\tuplinkFECCorrectedLatched_o => open,\n600: \t\t\t-- Clocks\n601: \t\t\tclk_mgtfreedrpclk_i         => axi_aclk,\n602: \t\t\tclk_mgtTxClk_i              => lpgbtfpga_mgttxclk_s,\n603: \t\t\tclk_mgtRxClk_i              => lpgbtfpga_mgtrxclk_s,\n604: \t\t\t-- MGT signals\n605: \t\t\tmgt_slide_debug_o           => lpgbtfpga_mgt_rxslide,\n606: \t\t\tdownlink_mgtword_o          => downlink_mgtword_s,\n607: \t\t\tuplink_mgtword_i            => uplink_mgtword_s,\n608: \t\t\t--Debug\n609: \t\t\trx_header_locked_o          => status_emp_lpgbt_o(0)"
+      }
+    ]
+  },
+  {
+    "id": "R02",
+    "title": "Core uplink: cabecera y campos",
+    "path": "epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/lpgbt-fpga/lpgbtfpga_uplink.vhd",
+    "origin": "repo",
+    "sha256": "f24feac597d33ecfc7661e942d7a848b37c55c3083b3f3a44acf40cfa2344d60",
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/lpgbt-fpga/lpgbtfpga_uplink.vhd",
+    "excerpts": [
+      {
+        "start": 263,
+        "end": 325,
+        "text": "263:     rst_pattsearch_s         <= uplinkRst_n_i; --DE Mod\n264: \n265:     -- lpgbtfpga_framealigner is used to align the input frame using the\n266:     -- lpGBT header.\n267:     lpgbtfpga_framealigner_inst: lpgbtfpga_framealigner\n268:         GENERIC MAP(\n269:             c_wordRatio                      => c_clockRatio,\n270:             c_wordSize                       => c_mgtWordWidth,\n271:             c_headerPattern                  => \"01\",\n272:             c_allowedFalseHeader             => c_allowedFalseHeader,\n273:             c_allowedFalseHeaderOverN        => c_allowedFalseHeaderOverN,\n274:             c_requiredTrueHeader             => c_requiredTrueHeader,\n275: \n276:             c_bitslip_mindly                 => c_bitslip_mindly,\n277:             c_bitslip_waitdly                => c_bitslip_waitdly\n278:         )\n279:         PORT MAP(\n280:             -- Clock(s)\n281:             clk_pcsRx_i                      => uplinkClk_i,\n282: \n283:             -- Reset(s)\n284:             rst_pattsearch_i                 => rst_pattsearch_s,\n285: \n286:             -- Control\n287:             cmd_bitslipCtrl_o                => mgt_bitslipCtrl_o,\n288: \n289:             -- Status\n290:             sta_headerLocked_o               => sta_headerLocked_s,\n291:             sta_headerFlag_o                 => sta_headerFlag_s,\n292:             sta_bitSlipEven_o                => frameAlignerEven_o,\n293: \n294:             -- Data\n295:             dat_word_i                       => mgt_word_i(1 downto 0)\n296:         );\n297:     header_locked_o <= sta_headerLocked_s;\n298:     rst_gearbox_s <= not(sta_headerLocked_s);\n299: \n300:     -- lpgbtfpga_rxGearbox is used to pass from mgt word size (e.g.: 32b @ 320MHz)\n301:     -- to lpgbt frame size (e.g.: 256b at 40MHz)\n302:     rxgearbox_10g_gen: IF DATARATE = DATARATE_10G24 GENERATE\n303:         rxGearbox_10g24_inst: lpgbtfpga_rxGearbox\n304:             GENERIC MAP(\n305:                 c_clockRatio                  => c_clockRatio,\n306:                 c_inputWidth                  => c_mgtWordWidth,\n307:                 c_outputWidth                 => 256,\n308:                 c_counterInitValue            => 2\n309:             )\n310:             PORT MAP(\n311:                 -- Clock and reset\n312:                 clk_inClk_i                   => uplinkClk_i,\n313:                 clk_outClk_i                  => uplinkClk_i,\n314:                 clk_clkEn_i                   => sta_headerFlag_s,\n315:                 clk_dataFlag_o                => sta_dataflag_s,\n316: \n317:                 rst_gearbox_i                 => rst_gearbox_s,\n318: \n319:                 -- Data\n320:                 dat_inFrame_i                 => mgt_word_i,\n321:                 dat_outFrame_o                => gbxFrame_s,\n322: \n323:                 -- Status\n324:                 sta_gbRdy_o                   => sta_gbRdy_s\n325:             );"
+      },
+      {
+        "start": 492,
+        "end": 525,
+        "text": "492:     -- Routes data depending on the datarate and FEC configurations\n493:     UserData_10g24_s        <= (OTHERS => '0') WHEN rdy_1_s = '0' ELSE\n494:                                fec5_data_from_descrambler_s(229 downto 0) WHEN (FEC = FEC5) ELSE\n495:                                \"0000000000000000000000000000\" & fec12_data_from_descrambler_s(201 downto 0);\n496: \n497:     EcData_10g24_s          <= (OTHERS => '0') WHEN rdy_1_s = '0' ELSE\n498:                                fec5_data_from_descrambler_s(231 downto 230) WHEN (FEC = FEC5) ELSE\n499:                                fec12_data_from_descrambler_s(203 downto 202);\n500: \n501:     IcData_10g24_s          <= (OTHERS => '0') WHEN rdy_1_s = '0' ELSE\n502:                                fec5_data_from_descrambler_s(233 downto 232) WHEN (FEC = FEC5) ELSE\n503:                                fec12_data_from_descrambler_s(205 downto 204);\n504: \n505:     UserData_5g12_s         <= (OTHERS => '0') WHEN rdy_1_s = '0' ELSE\n506:                                x\"00000000000000000000000000000\" & \"00\" & fec5_data_from_descrambler_s(111 downto 0) WHEN (FEC = FEC5) ELSE\n507:                                x\"000000000000000000000000000000000\" & fec12_data_from_descrambler_s(97 downto 0);\n508: \n509:     EcData_5g12_s           <= (OTHERS => '0') WHEN rdy_1_s = '0' ELSE\n510:                                fec5_data_from_descrambler_s(113 downto 112) WHEN (FEC = FEC5) ELSE\n511:                                fec12_data_from_descrambler_s(99 downto 98);\n512: \n513:     IcData_5g12_s           <= (OTHERS => '0') WHEN rdy_1_s = '0' ELSE\n514:                                fec5_data_from_descrambler_s(115 downto 114) WHEN (FEC = FEC5) ELSE\n515:                                fec12_data_from_descrambler_s(101 downto 100);\n516: \n517: \n518:     userData_o              <= UserData_10g24_s WHEN (DATARATE = DATARATE_10G24) ELSE\n519:                                UserData_5g12_s;\n520: \n521:     EcData_o                <= EcData_10g24_s WHEN (DATARATE = DATARATE_10G24) ELSE\n522:                                EcData_5g12_s;\n523: \n524:     IcData_o                <= IcData_10g24_s WHEN (DATARATE = DATARATE_10G24) ELSE\n525:                                IcData_5g12_s;"
+      }
+    ]
+  },
+  {
+    "id": "R03",
+    "title": "Conexiones de estado",
+    "path": "epos-firmware/empfw_debughub/src/empfw_debughub.vhd",
+    "origin": "repo",
+    "sha256": "ebd4e6eb7c8016d96256413fe1c0121942075ac9ebf5bbe98306890cfeaf9a4c",
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/empfw_debughub/src/empfw_debughub.vhd",
+    "excerpts": [
+      {
+        "start": 212,
+        "end": 246,
+        "text": "212:     status_tx_alignment_s(11 downto 0)      <= tx_aligned_ff_i;\n213:     status_tx_alignment_s(12)               <= tx_aligned_sfp_i(0);\n214:     \n215:     status_tx_ready_s(11 downto 0)          <= MGT_TXREADY_i;\n216:     status_rx_ready_s(11 downto 0)          <= MGT_RXREADY_i;\n217:     status_tx_ready_s(12)                   <= CH12_MGT_TXREADY_i;\n218:     status_rx_ready_s(12)                   <= CH12_MGT_RXREADY_i;\n219:     \n220:     status_lpgbt_rx_locked_s(0)              <= status_emp_lpgbt_0(0);\n221:     status_lpgbt_rx_locked_s(1)              <= status_emp_lpgbt_1(0);      \n222:     status_lpgbt_rx_locked_s(2)              <= status_emp_lpgbt_2(0);     \n223:     status_lpgbt_rx_locked_s(3)              <= status_emp_lpgbt_3(0);     \n224:     status_lpgbt_rx_locked_s(4)              <= status_emp_lpgbt_4(0);     \n225:     status_lpgbt_rx_locked_s(5)              <= status_emp_lpgbt_5(0);     \n226:     status_lpgbt_rx_locked_s(6)              <= status_emp_lpgbt_6(0);     \n227:     status_lpgbt_rx_locked_s(7)              <= status_emp_lpgbt_7(0);     \n228:     status_lpgbt_rx_locked_s(8)              <= status_emp_lpgbt_8(0);     \n229:     status_lpgbt_rx_locked_s(9)              <= status_emp_lpgbt_9(0);     \n230:     status_lpgbt_rx_locked_s(10)             <= status_emp_lpgbt_10(0);     \n231:     status_lpgbt_rx_locked_s(11)             <= status_emp_lpgbt_11(0);    \n232:     status_lpgbt_rx_locked_s(12)             <= status_emp_lpgbt_12(0);\n233:    \n234:    status_lpgbt_tx_ready_s(0)               <= status_emp_lpgbt_0(1);\n235:    status_lpgbt_tx_ready_s(1)               <= status_emp_lpgbt_1(1);      \n236:    status_lpgbt_tx_ready_s(2)               <= status_emp_lpgbt_2(1);     \n237:    status_lpgbt_tx_ready_s(3)               <= status_emp_lpgbt_3(1);     \n238:    status_lpgbt_tx_ready_s(4)               <= status_emp_lpgbt_4(1);     \n239:    status_lpgbt_tx_ready_s(5)               <= status_emp_lpgbt_5(1);     \n240:    status_lpgbt_tx_ready_s(6)               <= status_emp_lpgbt_6(1);     \n241:    status_lpgbt_tx_ready_s(7)               <= status_emp_lpgbt_7(1);     \n242:    status_lpgbt_tx_ready_s(8)               <= status_emp_lpgbt_8(1);     \n243:    status_lpgbt_tx_ready_s(9)               <= status_emp_lpgbt_9(1);     \n244:    status_lpgbt_tx_ready_s(10)              <= status_emp_lpgbt_10(1);     \n245:    status_lpgbt_tx_ready_s(11)              <= status_emp_lpgbt_11(1);    \n246:    status_lpgbt_tx_ready_s(12)              <= status_emp_lpgbt_12(1);     "
+      },
+      {
+        "start": 283,
+        "end": 294,
+        "text": "283:             reset_reg_1_emp_lpgbt_ip         => reset_emp_lpgbt_ip_s,\n284:             reset_reg_2_strobe               => open,\n285:             reset_reg_2_tx_reset             => reset_tx_s,\n286:             reset_reg_2_rx_reset             => reset_rx_s,\n287:             status_reg_1_strobe              => open,\n288:             status_reg_1_tx_alignment        => status_tx_alignment_s,\n289:             status_reg_2_strobe              => open,\n290:             status_reg_2_tx_ready            => status_tx_ready_s,\n291:             status_reg_2_rx_ready            => status_rx_ready_s,\n292:             status_reg_3_strobe              => open,\n293:             status_reg_3_lpgbt_rx_locked     => status_lpgbt_rx_locked_s,\n294:             status_reg_3_lpgbt_tx_ready      => status_lpgbt_tx_ready_s"
+      }
+    ]
+  },
+  {
+    "id": "R04",
+    "title": "Plantilla de máscaras",
+    "path": "puzzledWizards/templates/airhdl_to_cppbody.jinja",
+    "origin": "repo",
+    "sha256": "6bd5205be4b7313df1382b1fd211fcef28a86359a5a040601413df3683391e92",
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/puzzledWizards/templates/airhdl_to_cppbody.jinja",
+    "excerpts": [
+      {
+        "start": 110,
+        "end": 122,
+        "text": "110: // Takes value and returns the isolated bits specified by bitWidth and bitOffset. Shifts the bits to 0th position.\n111: uint32_t {{CppClassName}}::_isolateBitsForRead(uint32_t value, uint32_t bitWidth, uint8_t bitOffset){\n112:     uint32_t bitMask = (1 << bitWidth) -1; // 1's on the first 'bitWidth' fields.\n113:     bitMask = bitMask << bitOffset;\n114:     return ((value & bitMask) >> bitOffset);\n115: }\n116: \n117: // Takes and old value and replaces the specified bits defined by value, bitWidth and bitOffset.\n118: uint32_t {{CppClassName}}::_isolateBitsForWrite(uint32_t value, uint32_t bitWidth, uint8_t bitOffset, uint32_t oldValue){\n119:     uint32_t bitMask = (1 << bitWidth) -1; // 1's on the first 'bitWidth' fields.\n120:     bitMask = bitMask << bitOffset;\n121:     return((oldValue & (~bitMask)) | (value<<bitOffset)); // Return oldvalue with the correct bits replaced.\n122: }"
+      }
+    ]
+  },
+  {
+    "id": "R05",
+    "title": "Variante antigua de un grupo",
+    "path": "puzzledWizards/output_tgc_readuplink_1002/TgcReadUplink.cpp",
+    "origin": "repo",
+    "sha256": "a0ec999ebd14583fa514a771bce8a3ada8e699c15235517a002eb66b8879691c",
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/puzzledWizards/output_tgc_readuplink_1002/TgcReadUplink.cpp",
+    "excerpts": [
+      {
+        "start": 64,
+        "end": 102,
+        "text": "64: // at register: data_groups\n65: uint32_t TgcReadUplink::readDataGroupsValue ()\n66: {\n67:     uint32_t value (0);\n68:     if (uio_read32 (\n69:                 m_uioInfo,\n70:                 0 /*map*/,\n71:                 4 /* address offset */,\n72:                 &value))\n73:     {\n74:         throw std::runtime_error(\"uio_read32 failed\");\n75:     };\n76:     uint32_t bitWidth = 32;\n77:     uint8_t bitOffset = 0;\n78:     return(_isolateBitsForRead(value, bitWidth, bitOffset));\n79: }\n80: void TgcReadUplink::writeDataGroupsValue (uint32_t value) {\n81:     uint32_t oldValue(0);\n82:     if (uio_read32 (\n83:                 m_uioInfo,\n84:                 0 /*map*/,\n85:                 4 /* address offset */,\n86:                 &oldValue))\n87:     {\n88:         throw std::runtime_error(\"uio_read32 failed\");\n89:     };\n90:     uint32_t bitWidth = 32;\n91:     uint8_t bitOffset = 0;\n92:     value = _isolateBitsForWrite(value, bitWidth, bitOffset, oldValue);\n93: \n94:     if (uio_write32 (\n95:                 m_uioInfo,\n96:                 0 /*map*/,\n97:                 4 /* address offset */,\n98:                 value))\n99:     {\n100:         throw std::runtime_error(\"uio_write32 failed\");\n101:     };\n102: }"
+      }
+    ]
+  },
+  {
+    "id": "R06",
+    "title": "CDC de recepción",
+    "path": "epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/cdc_user/cdc_rx.vhd",
+    "origin": "repo",
+    "sha256": "88ec7ece90e555391ec735c09d7245fa82b47607e02ef3b8d8fe6fe53cc4fb93",
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/cdc_user/cdc_rx.vhd",
+    "excerpts": [
+      {
+        "start": 130,
+        "end": 145,
+        "text": "130:   strobe_b_toggle        <= not strobe_b_toggle  when rising_edge(clk_b_i);\n131:   strobe_b_toggle_meta   <= strobe_b_toggle      when rising_edge(clk_a_i);\n132:   strobe_b_toggle_sync   <= strobe_b_toggle_meta when rising_edge(clk_a_i);\n133:   strobe_b_toggle_sync_r <= strobe_b_toggle_sync when rising_edge(clk_a_i);\n134: \n135:   -- This process is intended to ensure reset_a is de-asserted with a fixed-phase w.r.t. strobe B \n136:   p_reset_a_strobe_sync : process(clk_a_i)\n137:   begin\n138:     if (rising_edge(clk_a_i)) then\n139:       if (reset_a_i='1') then\n140:           reset_a_strobe_sync <= '1';      \n141:       elsif(strobe_b_toggle_sync_r/=strobe_b_toggle_sync) then\n142:           reset_a_strobe_sync <= '0';  \n143:       end if;\n144:     end if;\n145:   end process p_reset_a_strobe_sync;"
+      },
+      {
+        "start": 176,
+        "end": 218,
+        "text": "176:   strobe_a_r <= strobe_a_i when rising_edge(clk_a_i); \n177:   \n178:   p_phase : process(clk_a_i)\n179:   begin\n180:     if(rising_edge(clk_a_i)) then\n181:       if(reset_a_strobe_sync = '1') then\n182: \t    phase_o   <= (others => '0');\t\n183:         ready_b_o <= '0';\n184:       else\n185: \t      if(strobe_a_r = '1') then\n186: \t\t     phase_o   <= std_logic_vector(to_unsigned(ce_cntr_a, phase_o'length));\n187:              ready_b_o <= '1';\n188: \t\t  end if;\n189:       end if;\n190:     end if;\n191:   end process p_phase;\n192:   \n193:   --============================================================================\n194:   -- Data intermediary\n195:   --============================================================================  \n196:   p_data_int : process(clk_a_i) -- do not reset to avoid unecessarily large fan-out of reset_a_strobe_sync signal\n197:   begin\n198:     if(rising_edge(clk_a_i)) then\n199:       if (capture_a = '1') then\n200:          data_a_reg <= data_a_i;\n201:       else\n202:          data_a_reg <= data_a_reg;\n203:       end if;\n204:     end if;\n205:   end process p_data_int;\n206: \n207:   --============================================================================\n208:   -- Data out\n209:   --============================================================================  \n210:   p_data_out : process(clk_b_i)\n211:   begin\n212:     if(rising_edge(clk_b_i)) then\n213:       if(strobe_b_i='1') then\t\n214:         data_b_reg <= data_a_reg;\n215:       end if;\n216:     end if;\n217:   end process p_data_out;\n218:   data_b_o <= data_b_reg;"
+      }
+    ]
+  }
+]
