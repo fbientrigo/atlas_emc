@@ -1,0 +1,48 @@
+{
+  "alcance": "Contraejemplos de modelos reducidos; sin simulación VHDL ni hardware",
+  "resultado": "OK",
+  "casos": [
+    {
+      "id": "ready",
+      "precondicion": "Sin reset efectivo y sin nuevos strobes durante 32 ciclos",
+      "resultado": "ready conserva 1; reset posterior lo borra"
+    },
+    {
+      "id": "fsm_reset",
+      "precondicion": "FSM en waiting_resp al ejecutar rama de reset",
+      "resultado": "La rama no asigna estado; conserva waiting_resp"
+    },
+    {
+      "id": "lectura_parcial",
+      "precondicion": "Se omite grupo 5 y no hay nueva escritura downlink",
+      "resultado": "regStatus conserva un bit; lectura final lo limpia"
+    },
+    {
+      "id": "watchdog",
+      "precondicion": "reading_FIFO y empty permanentemente 1",
+      "traza": [
+        {
+          "contador_tras_resta": 1,
+          "rama": "empty: next_FIFO_byte_available <= 1",
+          "fuera_de_rango": false
+        },
+        {
+          "contador_tras_resta": 0,
+          "rama": "empty: next_FIFO_byte_available <= 1",
+          "fuera_de_rango": false
+        },
+        {
+          "contador_tras_resta": -1,
+          "rama": "empty: next_FIFO_byte_available <= 1",
+          "fuera_de_rango": true
+        }
+      ],
+      "limite": "Esta FSM no es seleccionada por 0x10004"
+    },
+    {
+      "id": "byte_bajo",
+      "precondicion": "Palabras construidas 0x000000AA y 0x123400AA",
+      "resultado": "El script no distingue ambas; no son datos experimentales"
+    }
+  ]
+}

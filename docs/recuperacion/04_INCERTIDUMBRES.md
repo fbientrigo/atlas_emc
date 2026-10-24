@@ -28,3 +28,11 @@ No hay estado de hardware actual observado en esta investigación. Esta tabla co
 Priorizar la exportación histórica de Vivado y los binarios del lector que ya funcionaban en las pruebas de loopback. No es necesario disponer de todo el disco para cerrar U2: bastan top/BD, fuentes del capturador, parámetros, Address Editor y relación con el bitstream. Para U3 hace falta configuración efectiva, no una captura de otra sesión ni un nombre de modo aislado.
 
 Si el lector existente solo admite captura disparada por la lógica de envío interna, primero comprobar si hay otra build o una interfaz `eLink_Interface` ya integrada. Solo después de demostrar que ninguna sirve corresponde evaluar desarrollo adicional.
+
+## Bloqueo intermitente — preguntas adicionales
+
+- **U11:** ejecutable exacto, retorno al prompt y alcance del reinicio histórico. Cierre: logs antes/después, PID y acción de recuperación identificada.
+- **U12:** trigger y rearme del capturador activo. Cierre: RTL enlazado a build y evidencia de progreso desde UserData hasta los registros.
+- **U13:** ¿se integra `eLink_Interface_v1` o la FSM IC single? Cierre: jerarquía de síntesis y configuración efectiva. No trasladar sus defectos a otra interfaz.
+
+Ver [hipótesis y pruebas discriminantes](10_BLOQUEO_LECTURAS.md).

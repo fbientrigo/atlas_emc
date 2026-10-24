@@ -1,115 +1,44 @@
-// Comprobación de navegación y lectura offline; nunca opera hardware.
+// Comprueba datos, enlaces y lógica. La revisión de navegador se registra aparte.
+// Uso: node verificar_base.mjs [--static]
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {fileURLToPath, pathToFileURL} from 'node:url';
+import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import vm from 'node:vm';
-const root = path.dirname(fileURLToPath(import.meta.url));
-const html = await readFile(path.join(root, 'index.html'), 'utf8');
-const data = JSON.parse(html.match(/<script id="data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
-const byId = new Map(data.docs.map(d => [d.id, d]));
-let checkedLinks = 0;
-for (const d of data.docs) for (const section of d.sections) {
-  for (const match of section.html.matchAll(/href="([^"\s]+)"/g)) {
-    const href = match[1];
-    const m = href.match(/^(?:\.\/)?(\d\d_[^#]+)\.md(?:#(.+))?$/);
-    if (!m) continue;
-    const target = byId.get(m[1]);
-    assert(target, 'Documento inexistente: ' + href);
-    if (m[2]) {
-      const anchor=decodeURIComponent(m[2]);
-      assert(target.sections.some(s => s.anchor === anchor || s.html.includes('id="' + anchor + '"')), 'Ancla inexistente: ' + href);
-    }
-    checkedLinks++;
-  }
-}
+const root=path.dirname(fileURLToPath(import.meta.url));
+const html=await readFile(path.join(root,'index.html'),'utf8');
+const data=JSON.parse(html.match(/<script id="data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
 const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 new vm.Script(script);
-// Doble DOM mínimo para probar las funciones de composición y rutas en Node.
-// No sustituye renderizado, eventos reales, accesibilidad o viewport de navegador.
-const callbacks={};
-const element=()=>({innerHTML:'',textContent:'',value:'',style:{},children:[],append(x){this.children.push(x)},replaceChildren(){this.children=[]},addEventListener(){},setAttribute(){},scrollIntoView(){},querySelectorAll(){return []},querySelector(selector){const value=selector.match(/="(.*)"/)?.[1];return value&&this.innerHTML.includes(value)?element():null},insertAdjacentHTML(_,s){this.innerHTML=s+this.innerHTML}});
-const elements=new Map(['content','q','results','expand','collapse','data'].map(x=>[x,element()]));
-elements.get('data').textContent=JSON.stringify(data);
-const context=vm.createContext({document:{getElementById:id=>elements.get(id),querySelectorAll:()=>[],createElement:element,addEventListener:(n,f)=>callbacks[n]=f},window:{addEventListener(){}},location:{hash:''},CSS:{escape:s=>s}});
-vm.runInContext(script,context);
-const call=(name,...args)=>vm.runInContext(name+'('+args.map(x=>JSON.stringify(x)).join(',')+')',context);
-const rendered=()=>elements.get('content').innerHTML;
-for(const mode of ['operar','entender','investigar','aprender']){call('home',mode);assert(rendered().includes('<h2>'),'Modo sin contenido: '+mode)}
-for(const doc of data.docs){call('showDoc',doc.id);assert(rendered().includes('aria-label="'+doc.title+'"'),'Documento no renderizado: '+doc.id)}
-for(const source of data.sources){call('showSource',source.id);assert(rendered().includes(source.sha256));assert(rendered().includes(source.excerpts[0].start+':'))}
-const entityKeys=vm.runInContext('Object.keys(entities)',context);
-for(const id of entityKeys){call('showEntity',id);assert(rendered().includes('class="entity"'));for(const source of vm.runInContext('entities['+JSON.stringify(id)+'].sources',context))assert(data.sources.some(s=>s.id===source))}
-call('home','operar');
-const taskLinks=[...rendered().matchAll(/href="#doc\/([^"/]+)\/([^"/]+)"/g)];
-assert.equal(taskLinks.length,6);
-for(const [,id,encoded] of taskLinks){const anchor=decodeURIComponent(encoded);assert(byId.get(id)?.sections.some(s=>s.anchor===anchor),'Tarea apunta a ancla inválida: '+anchor);call('showDoc',id,anchor);assert(!rendered().includes('Sección no encontrada'))}
-for(const term of ['readDataGroup0Value','Bus error','clk_thresh','mgt_word_i','ULDATASOURCE']){elements.get('q').value=term;call('search');assert(elements.get('results').children.length>1,'Búsqueda sin resultados: '+term)}
-elements.get('q').value='termino-inexistente-7391';call('search');assert(elements.get('results').children[0].textContent.includes('Sin coincidencias'));
-let prevented=false;
-callbacks.click({target:{closest:s=>s==='a'?{getAttribute:()=> '00_GUIA_CAMPO.md#etapa-e--diagn%C3%B3stico-remoto'}:null},preventDefault(){prevented=true}});
-assert(prevented,'No intercepta enlaces Markdown');
-assert.equal(context.location.hash,'#doc/00_GUIA_CAMPO/etapa-e--diagn%C3%B3stico-remoto');
-assert(!/<(?:script|link|img)[^>]+(?:src|href)="https?:/i.test(html),'Dependencia remota automática');
-console.log(JSON.stringify({validacion:'estatica y funciones JavaScript en Node; sin navegador',documentos:data.docs.length,fuentes:data.sources.length,enlacesMarkdown:checkedLinks,modos:4,nodos:entityKeys.length,tareas:taskLinks.length,busquedas:5,resultado:'OK'},null,2));
-if(process.argv[2]==='--static')process.exit(0);
-const {chromium} = await import(process.argv[2] || 'playwright');
-const browser = await chromium.launch({headless:true, args:['--no-sandbox']});
-try {
-  const page = await browser.newPage({viewport:{width:1280,height:960}});
-  const errors = [], requests = [];
-  page.on('pageerror', e => errors.push(String(e)));
-  page.on('request', r => {if (/^https?:/.test(r.url())) requests.push(r.url())});
-  await page.route(/^https?:/, r => r.abort());
-  await page.goto(pathToFileURL(path.join(root, 'index.html')).href);
-  await page.waitForSelector('#content h2');
-  for (const [mode, text] of [['operar','Leer datos reales'],['entender','Arquitectura y relaciones'],['investigar','Entrar desde un síntoma'],['aprender','Recuperar criterio técnico']]) {
-    await page.click('[data-mode="'+mode+'"]');
-    await page.waitForFunction(t => document.getElementById('content').textContent.includes(t), text);
-  }
-  await page.click('[data-mode="entender"]');
-  await page.click('[data-entity="mgt"]');
-  await page.waitForFunction(() => document.querySelector('.entity h3').textContent.includes('MGT'));
-  await page.click('.entity a[href="#nodo/core"]');
-  await page.waitForFunction(() => document.querySelector('.entity h3').textContent === 'Core uplink');
-  await page.click('.entity a[href="#fuente/R02"]');
-  await page.waitForSelector('.source pre');
-  assert((await page.locator('.source').first().textContent()).includes('263:'), 'Faltan números de línea');
-  await page.fill('#q', 'readDataGroup0Value');
-  await page.waitForSelector('#results .result');
-  assert((await page.locator('#results').textContent()).includes('resultado'));
-  await page.locator('#results .result').first().click();
-  await page.waitForSelector('#content article, #content .source');
-  await page.fill('#q', 'termino-que-no-existe-7391');
-  assert((await page.locator('#results').textContent()).includes('Sin coincidencias'));
-  await page.fill('#q', '"><img src=x onerror=alert(1)>');
-  assert.equal(await page.locator('#results img').count(), 0);
-  await page.fill('#q', '');
-  for (const doc of data.docs) {
-    await page.evaluate(id => location.hash = 'doc/' + encodeURIComponent(id), doc.id);
-    await page.waitForFunction(t => document.querySelector('#content article')?.getAttribute('aria-label') === t, doc.title);
-    await page.click('#expand');
-    assert.equal(await page.locator('#content details:not([open])').count(), 0);
-    await page.click('#collapse');
-    assert.equal(await page.locator('#content details[open]').count(), 0);
-  }
-  await page.evaluate(() => location.hash='modo/operar');
-  await page.waitForSelector('#content .card');
-  for (const href of await page.locator('#content .card a').evaluateAll(xs => xs.map(x=>x.getAttribute('href')))) {
-    await page.evaluate(h=>location.hash=h,href);
-    await page.waitForSelector('#content article');
-    assert.equal(await page.locator('#content .notice').count(),0,'Ruta de tarea rota: '+href);
-    assert.equal(await page.locator('#content details[open]').count(),1,'No abre la sección: '+href);
-  }
-  await page.evaluate(() => location.hash='doc/02_CATALOGO');
-  await page.waitForSelector('#content article');
-  await page.locator('#content article a[href="00_GUIA_CAMPO.md"]').first().click();
-  await page.waitForFunction(() => location.hash.startsWith('#doc/00_GUIA_CAMPO'));
-  await page.setViewportSize({width:390,height:844});
-  await page.evaluate(() => location.hash='modo/operar');
-  await page.waitForSelector('#content .card');
-  assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1), 'Desborde horizontal móvil');
-  assert.deepEqual(errors, [], 'Errores JavaScript');
-  assert.deepEqual(requests, [], 'La lectura local intenta usar red');
-  console.log(JSON.stringify({resultado:'OK',documentos:data.docs.length,fuentes:data.sources.length,enlacesMarkdown:checkedLinks,modos:4,red:requests.length,erroresJS:errors.length,pruebas:['navegación','relaciones','extractos','búsqueda','sin resultados','entrada HTML como texto','expandir/resumir','anclas de tareas','enlaces Markdown interceptados','viewport móvil']},null,2));
-} finally {await browser.close()}
+const docs=new Map(data.docs.map(d=>[d.id,d]));let links=0;
+for(const d of data.docs)for(const s of d.sections)for(const m of s.html.matchAll(/href="(?:\.\/)?(\d\d_[^#"]+)\.md(?:#([^"\s]+))?"/g)){
+ const target=docs.get(m[1]);assert(target,'Documento inexistente: '+m[1]);
+ if(m[2]){const anchor=decodeURIComponent(m[2]);assert(target.sections.some(s=>s.anchor===anchor||s.html.includes('id="'+anchor+'"')),'Ancla inexistente: '+m[0])}links++;
+}
+const app=await readFile(path.join(root,'web/aplicacion.js'),'utf8');
+for(const m of app.matchAll(/(?:go|link)\('[^']*'\s*,\s*'(\d\d_[^']+)'\s*,\s*'([^']+)'\)/g)){
+ assert(docs.get(m[1])?.sections.some(s=>s.anchor===m[2]||s.html.includes('id="'+m[2]+'"')),'Ancla de interfaz inválida: '+m[2]);
+}
+for(const m of app.matchAll(/go\('(\d\d_[^']+)'\s*,\s*'([^']+)'\)/g))assert(docs.get(m[1])?.sections.some(s=>s.anchor===m[2]),'Ruta inválida: '+m[0]);
+for(const m of app.matchAll(/anchor:'([^']+)'/g))assert(docs.get('00_GUIA_CAMPO').sections.some(s=>s.anchor===m[1]),'Etapa inválida: '+m[1]);
+for(const [id,e] of Object.entries(data.entities)){
+ for(const k of e.related)assert(data.entities[k],id+' relación ausente: '+k);
+ for(const k of e.docs)assert(docs.has(k),id+' documento ausente: '+k);
+ for(const k of e.sources)assert(data.sources.some(s=>s.id===k),id+' fuente ausente: '+k);
+}
+const seen=new Set();for(const s of data.sources){assert(!seen.has(s.id),'ID duplicado');seen.add(s.id);assert(/^[a-f\d]{64}$/.test(s.sha256));for(const e of s.excerpts){const lines=e.text.split('\n');assert.equal(lines.length,e.end-e.start+1);lines.forEach((line,i)=>assert(line.startsWith((e.start+i)+':')))}}
+assert(!/<(?:script|link|img)[^>]+(?:src|href)="https?:/i.test(html),'Dependencia externa automática');
+assert(!/\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/.test(app),'Red no esperada');
+const ctx=vm.createContext({});vm.runInContext(await readFile(path.join(root,'web/logica.js'),'utf8'),ctx);const L=ctx.AtlasLogic;
+const capture=(x=0)=>['magic: 0x12345678',...Array.from({length:9},(_,i)=>'data_group_'+i+': 0x'+(i===0?x:0).toString(16).padStart(8,'0')),'data_header: 0x00000001','clk_thresh: 0x0000000e','14'].join('\n');
+const a=L.parseCapture(capture()),b=L.parseCapture(capture(0x80000001));assert(a.complete);assert.equal(a.ignored.length,1);let r=L.compareCaptures(a,b);assert.equal(r.changedGroups,1);assert.equal(r.rows[1].xor,0x80000001);assert.equal(r.rows[1].bits.join(','),'31,0');
+for(let i=0;i<32;i++){const v=2**i;const r=L.compareCaptures(a,L.parseCapture(capture(v)));assert.equal(r.rows[1].bits.join(','),String(i));assert.equal(r.rows[1].xor,v)}
+r=L.compareCaptures(a,a);assert.equal(r.changedGroups,0);assert.equal(r.comparableGroups,9);
+assert(L.parseCapture(capture()+'\ndata_group_0: 0x0').errors.length);assert(!L.parseCapture('data_group_0: 0x0').complete);
+for(const input of ['data_group_0: 0x100000000','data_group_0: 12','data_group_9: 0x0','data_group_0: -1','data_header: 0xGG'])assert(L.parseCapture(input).errors.length,'Aceptó valor inválido: '+input);
+assert(L.parseCapture('x'.repeat(200001)).errors.length);assert.equal(L.parseCapture('<img src=x onerror=alert(1)>').values.magic,undefined);
+assert.equal(L.compareCaptures(L.parseCapture(''),L.parseCapture('')).comparableGroups,0);
+assert.equal(L.compareCaptures(a,L.parseCapture(capture().replace('clk_thresh: 0x0000000e','clk_thresh: 0x0000000f'))).configurationChanged[0],'clk_thresh');
+assert.equal(L.diagnose({linux:'no'}).stop,true);assert.equal(L.diagnose({linux:'yes',returns:'no',tool:'ic'}).priority[0],'H5');assert.equal(L.diagnose({returns:'no',tool:'payload'}).stop,true);
+assert.equal(L.diagnose({returns:'yes',tool:'script'}).priority[0],'H2');assert.equal(L.diagnose({returns:'yes',tool:'payload',link:'lost'}).priority[0],'H3');assert(!L.diagnose({returns:'yes',tool:'payload'}).priority.includes('H5'));assert(L.diagnose({}).title.includes('Falta'));assert(L.diagnose({returns:'yes',tool:'ic'}).title.includes('control IC'));
+console.log(JSON.stringify({resultado:'OK',alcance:'Sintaxis, enlaces, fuentes y lógica pura; no sustituye navegador ni hardware',documentos:data.docs.length,fuentes:data.sources.length,entidades:Object.keys(data.entities).length,enlacesMarkdown:links,casosBits:32,pruebas:['parseo completo/parcial','duplicados','límites 32 bits','datos malformados','entrada HTML como texto','capturas vacías','cambio de configuración','diagnóstico por ruta y síntoma','sin dependencias automáticas de red']},null,2));

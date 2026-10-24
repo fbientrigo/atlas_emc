@@ -1,5 +1,7 @@
 # Guía de campo: comprobar recepción real del front-end
 
+**Si los valores dejan de actualizarse:** conservar el fallo antes de reiniciar. Ver [diagnóstico ampliado y procedimientos F0/F1](10_BLOQUEO_LECTURAS.md). Distinguir comando detenido de comando que termina con una muestra repetida.
+
 Fecha de investigación: 24 de octubre de 2026. **Validación estática; sin ejecución en la Trenz.** Esta guía puede utilizarse sin leer los demás documentos.
 
 ## Decisión inicial

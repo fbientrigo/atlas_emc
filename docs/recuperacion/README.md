@@ -22,5 +22,12 @@ Investigación iniciada el 24-10-2026 sobre baseline `c02a33b`. P0 se entregó p
 |---|---|
 | P0 | Guía estática terminada; ejecución local y prueba FE pendientes. |
 | P1 | Reconstrucción acotada con fuentes, variantes y dos recorridos; falta RTL/integración del capturador, configuración FE y build activa. |
-| P2 | Base local de consulta sobre evidencia disponible; lógica de búsqueda, relaciones y extractos comprobada en Node. Prueba de navegador pendiente. |
-| P3 | Revisión adversarial de afirmaciones y comprobaciones estáticas; hardware y renderizado de navegador pendientes. |
+| P2 | Base local de consulta sobre evidencia disponible; lógica de búsqueda, relaciones y extractos comprobada en Node. Portada, mapa, búsqueda y diagnóstico revisados en navegador; ver límites en auditoría. |
+| P3 | Revisión adversarial de afirmaciones y comprobaciones estáticas; hardware pendiente; revisión visual parcial y pruebas de lógica completadas. |
+
+## Revisión de lecturas congeladas y web mejorada
+
+- [Análisis del bloqueo y procedimientos F0/F1](10_BLOQUEO_LECTURAS.md).
+- [Matriz de incompatibilidades](11_COMPATIBILIDAD.md).
+- Web local: mapa interactivo, diagnóstico condicional, comparación XOR de capturas, catálogo filtrable y registro de sesión con exportación revisable.
+- Los modelos de `analisis/contraejemplos.py` comprueban ramas reducidas; no simulan el FPGA ni prueban la causa histórica.

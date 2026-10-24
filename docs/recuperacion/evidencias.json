@@ -273,5 +273,241 @@
         "text": "176:   strobe_a_r <= strobe_a_i when rising_edge(clk_a_i); \n177:   \n178:   p_phase : process(clk_a_i)\n179:   begin\n180:     if(rising_edge(clk_a_i)) then\n181:       if(reset_a_strobe_sync = '1') then\n182: \t    phase_o   <= (others => '0');\t\n183:         ready_b_o <= '0';\n184:       else\n185: \t      if(strobe_a_r = '1') then\n186: \t\t     phase_o   <= std_logic_vector(to_unsigned(ce_cntr_a, phase_o'length));\n187:              ready_b_o <= '1';\n188: \t\t  end if;\n189:       end if;\n190:     end if;\n191:   end process p_phase;\n192:   \n193:   --============================================================================\n194:   -- Data intermediary\n195:   --============================================================================  \n196:   p_data_int : process(clk_a_i) -- do not reset to avoid unecessarily large fan-out of reset_a_strobe_sync signal\n197:   begin\n198:     if(rising_edge(clk_a_i)) then\n199:       if (capture_a = '1') then\n200:          data_a_reg <= data_a_i;\n201:       else\n202:          data_a_reg <= data_a_reg;\n203:       end if;\n204:     end if;\n205:   end process p_data_int;\n206: \n207:   --============================================================================\n208:   -- Data out\n209:   --============================================================================  \n210:   p_data_out : process(clk_b_i)\n211:   begin\n212:     if(rising_edge(clk_b_i)) then\n213:       if(strobe_b_i='1') then\t\n214:         data_b_reg <= data_a_reg;\n215:       end if;\n216:     end if;\n217:   end process p_data_out;\n218:   data_b_o <= data_b_reg;"
       }
     ]
+  },
+  {
+    "id": "R07",
+    "title": "CDC: ready y retención de datos",
+    "path": "epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/cdc_user/cdc_rx.vhd",
+    "origin": "repo",
+    "sha256": "88ec7ece90e555391ec735c09d7245fa82b47607e02ef3b8d8fe6fe53cc4fb93",
+    "excerpts": [
+      {
+        "start": 36,
+        "end": 39,
+        "text": "36: -- unit name: Rx mesochronous fixed-phase clock-domain crossing\n37: --\n38: --! @brief Mesochronous fixed-phase CDC for Receiver\n39: --! - This Clock-domain crossing requires that the clk_a_i and clk_b_i are an integer related of each other"
+      },
+      {
+        "start": 130,
+        "end": 218,
+        "text": "130:   strobe_b_toggle        <= not strobe_b_toggle  when rising_edge(clk_b_i);\n131:   strobe_b_toggle_meta   <= strobe_b_toggle      when rising_edge(clk_a_i);\n132:   strobe_b_toggle_sync   <= strobe_b_toggle_meta when rising_edge(clk_a_i);\n133:   strobe_b_toggle_sync_r <= strobe_b_toggle_sync when rising_edge(clk_a_i);\n134: \n135:   -- This process is intended to ensure reset_a is de-asserted with a fixed-phase w.r.t. strobe B \n136:   p_reset_a_strobe_sync : process(clk_a_i)\n137:   begin\n138:     if (rising_edge(clk_a_i)) then\n139:       if (reset_a_i='1') then\n140:           reset_a_strobe_sync <= '1';      \n141:       elsif(strobe_b_toggle_sync_r/=strobe_b_toggle_sync) then\n142:           reset_a_strobe_sync <= '0';  \n143:       end if;\n144:     end if;\n145:   end process p_reset_a_strobe_sync;\n146: \n147:   --=== CLK_A\n148:   phase_calib_a        <= phase_calib_i when rising_edge(clk_a_i);\n149:   phase_force_a        <= phase_force_i when rising_edge(clk_a_i);\n150:   p_clock_enable : process(clk_a_i)\n151:   begin\n152:     if(rising_edge(clk_a_i)) then\n153:       if(reset_a_strobe_sync='1') then  \n154: \t      ce_cntr_a   <= 0;\n155: \t\t  capture_a   <= '0';\n156:       else\n157:           if(phase_force_a='1' and strobe_a_i='1') then\n158:              ce_cntr_a <= to_integer(unsigned(phase_calib_a));\t\t  \n159: \t      elsif(ce_cntr_a = g_CLOCK_A_RATIO-1) then\n160: \t\t     ce_cntr_a <= 0;\n161: \t\t  else\n162: \t\t     ce_cntr_a <= ce_cntr_a + 1;\n163: \t\t  end if;\n164: \t\t  if (ce_cntr_a = g_CLOCK_A_RATIO-1) then\n165:             capture_a  <= '1';\t\t\t\n166: \t\t  else\n167:             capture_a  <= '0';\n168: \t\t  end if;\n169:       end if;\n170:     end if;\n171:   end process p_clock_enable;\n172: \n173:   --============================================================================\n174:   -- Phase measurement\n175:   --============================================================================  \n176:   strobe_a_r <= strobe_a_i when rising_edge(clk_a_i); \n177:   \n178:   p_phase : process(clk_a_i)\n179:   begin\n180:     if(rising_edge(clk_a_i)) then\n181:       if(reset_a_strobe_sync = '1') then\n182: \t    phase_o   <= (others => '0');\t\n183:         ready_b_o <= '0';\n184:       else\n185: \t      if(strobe_a_r = '1') then\n186: \t\t     phase_o   <= std_logic_vector(to_unsigned(ce_cntr_a, phase_o'length));\n187:              ready_b_o <= '1';\n188: \t\t  end if;\n189:       end if;\n190:     end if;\n191:   end process p_phase;\n192:   \n193:   --============================================================================\n194:   -- Data intermediary\n195:   --============================================================================  \n196:   p_data_int : process(clk_a_i) -- do not reset to avoid unecessarily large fan-out of reset_a_strobe_sync signal\n197:   begin\n198:     if(rising_edge(clk_a_i)) then\n199:       if (capture_a = '1') then\n200:          data_a_reg <= data_a_i;\n201:       else\n202:          data_a_reg <= data_a_reg;\n203:       end if;\n204:     end if;\n205:   end process p_data_int;\n206: \n207:   --============================================================================\n208:   -- Data out\n209:   --============================================================================  \n210:   p_data_out : process(clk_b_i)\n211:   begin\n212:     if(rising_edge(clk_b_i)) then\n213:       if(strobe_b_i='1') then\t\n214:         data_b_reg <= data_a_reg;\n215:       end if;\n216:     end if;\n217:   end process p_data_out;\n218:   data_b_o <= data_b_reg;"
+      }
+    ],
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/cdc_user/cdc_rx.vhd"
+  },
+  {
+    "id": "R08",
+    "title": "eLink_Interface: FSM, lectura consumible y reset",
+    "path": "epos-firmware/eLink_Interface_v1/src/eLink_Interface.vhd",
+    "origin": "repo",
+    "sha256": "5d00d26f4aa38c8101dd6b267e9b473415003c385920b0294cca980314a25fd5",
+    "excerpts": [
+      {
+        "start": 214,
+        "end": 335,
+        "text": "214:     type fsm_state_eLink_t is (idle, waiting_resp, waiting_read, finish);\n215: \tsignal fsm_state     : fsm_state_eLink_t := idle;\n216:     signal check_bit     : std_logic;\n217: begin\n218:     \n219:      -- rd_en control txFIFO\n220:     process (logicCLK, axi_aresetn)\n221:     begin\n222:         if axi_aresetn = '0' then\n223:             TX_RdEN <= '0';\n224:         elsif rising_edge(logicCLK) then\n225:             if dlFIFO_empty_s(0) = '0' then\n226:                 TX_RdEN <= '1';\n227:                 user_data_out <= tx_out;\n228:             else\n229:                 TX_RdEN <= '0';\n230:                 user_data_out <= (others => '0');\n231:             end if;\n232:         end if;\n233:     end process;\n234:  \n235:  \n236:     -- wr_en control rxFIFO\n237:     process(logicCLK, axi_aresetn)\n238:     begin\n239:         if axi_aresetn = '0' then\n240:             RX_WrEN <= '0';\n241:             rx_in <= (others => '0');\n242:         elsif rising_edge(logicCLK) then\n243:             check_bit <= or ulData_in_s(223 downto 0);\n244:             if check_bit = '1' and dlFIFO_full_s(0) = '0' then\n245:                 rx_in <= ulData_in_s(223 downto 0);\n246:                 RX_WrEN <= '1';\n247:             else\n248:                 rx_in <= (others => '0');\n249:                 RX_WrEN <= '0';\n250:             end if;\n251:         end if;\n252:     end process;\n253:      \n254:      \n255:     eLink_fsm : process(axi_aclk, axi_aresetn)\n256:         variable respCon    : std_logic := '0';\n257:         variable regStatus  : std_logic_vector(6 downto 0) := (others => '0');\n258:     begin\n259:         if rising_edge(axi_aclk) then\n260:             if axi_aresetn = '0' then\n261:                 regStatus := (others => '0');\n262:                 intr <= '0';\n263:                 TX_WrEN <= '0';\n264:                 tx_in <= (others => '0');\n265:             else\n266:                 case fsm_state is\n267:                 \n268:                 when idle =>\n269:                     if dlStrobe_s = '1' and dlFIFO_full_s(0) = '0' then\n270:                         tx_in <= dlData_s;\n271:                         TX_WrEN <= '1';\n272:                         fsm_state <= waiting_resp;\n273:                     else \n274:                         TX_WrEN <= '0';\n275:                         tx_in <= (others => '0');\n276:                     end if;\n277:                 \n278:                 when waiting_resp =>\n279:                     TX_WrEN <= '0';\n280:                     tx_in <= (others => '0');\n281:                     respCon := or rx_out;\n282:                     if respCon = '1' then\n283:                         ulGrp0Data_s <= rx_out(223 downto 192);\n284:                         ulGrp1Data_s <= rx_out(191 downto 160);\n285:                         ulGrp2Data_s <= rx_out(159 downto 128);\n286:                         ulGrp3Data_s <= rx_out(127 downto 96);\n287:                         ulGrp4Data_s <= rx_out(95 downto 64);\n288:                         ulGrp5Data_s <= rx_out(63 downto 32);\n289:                         ulGrp6Data_s <= rx_out(31 downto 0);\n290:                         regStatus := (others => '1');\n291:                         fsm_state <= waiting_read;\n292:                         intr <= '1';\n293:                     end if;\n294:                  \n295:                 when waiting_read =>\n296:                     if ulGrp0Strobe_s = '1' then\n297:                         ulGrp0Data_s <= (others => '0');\n298:                         regStatus(0) := '0';\n299:                     elsif ulGrp1Strobe_s = '1' then\n300:                         ulGrp1Data_s <= (others => '0');\n301:                         regStatus(1) := '0';\n302:                     elsif ulGrp2Strobe_s = '1' then\n303:                         ulGrp2Data_s <= (others => '0');\n304:                         regStatus(2) := '0';\n305:                     elsif ulGrp3Strobe_s = '1' then\n306:                         ulGrp3Data_s <= (others => '0');\n307:                         regStatus(3) := '0';\n308:                     elsif ulGrp4Strobe_s = '1' then\n309:                         ulGrp4Data_s <= (others => '0');\n310:                         regStatus(4) := '0';\n311:                     elsif ulGrp5Strobe_s = '1' then\n312:                         ulGrp5Data_s <= (others => '0');\n313:                         regStatus(5) := '0';\n314:                     elsif ulGrp6Strobe_s = '1' then\n315:                         ulGrp6Data_s <= (others => '0');\n316:                         regStatus(6) := '0';\n317:                     elsif (or regStatus) = '0' then\n318:                         fsm_state <= finish;\n319:                     elsif dlStrobe_s = '1' and dlFIFO_full_s(0) = '0' then\n320:                         regStatus := (others => '0');\n321:                         intr <= '0';\n322:                         tx_in <= dlData_s;\n323:                         TX_WrEN <= '1';\n324:                         fsm_state <= waiting_resp;\n325:                     end if;\n326:                     \n327:                 when finish =>\n328:                     regStatus := (others => '0');\n329:                     intr <= '0';\n330:                     fsm_state <= idle;\n331:                     \n332:                 end case;\n333:             end if;\n334:         end if;\n335:     end process;   "
+      },
+      {
+        "start": 355,
+        "end": 368,
+        "text": "355:     rxFIFO : FIFO_rx_wrapper\n356:         port map(\n357:             -- FIFO_WRITE\n358:             full        => ulFIFO_full_s(0),\n359:             din         => rx_in,\n360:             wr_en       => RX_WrEN,\n361:             wr_clk      => logicCLK,\n362:             -- FIFO_READ\n363:             empty       => ulFIFO_empty_s(0),\n364:             dout        => rx_out,\n365:             rd_en       => '1',\n366:             rd_clk      => axi_aclk,\n367:             -- Reset\n368:             rst         => not axi_aresetn"
+      },
+      {
+        "start": 405,
+        "end": 434,
+        "text": "405: \t\t\t-- User Ports  \n406:             magic_strobe              => open,\n407:             magic_value               => magicValue_s,\n408:             status_strobe             => open,\n409:             status_dlinkfifo_empty    => dlFIFO_empty_s,\n410:             status_dlinkfifo_full     => dlFIFO_full_s,\n411:             status_ulinkfifo_empty    => ulFIFO_empty_s,\n412:             status_ulinkfifo_full     => ulFIFO_full_s,\n413:             control_strobe            => ctrlStrobe_s,\n414:             control_ack               => ctrlACK_s,\n415:             downlinkdata_strobe       => dlStrobe_s,\n416:             downlinkdata_dataword     => dlData_s,\n417:             uplinkdatagrp_0_strobe    => ulGrp0Strobe_s,\n418:             uplinkdatagrp_0_dataword  => ulGrp0Data_s,\n419:             uplinkdatagrp_1_strobe    => ulGrp1Strobe_s,\n420:             uplinkdatagrp_1_dataword  => ulGrp1Data_s,\n421:             uplinkdatagrp_2_strobe    => ulGrp2Strobe_s,\n422:             uplinkdatagrp_2_dataword  => ulGrp2Data_s,\n423:             uplinkdatagrp_3_strobe    => ulGrp3Strobe_s,\n424:             uplinkdatagrp_3_dataword  => ulGrp3Data_s,\n425:             uplinkdatagrp_4_strobe    => ulGrp4Strobe_s,\n426:             uplinkdatagrp_4_dataword  => ulGrp4Data_s,\n427:             uplinkdatagrp_5_strobe    => ulGrp5Strobe_s,\n428:             uplinkdatagrp_5_dataword  => ulGrp5Data_s,\n429:             uplinkdatagrp_6_strobe    => ulGrp6Strobe_s,\n430:             uplinkdatagrp_6_dataword  => ulGrp6Data_s\n431:         );\n432:         \n433:         magicValue_s    <= x\"736D656D\";\n434:         ulData_in_s     <= user_data_in;"
+      }
+    ],
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/eLink_Interface_v1/src/eLink_Interface.vhd"
+  },
+  {
+    "id": "R09",
+    "title": "Reset y avance del core uplink",
+    "path": "epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/lpgbt-fpga/kcu105/hdl/lpgbtfpga_10g24.vhd",
+    "origin": "repo",
+    "sha256": "dbb23cd729af4ded6853df62e01b9a5c34de6b758668f964d4f717dd8fc57306",
+    "excerpts": [
+      {
+        "start": 207,
+        "end": 248,
+        "text": "207: \t--========####   Uplink datapath   ####========--\n208: \tcdc_uplink_reset <= not uplinkReady_s;\n209: \tuplink_inst : lpgbtfpga_uplink\n210: \t\tGENERIC MAP(\n211: \t\t\t-- General configuration\n212: \t\t\tDATARATE                  => DATARATE_10G24,\n213: \t\t\tFEC                       => FEC,\n214: \t\t\t-- Expert parameters\n215: \t\t\tc_multicyleDelay          => 3,\n216: \t\t\tc_clockRatio              => 8,\n217: \t\t\tc_mgtWordWidth            => 32,\n218: \t\t\tc_allowedFalseHeader      => 5,\n219: \t\t\tc_allowedFalseHeaderOverN => 64,\n220: \t\t\tc_requiredTrueHeader      => 30,\n221: \t\t\tc_bitslip_mindly          => 1,\n222: \t\t\tc_bitslip_waitdly         => 40\n223: \t\t)\n224: \t\tPORT MAP(\n225: \t\t\t-- Clock and reset\n226: \t\t\tuplinkClk_i         => clk_mgtRxClk_s,\n227: \t\t\tuplinkClkOutEn_o    => uplinkStrobe320,\n228: \t\t\tuplinkRst_n_i       => uplinkRst_i, --DE MOD\n229: \t\t\t-- Input\n230: \t\t\tmgt_word_i          => uplink_mgtword_s,\n231: \t\t\t-- Data\n232: \t\t\tuserData_o          => uplinkData320(229 downto 0),\n233: \t\t\tEcData_o            => uplinkData320(231 downto 230),\n234: \t\t\tIcData_o            => uplinkData320(233 downto 232),\n235: \t\t\t-- Control\n236: \t\t\tbypassInterleaver_i => uplinkBypassInterleaver_i,\n237: \t\t\tbypassFECEncoder_i  => uplinkBypassFECEncoder_i,\n238: \t\t\tbypassScrambler_i   => uplinkBypassScrambler_i,\n239: \t\t\t-- Transceiver control\n240: \t\t\tmgt_bitslipCtrl_o   => mgt_rxslide_s,\n241: \t\t\t-- Status\n242: \t\t\tdataCorrected_o     => uplinkdataCorrected,\n243: \t\t\tIcCorrected_o       => uplinkIcCorrected,\n244: \t\t\tEcCorrected_o       => uplinkEcCorrected,\n245: \t\t\trdy_o               => uplinkReady_s,\n246: \t\t\tframeAlignerEven_o  => open,\n247: \t\t\theader_locked_o     => rx_header_locked_o\n248: \t\t);"
+      }
+    ],
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/lpgbt-fpga/kcu105/hdl/lpgbtfpga_10g24.vhd"
+  },
+  {
+    "id": "R10",
+    "title": "FSM IC: prioridad del watchdog",
+    "path": "epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/new/emp_lpgbt.vhd",
+    "origin": "repo",
+    "sha256": "fbc7c32ed26b8e3c03960ca6b51b8988598979f21468a8e9090885aae2d29dc5",
+    "excerpts": [
+      {
+        "start": 667,
+        "end": 705,
+        "text": "667: \t\t\tif reset_general = '1' then\n668: \t\t\t\tfsm_state_ic               <= idle;\n669: \t\t\t\tinterrupt_flags_ic_resp(0) <= '0';\n670: \t\t\t\tIC_rx_rd_s                 <= '0';\n671: \t\t\t\tIC_tx_wr_s                 <= '0';\n672: \t\t\t\tIC_tx_start_read_s         <= '0';\n673: \t\t\t\tIC_tx_start_write_s        <= '0';\n674: \t\t\t\tdata_rx_data               <= (others => '0');\n675: \t\t\t\tcontrol_nb_read_ic         <= (others => '0');\n676: \t\t\t\tstatus_timeout_error(0)    <= '0';\n677: \t\t\t\tstatus_parity_error(0)     <= '0';\n678: \t\t\t\tlpgbt_resp_timeout := 100000000;\n679: \t\t\t\tIC_empty_flag_old := '0';\n680: \t\t\t\tparity_check             <= x\"00\";\n681: \t\t\t\tnext_FIFO_byte_available <= 0;\n682: \t\t\t\tFIFO_cnt                 <= 0;\n683: \n684: \t\t\telsif control_single_write_read(0) = '1' then -- Only for single read/write. Byte read written automatically and parity bit checked\n685: \t\t\t\tcase fsm_state_ic is\n686: \n687: \t\t\t\t\twhen idle =>\n688: \t\t\t\t\t\tif (control_fifoctrl(1) = '1' or control_lpgbtctrl(1) = '1') and control_strobe = '1' then -- Write the byte and wait for lpgbt response\n689: \t\t\t\t\t\t\t-- Clear previous errors\n690: \t\t\t\t\t\t\tstatus_timeout_error(0) <= '0';\n691: \t\t\t\t\t\t\tstatus_parity_error(0)  <= '0';\n692: \t\t\t\t\t\t\tif status_ready_flag(0) = '1' then\n693: \t\t\t\t\t\t\t\tIC_tx_wr_s   <= '1'; -- write to FIFO\n694: \t\t\t\t\t\t\t\tfsm_state_ic <= sending_command;\n695: \t\t\t\t\t\t\tend if;\n696: \n697: \t\t\t\t\t\telsif (control_fifoctrl(0) = '1' or control_lpgbtctrl(0) = '1') and control_strobe = '1' then -- Read request to lpgbt\n698: \t\t\t\t\t\t\t-- Clear previous errors\n699: \t\t\t\t\t\t\tstatus_timeout_error(0) <= '0';\n700: \t\t\t\t\t\t\tstatus_parity_error(0)  <= '0';\n701: \t\t\t\t\t\t\tif status_ready_flag(0) = '1' then\n702: \t\t\t\t\t\t\t\tIC_tx_start_read_s <= '1'; -- read command to lpgbt\n703: \t\t\t\t\t\t\t\tcontrol_nb_read_ic <= x\"0001\"; --only one byte allowed\n704: \t\t\t\t\t\t\t\tlpgbt_resp_timeout := 100000000;\n705: \t\t\t\t\t\t\t\tfsm_state_ic       <= waiting_resp;"
+      },
+      {
+        "start": 715,
+        "end": 790,
+        "text": "715: \t\t\t\t\twhen waiting_resp =>\n716: \t\t\t\t\t\tIC_tx_start_write_s <= '0';\n717: \t\t\t\t\t\tIC_tx_start_read_s  <= '0';\n718: \t\t\t\t\t\tlpgbt_resp_timeout  := lpgbt_resp_timeout - 1;\n719: \t\t\t\t\t\tif status_empty_flag(0) = '0' and (data_rx_data_FIFO = x\"E0\" or data_rx_data_FIFO = x\"E1\") then -- start reading FIFO\n720: \t\t\t\t\t\t\tIC_rx_rd_s               <= '1'; --start pulling from FIFO\n721: \t\t\t\t\t\t\tFIFO_cnt                 <= 0;\n722: \t\t\t\t\t\t\tnext_FIFO_byte_available <= 0;\n723: \t\t\t\t\t\t\tparity_check             <= x\"00\";\n724: \t\t\t\t\t\t\tlpgbt_resp_timeout       := 100000000;\n725: \t\t\t\t\t\t\tfsm_state_ic             <= reading_FIFO;\n726: \t\t\t\t\t\telsif lpgbt_resp_timeout = 0 then -- waiting during 1 second, rise error flag\n727: \t\t\t\t\t\t\tstatus_timeout_error(0) <= '1';\n728: \t\t\t\t\t\t\tfsm_state_ic            <= finish;\n729: \t\t\t\t\t\tend if;\n730: \n731: \t\t\t\t\twhen reading_FIFO => -- reading all the bytes on the fifo\n732: \n733: \t\t\t\t\t\tlpgbt_resp_timeout := lpgbt_resp_timeout - 1;\n734: \t\t\t\t\t\tIC_rx_rd_s         <= '0'; -- wait until next byte is available\n735: \n736: \t\t\t\t\t\tif status_empty_flag(0) = '1' then -- need to wait until empy flag goes '1' again, before reading next byte\t\t\t\t\t\n737: \t\t\t\t\t\t\tnext_FIFO_byte_available <= 1;\n738: \t\t\t\t\t\telsif next_FIFO_byte_available = 1 then -- wait extra clock cycle for timing issues\n739: \t\t\t\t\t\t\tnext_FIFO_byte_available <= 2;\n740: \t\t\t\t\t\telsif next_FIFO_byte_available = 2 then\n741: \t\t\t\t\t\t\tIC_rx_rd_s   <= '1';\n742: \t\t\t\t\t\t\tparity_check <= parity_check xor data_rx_data_FIFO; --save the parity calc\n743: \n744: \t\t\t\t\t\t\tif FIFO_cnt = 2 then -- number of bytes received should be 1 (0:7)\n745: \t\t\t\t\t\t\t\tif data_rx_data_FIFO = x\"1\" then\n746: \t\t\t\t\t\t\t\t\tfsm_state_ic <= finish;\n747: \t\t\t\t\t\t\t\tend if;\n748: \t\t\t\t\t\t\telsif FIFO_cnt = 3 then -- number of bytes received should be 1 (8:15)\n749: \t\t\t\t\t\t\t\tif data_rx_data_FIFO = x\"0\" then\n750: \t\t\t\t\t\t\t\t\tfsm_state_ic <= finish;\n751: \t\t\t\t\t\t\t\tend if;\n752: \t\t\t\t\t\t\telsif FIFO_cnt = 6 then -- get the data\n753: \t\t\t\t\t\t\t\tdata_rx_data <= data_rx_data_FIFO;\n754: \t\t\t\t\t\t\telsif FIFO_cnt = 7 then -- check parity byte\n755: \t\t\t\t\t\t\t\tif parity_check = data_rx_data_FIFO then\n756: \t\t\t\t\t\t\t\t\tinterrupt_flags_ic_resp(0) <= '1'; -- trigger interrupt\n757: \t\t\t\t\t\t\t\telse\n758: \t\t\t\t\t\t\t\t\tstatus_parity_error(0) <= '1';\n759: \t\t\t\t\t\t\t\tend if;\n760: \t\t\t\t\t\t\t\tfsm_state_ic <= finish;\n761: \t\t\t\t\t\t\tend if;\n762: \t\t\t\t\t\t\tnext_FIFO_byte_available <= 0;\n763: \t\t\t\t\t\t\tFIFO_cnt <= FIFO_cnt + 1;\n764: \n765: \t\t\t\t\t\telsif lpgbt_resp_timeout = 0 then -- waiting during 1 second, rise error flag\n766: \t\t\t\t\t\t\tstatus_timeout_error(0) <= '1';\n767: \t\t\t\t\t\t\tfsm_state_ic            <= finish;\n768: \t\t\t\t\t\tend if;\n769: \n770: \t\t\t\t\twhen finish =>\n771: \t\t\t\t\t\tIC_rx_rd_s   <= '0';\n772: \t\t\t\t\t\tfsm_state_ic <= idle;\n773: \n774: \t\t\t\tend case;\n775: \n776: \t\t\telse                        -- Multiple read/writes. PS manages FIFO and parity bit\n777: \t\t\t\tIC_rx_rd_s          <= control_fifoctrl(0) and control_strobe;\n778: \t\t\t\tIC_tx_wr_s          <= control_fifoctrl(1) and control_strobe;\n779: \t\t\t\tIC_tx_start_read_s  <= control_lpgbtctrl(0) and control_strobe;\n780: \t\t\t\tIC_tx_start_write_s <= control_lpgbtctrl(1) and control_strobe;\n781: \t\t\t\tdata_rx_data        <= data_rx_data_FIFO;\n782: \t\t\t\tcontrol_nb_read_ic  <= control_nb_read;\n783: \n784: \t\t\t\t-- Trigger interrupt when receiving something\n785: \t\t\t\tif status_empty_flag(0) = '0' and IC_empty_flag_old = '1' then -- Falling edge generates interrupt\n786: \t\t\t\t\tinterrupt_flags_ic_resp(0) <= '1';\n787: \t\t\t\tend if;\n788: \n789: \t\t\t\tIC_empty_flag_old := status_empty_flag(0);\n790: \t\t\tend if;"
+      }
+    ],
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/new/emp_lpgbt.vhd"
+  },
+  {
+    "id": "R11",
+    "title": "IC: reset de FIFO por transacción",
+    "path": "epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/IC/ic_top.vhd",
+    "origin": "repo",
+    "sha256": "3e95ad7ea9a3f0f2134210179bc3c7e9fee4d966617fba0550d23b52cb3fde6f",
+    "excerpts": [
+      {
+        "start": 206,
+        "end": 228,
+        "text": "206:     ic_rst_rx_s   <= rx_reset_i or tx_start_write_i or tx_start_read_i;\n207: \n208:     rx_inst: entity work.ic_rx\n209:         generic map (\n210:             g_FIFO_DEPTH    => g_FIFO_DEPTH\n211:         )\n212:         port map (\n213:             -- Clock and reset\n214:             rx_clk_i        => rx_clk_i,\n215:             rx_clk_en       => rx_clk_en,\n216: \n217:             reset_i         => ic_rst_rx_s,\n218: \n219:             -- Status\n220:             rx_empty_o      => rx_empty_o,\n221: \n222:             -- Internal FIFO\n223:             rd_clk_i        => rd_clk_i,\n224:             rd_i            => rx_rd_i,\n225:             data_o          => rx_data_from_gbtx_o,\n226: \n227:             -- IC line\n228:             rx_data_i       => data_ic_rx_inv"
+      }
+    ],
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/IC/ic_top.vhd"
+  },
+  {
+    "id": "R12",
+    "title": "Registro histórico del bloqueo",
+    "path": "ChargeMonitoringSystem_obsidian/30_Notes/1028-1031-Testing.md",
+    "origin": "repo",
+    "sha256": "fb53d4897cf8f627abd7e9b5bfa98f6e4434b5e942c33b1f9fcc30498ec90ec4",
+    "excerpts": [
+      {
+        "start": 47,
+        "end": 67,
+        "text": "47: ## Physical Reading and FE tests\n48: ### Physical Loopback\n49: Using a cable that closes on itself, we get data out from the downlink TX into the RX in order to be read on the uplink then in the registers on the PS (as the AirhHDL module for reading)\n50: \n51: \n52: Testing sending 0xB8 : 101100\n53: We read:\n54: \n55: 0x05: 0101\n56: 0xC0: 1100\n57: \n58: Seeing in binary we can interpret the fact that as our downlink its all zero then each 300ms we send our data 0xB8:\n59: ... 0000 0000 1011 1000 0000 0000 ... (original frame bits)\n60:     0     0       B       8      0       0\n61: \n62: Then what we read\n63: ... 0000 0101 1100 0000 0000 ...( what we read)\n64:     0     5       C      0        0\n65: \n66: For this we use the internal signal and we start counting clocks, this allows us to see different clock reads,\n67: as the cable adds some offset from the \"send signal\" then when we read:"
+      },
+      {
+        "start": 90,
+        "end": 105,
+        "text": "90: Here we only care about the last 2 bits, as we are using a 1280 speed, being only the last 2 bits the ones that\n91: - we need to incorporate a bit slip logic\n92: \n93: ___\n94: ### On the reading\n95: Every now and then the reading AirHDL that's done directly reading on the registers gets stuck,\n96: and it is required that the system its reset,\n97: \n98: ___\n99: ### FE testing\n100: We are doing Front End Testing usin a modified RJ45 cable, sending a clock signal from LpGbt into the FE and then sending the signal throught the uplink, then it's read into the PS. Some modifications are still required as we are finetuning the cable and reading speed.\n101: \n102: # 1031- FE Testing\n103: Testing with the mod cable, we tested\n104: 0x03 filling with zeros\n105: we got: 0xEE6EEEEE"
+      }
+    ],
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/ChargeMonitoringSystem_obsidian/30_Notes/1028-1031-Testing.md"
+  },
+  {
+    "id": "R13",
+    "title": "Selección de ruta IC por bit 4",
+    "path": "epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/new/emp_lpgbt_ic_clerk_regs_pkg.vhd",
+    "origin": "repo",
+    "sha256": "d95f0278e9b608bc5b42eeef77335aae72f3bb44d8b1319ae026b72d92888fc8",
+    "excerpts": [
+      {
+        "start": 75,
+        "end": 100,
+        "text": "75:     constant CONTROL_OFFSET : unsigned(31 downto 0) := unsigned'(x\"00000004\"); -- address offset of the 'control' register\n76:     -- Field 'control.FIFOCtrl'\n77:     constant CONTROL_FIFOCTRL_BIT_OFFSET : natural := 0; -- bit offset of the 'FIFOCtrl' field\n78:     constant CONTROL_FIFOCTRL_BIT_WIDTH : natural := 2; -- bit width of the 'FIFOCtrl' field\n79:     constant CONTROL_FIFOCTRL_RESET : std_logic_vector(1 downto 0) := std_logic_vector'(\"00\"); -- reset value of the 'FIFOCtrl' field\n80:     -- Enumerated values for field 'control.FIFOCtrl'\n81:     constant CONTROL_FIFOCTRL_DEFAULT : natural := 0;\n82:     constant CONTROL_FIFOCTRL_READ : natural := 1;\n83:     constant CONTROL_FIFOCTRL_WRITE : natural := 2;\n84:     constant CONTROL_FIFOCTRL_ERR : natural := 3;\n85:     -- Field 'control.lpGBTCtrl'\n86:     constant CONTROL_LPGBTCTRL_BIT_OFFSET : natural := 2; -- bit offset of the 'lpGBTCtrl' field\n87:     constant CONTROL_LPGBTCTRL_BIT_WIDTH : natural := 2; -- bit width of the 'lpGBTCtrl' field\n88:     constant CONTROL_LPGBTCTRL_RESET : std_logic_vector(3 downto 2) := std_logic_vector'(\"00\"); -- reset value of the 'lpGBTCtrl' field\n89:     -- Enumerated values for field 'control.lpGBTCtrl'\n90:     constant CONTROL_LPGBTCTRL_DEFAULT : natural := 0;\n91:     constant CONTROL_LPGBTCTRL_READ : natural := 1;\n92:     constant CONTROL_LPGBTCTRL_WRITE : natural := 2;\n93:     constant CONTROL_LPGBTCTRL_ERR : natural := 3;\n94:     -- Field 'control.single_write_read'\n95:     constant CONTROL_SINGLE_WRITE_READ_BIT_OFFSET : natural := 4; -- bit offset of the 'single_write_read' field\n96:     constant CONTROL_SINGLE_WRITE_READ_BIT_WIDTH : natural := 1; -- bit width of the 'single_write_read' field\n97:     constant CONTROL_SINGLE_WRITE_READ_RESET : std_logic_vector(4 downto 4) := std_logic_vector'(\"0\"); -- reset value of the 'single_write_read' field\n98:     -- Field 'control.NB_read'\n99:     constant CONTROL_NB_READ_BIT_OFFSET : natural := 16; -- bit offset of the 'NB_read' field\n100:     constant CONTROL_NB_READ_BIT_WIDTH : natural := 16; -- bit width of the 'NB_read' field"
+      }
+    ],
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/new/emp_lpgbt_ic_clerk_regs_pkg.vhd"
+  },
+  {
+    "id": "R14",
+    "title": "FIFO IC: punteros y límites",
+    "path": "epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/IC/ic_rx_fifo.vhd",
+    "origin": "repo",
+    "sha256": "48c5c3918fb8ed32dc9064a26376ba19ac82d402bca2f0b851c4df87abfa7ec8",
+    "excerpts": [
+      {
+        "start": 66,
+        "end": 110,
+        "text": "66:     -- Signals\n67:     signal mem_arr              : ramreg_t(g_FIFO_DEPTH downto 0);\n68: \n69:     signal wr_ptr               : integer range 0 to g_FIFO_DEPTH;\n70:     signal word_in_mem_size     : integer range 0 to g_FIFO_DEPTH;\n71:     signal rd_ptr               : integer range 0 to g_FIFO_DEPTH;\n72: \n73: begin                 --========####   Architecture Body   ####========--\n74: \n75:     ram_proc_rd: process(reset_i, rd_clk_i)\n76:     begin\n77:         if reset_i = '1' then\n78:             rd_ptr              <= 0;\n79:             rx_empty_o          <= '1';\n80: \n81:         elsif rising_edge(rd_clk_i) then\n82:             if read_i = '1' and rd_ptr < word_in_mem_size then\n83:                 rd_ptr          <= rd_ptr + 1;\n84:             end if;\n85: \n86:             if word_in_mem_size > rd_ptr then\n87:                 rx_empty_o         <= '0';\n88:             else\n89:                 rx_empty_o         <= '1';\n90:             end if;\n91: \n92:             data_o          <= mem_arr(rd_ptr);\n93:         end if;\n94:     end process;\n95: \n96:     ram_proc_wr: process(reset_i, wr_clk_i)\n97:     begin\n98:         if reset_i = '1' then\n99:             wr_ptr              <= 0;\n100:             word_in_mem_size    <= 0;\n101:             mem_arr             <= (others => zero_ram_s);\n102: \n103:         elsif rising_edge(wr_clk_i) then\n104:             if write_i = '1' and wr_clk_en_i = '1' then\n105:                 mem_arr(wr_ptr) <= data_i;\n106:                 wr_ptr <= wr_ptr + 1;\n107:                 word_in_mem_size  <= word_in_mem_size + 1;\n108:             end if;\n109:         end if;\n110:     end process;"
+      }
+    ],
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/IC/ic_rx_fifo.vhd"
+  },
+  {
+    "id": "R15",
+    "title": "Core: reset modificado y generación de strobe",
+    "path": "epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/lpgbt-fpga/lpgbtfpga_uplink.vhd",
+    "origin": "repo",
+    "sha256": "f24feac597d33ecfc7661e942d7a848b37c55c3083b3f3a44acf40cfa2344d60",
+    "excerpts": [
+      {
+        "start": 261,
+        "end": 265,
+        "text": "261: BEGIN                 --========####   Architecture Body   ####========--\n262: \n263:     rst_pattsearch_s         <= uplinkRst_n_i; --DE Mod\n264: \n265:     -- lpgbtfpga_framealigner is used to align the input frame using the"
+      },
+      {
+        "start": 358,
+        "end": 401,
+        "text": "358:     datapath_rst_s    <= not(sta_gbRdy_s);\n359: \n360:     --! Data input pipeline\n361:     dataInPipeliner_proc: PROCESS(uplinkClk_i, datapath_rst_s)\n362:     BEGIN\n363:         IF datapath_rst_s = '1' THEN\n364:             frame_pipelined_s      <= (OTHERS => '0');\n365:         ELSIF rising_edge(uplinkClk_i) THEN\n366:             IF sta_dataflag_s = '1' THEN\n367:                 frame_pipelined_s  <= gbxFrame_s;\n368:             END IF;\n369:         END IF;\n370:     END PROCESS;\n371: \n372: \n373:     --! Multicycle path configuration\n374:     syncShIFtReg_proc: PROCESS(datapath_rst_s, uplinkClk_i)\n375:         VARIABLE cnter  : integer RANGE 0 TO 7;\n376:     BEGIN\n377: \n378:         IF datapath_rst_s = '1' THEN\n379:               cnter              := 0;\n380:               clkEnOut_s   <= '0';\n381: \n382:         ELSIF rising_edge(uplinkClk_i) THEN\n383:             IF sta_dataflag_s = '1' THEN\n384:                 cnter                 := 0;\n385:                 rst_synch_s  <= '1';\n386:             ELSIF rst_synch_s = '1' THEN\n387: \t\t\t    if(cnter < 7) then\n388:                   cnter            := cnter + 1;\n389: \t\t\t\telse\n390:                     cnter  := 0;\n391: \t\t\t\tend if;\n392:             END IF;\n393: \n394:             clkEnOut_s       <= '0';\n395:             IF cnter = c_multicyleDelay THEN\n396:                 clkEnOut_s   <= '1';\n397:             END IF;\n398:         END IF;\n399:     END PROCESS;\n400: \n401:     uplinkClkOutEn_o  <= clkEnOut_s;"
+      },
+      {
+        "start": 472,
+        "end": 489,
+        "text": "472:     --! Generate ready SIGNAL from the reset (2 clock cycle delay)\n473:     readySync_proc: PROCESS(uplinkClk_i, datapath_rst_s)\n474:     BEGIN\n475: \n476:         IF datapath_rst_s = '1' THEN\n477:             rdy_1_s  <= '0';\n478:             rdy_0_s  <= '0';\n479:             rdy_o    <= '0';\n480: \n481:         ELSIF rising_edge(uplinkClk_i) THEN\n482: \n483:             IF clkEnOut_s = '1' THEN\n484:                 rdy_o    <= rdy_1_s;\n485:                 rdy_1_s  <= rdy_0_s;\n486:                 rdy_0_s  <= '1';\n487:             END IF;\n488: \n489:         END IF;"
+      }
+    ],
+    "url": "https://github.com/fbientrigo/atlas_emc/blob/c02a33b645dc70fb4076add25b78c5246589676e/epos-firmware/emp_lpgbt/emp_lpgbt.srcs/sources_1/imports/lpgbt-fpga/lpgbtfpga_uplink.vhd"
+  },
+  {
+    "id": "B10",
+    "title": "IC: bucles sin límite y espera IRQ",
+    "path": "LpGbtSw/LpGbtUioBackend/LpGbtUioFunctions.cpp",
+    "origin": "backup",
+    "sha256": "f0bf5c9fe02e632ac8eb020e6b94cb2ded039075e30c8d0edf92477750eac330",
+    "excerpts": [
+      {
+        "start": 99,
+        "end": 126,
+        "text": "99: std::vector<uint32_t> readICRxFifo(uio_info_t* uio)\n100: {\n101: \n102:     uint32_t dataRxValue, status_v;\n103:     std::vector<uint32_t>readValues;\n104:     \n105:     status_v = readStatusRegister(uio);\n106:     status_v = isolateBitsRead(status_v, 1, 1); // Isolate to only be the empty flag\n107:     if(status_v)\n108:         return readValues;\n109:     while(!status_v)\n110:     {\n111: \n112:         if ( uio_read32(uio, 0, dataRxAddr, &dataRxValue) )\n113:         {\n114:             LOG(Log::ERR) << \"Failed to read data_rx\";\n115:         }\n116:         readValues.push_back(dataRxValue);\n117:         if ( uio_write32(uio, 0, ctrlAddr, 0x1) )\n118:         {\n119:             LOG(Log::ERR) << \"Failed to read next byte from rx_fifo\";\n120:         }\n121: \n122:         status_v = readStatusRegister(uio);\n123:         status_v = isolateBitsRead(status_v, 1, 1); // Isolate to only be the empty flag\n124: \n125:     }\n126:     return readValues;"
+      },
+      {
+        "start": 172,
+        "end": 185,
+        "text": "172: void waitIntr(uio_info_t* uio, int waitDurationMs)\n173: {\n174: \n175:     // Interrupt time\n176:     timeval t;\n177:     t.tv_sec = 0;\n178:     t.tv_usec = waitDurationMs * 1000;\n179:     std::string uioDeviceName(uio_get_devname(uio));\n180: \n181:     if ( uio_irqwait_timeout(uio, &t) )\n182:     {\n183:         LPGBTSW_EXCEPTION(\"Failed to wait for IRQ for \" + uioDeviceName);\n184:     }\n185: "
+      },
+      {
+        "start": 211,
+        "end": 230,
+        "text": "211: void clearIntr(uio_info_t* uio, uint32_t interruptClearValue, uint32_t fieldWidth, uint32_t fieldOffset)\n212: {\n213: \n214:     uint32_t interruptFlagsValue;\n215: \n216:     if ( uio_read32(uio, 0, interruptFlagsAddr, &interruptFlagsValue) )\n217:     {\n218:         LOG(Log::ERR) << \"Failed to read interrupt status\";\n219:     }\n220:     // Clear old interrupts until everything works\n221:     while(isolateBitsRead(interruptFlagsValue, fieldWidth, fieldOffset)) {\n222:         if ( uio_write32(uio, 0, interruptClearAddr, interruptClearValue) )\n223:         {\n224:             LOG(Log::ERR) << \"Failed to clear previous interrupt\";\n225:         }\n226:         if ( uio_read32(uio, 0, interruptFlagsAddr, &interruptFlagsValue) )\n227:         {\n228:             LOG(Log::ERR) << \"Failed to read interrupt status\";\n229:         }\n230:     }"
+      }
+    ]
+  },
+  {
+    "id": "B11",
+    "title": "Script que espera cambios solo del byte bajo",
+    "path": "read_lpgbt10.sh",
+    "origin": "backup",
+    "sha256": "3391f10d4207e9145db60b6d0c5d5d7c3d21e7ef57b422e3db9ad5177772e201",
+    "excerpts": [
+      {
+        "start": 1,
+        "end": 17,
+        "text": "1: #!/bin/bash\n2: w1=x\n3: w2=x\n4: mask=0xff\n5: val=`sudo busybox devmem 0xa00e0004`\n6: w1=$((val&mask))\n7: printf \"0x%04X\\n\" $w1\n8: while true; do\n9:     val=`sudo busybox devmem 0xa00e0004`\n10:     w2=$((val&mask))    \n11:     if [ $w1 -ne $w2 ]; then\n12: \tprintf \"0x%04X\\n\" $w2\n13: \tbreak\n14:     fi\n15: done;\n16: #echo $w1$w2\n17: printf \"data received: 0x%02X%02X\\n\" $w1 $w2"
+      }
+    ]
+  },
+  {
+    "id": "B12",
+    "path": "watch_devmem.sh",
+    "title": "Lectura repetida: grupo omitido y errores ocultos",
+    "origin": "backup",
+    "sha256": "2221914dfe1d1c16e087ca59375901c6c674f1308b2f373276543fe8dfbbaeb7",
+    "excerpts": [
+      {
+        "start": 1,
+        "end": 26,
+        "text": "1: #!/bin/bash\n2: # Script: watch_devmem_list.sh\n3: # Uso: sudo ./watch_devmem_list.sh [intervalo_segundos]\n4: \n5: echo \"=== Lectura devmem ($(date '+%H:%M:%S')) ===\"\n6: INTERVAL=${1:-0.3}  # intervalo entre lecturas (por defecto 0.3 segundos)\n7: ADDR_LIST=(\n8:   0xA00E0004\n9:   0xA00E0008\n10:   0xA00E000C\n11:   0xA00E0010\n12:   0xA00E0014\n13:   0xA00E001C\n14:   0xA00E0020\n15:   0xA00E0024\n16:   0xA00E0028\n17: )\n18: cnt=0;\n19: while true; do\n20:   printf \"\\n\"\n21:   for addr in \"${ADDR_LIST[@]}\"; do\n22:     value=$(sudo busybox devmem \"$addr\" 32 2>/dev/null)\n23:     printf \"%-12s : %s\\n\" \"$addr\" \"$value\"\n24:   done\n25:   #sleep \"$INTERVAL\"\n26: done"
+      }
+    ]
+  },
+  {
+    "id": "B13",
+    "path": "sweep_clock.sh",
+    "title": "Barrido: escrituras y ceros sustituidos",
+    "origin": "backup",
+    "sha256": "007bc726e48fa0a6d1a0b8aa0aa91f628a857d9081f33ad7c7e115ea82f21dcc",
+    "excerpts": [
+      {
+        "start": 1,
+        "end": 56,
+        "text": "1: #!/bin/bash\n2: \n3: # Dirección física del registro clk_thresh\n4: ADDR=0xA00E002C\n5: \n6: # Rango de valores a probar\n7: START=0x00000002\n8: END=0x0000000B0\n9: STEP=0x00000001\n10: \n11: # Programa lector\n12: READER=\"./puzzled_getData/tgc_readuplink_cli\"\n13: \n14: # Archivo de salida\n15: LOGFILE=\"clk_sweep_results.log\"\n16: \n17: # Limpiar log anterior\n18: > \"$LOGFILE\"\n19: \n20: echo \"==============================\"\n21: echo \" Sweep clk_thresh values\"\n22: echo \"==============================\"\n23: echo \"Resultados guardados en: $LOGFILE\"\n24: echo \"==============================\"\n25: \n26: val=$START\n27: line=0\n28: while [ $((val)) -le $((END)) ]; do\n29:     ((line++))\n30:     printf \"[%03d] Escribiendo clk_thresh = 0x%08X ... \" $line $val\n31: \n32:     # Escribir valor en el registro\n33:     sudo busybox devmem $ADDR 32 $val >/dev/null\n34: \n35:     # Leer valor reportado por tgc_readuplink_cli\n36:     read_val=$(sudo busybox devmem 0xA00E0004)\n37: \n38:     # Si no se pudo leer, asignar 0\n39:     [ -z \"$read_val\" ] && read_val=\"0x00000000\"\n40: \n41:     printf \"leído %s\\n\" \"$read_val\"\n42: \n43:     # Guardar en archivo (valor escrito, valor leído)\n44:     printf \"0x%08X %s\\n\" $val \"$read_val\" >> \"$LOGFILE\"\n45: \n46:     val=$((val + STEP))\n47:     sleep 0.003\n48: done\n49: \n50: echo \"==============================\"\n51: echo \" Fin del barrido\"\n52: echo \"==============================\"\n53: \n54: # Buscar líneas donde el valor leído NO fue 0x00000000\n55: echo -e \"\\n=== Valores distintos de cero encontrados ===\"\n56: grep -n -v \"0x00000000$\" \"$LOGFILE\" || echo \"Ninguno\""
+      }
+    ]
   }
 ]

@@ -15,3 +15,7 @@ Estas son oportunidades identificadas, **sin implementar cambios en software de 
 | 9 | `eLink_Interface` existe pero no está conectado en el BD recuperado | Revisar si alguna build funcional ya lo integra antes de crear otra interfaz | Evidencia de despliegue y captura con el FE real; no basta con tener el VHDL. |
 
 No se recomienda migrar frameworks, cambiar distribución Linux, rehacer la adquisición ni consolidar todos los repositorios antes de saber qué herramientas se usan y qué problema actual resuelve el cambio.
+
+## Hallazgos de la revisión del bloqueo
+
+Priorizar, solo en las versiones que se confirmen desplegadas: timeout global y límite de respuesta IC; validar `readValues[6]`; reset explícito de FSM; watchdog independiente de ramas prioritarias; validez de payload independiente de ser distinto de cero; contador de captura y snapshot. No se implementaron cambios. Detalles y límites en [el análisis](10_BLOQUEO_LECTURAS.md).

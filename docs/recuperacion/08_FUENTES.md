@@ -177,3 +177,9 @@ La lista siguiente registra integridad y cobertura disponible; no implica análi
 - El BD sí contiene una asignación explícita A00D/A00E a interrupt controllers. La incompatibilidad con scripts históricos no es solo una ausencia de archivos.
 - Las fichas TDR/Interaction/Elink consultadas enlazan PDFs y están vacías; los PDFs no se leyeron en esta entrega.
 - Las imágenes citadas por las notas no se interpretaron como prueba de conexión actual. Los estados posteriores de hardware y otras ramas no se han auditado exhaustivamente.
+
+## Ampliación del 24-10-2026: bloqueo intermitente
+
+La edición ampliada contiene 28 extractos identificados, incluyendo R07–R15 y B10–B13. Sus rutas, rangos y SHA-256 están en `evidencias.json`. Se inspeccionaron además `ic_top.vhd`, `ic_rx.vhd`, `ic_rx_fifo.vhd` y el package del controlador IC en el mismo baseline c02a33b. Los hashes corresponden a los archivos locales inspeccionados; los enlaces remotos están fijados al commit. La observación del usuario sobre recuperación temporal tras reiniciar es testimonio histórico recibido el 24-10-2026, no una prueba actual.
+
+La documentación oficial de Linux UIO, /proc y GNU timeout respalda únicamente conceptos de sistema operativo; no acredita el firmware. Enlaces en el documento 10. No se inspeccionó hardware real ni se compiló/simuló el diseño completo.

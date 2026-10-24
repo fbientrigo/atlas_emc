@@ -44,3 +44,33 @@ Nada de lo anterior representa ejecución en hardware. La página no ofrece boto
 No se ha probado accesibilidad AXI, configuración eléctrica, fuente del Serializer, lock actual, compatibilidad del ELF, empaquetado de grupos, disparo de captura ni fidelidad FE. La prueba A/B/A está propuesta; no se ejecutó. No hay prueba de adquisición de eventos sin pérdida, incluso si una futura prueba con constantes sostenidas resulta correcta.
 
 P1 es una reconstrucción acotada a las fuentes recuperadas: falta unir UserData con el capturador y faltan informes PDF, detalles del FE y build activa. P2 ofrece acceso real al conocimiento disponible, no una simulación de funcionamiento ni certificación del sistema. La revisión P3 de esta entrega no homologa un procedimiento para firmware desconocido.
+
+## Actualización: web mejorada y bloqueo intermitente
+
+Esta sección reemplaza el estado de verificación de navegador de la primera edición, que se conserva arriba como registro del trabajo inicial.
+
+### Verificación completada
+
+- Revisión visual de portada y mapa en Chrome remoto mediante la vista previa local.
+- Interacción con nodos del mapa, búsqueda `clearIntr` y apertura del extracto B10 con líneas originales.
+- Dos ramas del diagnóstico: proceso IC que no termina, y lector payload que retorna con valores repetidos. Las recomendaciones difieren y mantienen explícita su condición de hipótesis.
+- Vista de exportación Markdown generada con observaciones, fecha y límites. Texto seleccionable como alternativa a descarga/copia automáticas.
+- Pruebas Node: sintaxis del JavaScript empaquetado, enlaces Markdown/anclas de etapas, 28 extractos y once entidades. Parser completo/parcial, duplicados, hexadecimales inválidos, límites de tamaño, ausencia de grupos y XOR de cada una de las 32 posiciones de bit. Diagnóstico distingue rutas IC/payload/script y no atribuye bucles IC a la CLI payload.
+- Modelos Python: cinco contraejemplos reducidos. No es una simulación del diseño ni una ejecución en hardware.
+
+### Limitaciones de verificación de la web
+
+La descarga Blob no produjo un archivo verificable mediante el navegador remoto. La copia automática tampoco estuvo disponible; sí se observó la selección alternativa del texto. No se presenta la descarga como validada de extremo a extremo. Se añadió una vista revisable para que el informe pueda copiarse manualmente.
+
+Una interrupción de sesión cerró la pestaña y la vista previa. Al retomarla, el navegador no pudo adquirir la pestaña de error por su política de URL. No se intentó sortear esa restricción. El comparador completo en navegador, la persistencia tras recargar y el viewport móvil quedan pendientes; su lógica y estructura se revisaron estáticamente. No se declara una cobertura visual universal.
+
+### Refutación de hipótesis del fallo
+
+- `ready` retenido: el reset derivado del core puede borrarlo; no atribuir toda pérdida de enlace a un ready pegado.
+- FSM eLink: existe salida alternativa por escritura downlink; falta demostrar integración en la build. No llamar al fallo inevitable.
+- Watchdog IC: `0x10004` no selecciona la ruta single afectada. No usar el defecto como explicación de la CLI payload.
+- FIFO IC: se resetea al iniciar cada transacción. La explicación de acumulación entre consultas correctas queda refutada en su forma simple.
+- Script silencioso: el byte bajo puede ser constante aunque cambie el resto. El silencio no es prueba de bloqueo completo.
+- Reiniciar recupera: no identifica la pieza responsable sin conocer alcance, estado previo y repetibilidad.
+
+No se modificaron fuentes originales, no se ejecutaron binarios de adquisición, no se abrió MMIO y no se cargó firmware. La causa histórica sigue abierta; el resultado es una investigación trazable y un procedimiento para localizarla.
