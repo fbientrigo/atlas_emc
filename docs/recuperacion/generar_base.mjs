@@ -17,14 +17,14 @@ for(const file of (await readdir(root)).filter(n=>/^\d\d_.*\.md$/.test(n)).sort(
 }
 const sources=JSON.parse(await readFile(path.join(root,'evidencias.json'),'utf8'));
 const entities=JSON.parse(await readFile(path.join(root,'web/entidades.json'),'utf8'));
-const data=JSON.stringify({docs,sources,entities,edition:'2026-10-24 / revisión de bloqueo'}).replaceAll('<','\\u003c');
+const data=JSON.stringify({docs,sources,entities,edition:'2026-10-25 / diagnóstico reproducible'}).replaceAll('<','\\u003c');
 const css=await readFile(path.join(root,'web/estilos.css'),'utf8');
 const js=(await readFile(path.join(root,'web/logica.js'),'utf8'))+'\n'+(await readFile(path.join(root,'web/aplicacion.js'),'utf8'));
 if(/<\/script/i.test(js))throw Error('Un cierre script literal requiere escape antes de empaquetar');
 const html=`<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Cuaderno de campo ATLAS TGC Charge Monitoring: operación, arquitectura, diagnóstico y evidencia para EMP / lpGBT."><meta name="color-scheme" content="light"><title>ATLAS · Recuperación EMP / lpGBT</title><style>${css}</style></head><body>
 <a class="sr-only" href="#content">Saltar al contenido</a>
-<header class="topbar"><div class="shell topbar-inner"><a class="brand" href="#modo/operar"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 28L20 5L36 28M10 20H30M20 5V35M4 28H36" fill="none" stroke="#b4dfc4" stroke-width="1.6"/><circle cx="20" cy="20" r="5" fill="#b4dfc4"/></svg><div>ATLAS / TGC<span>CHARGE MONITORING · EMP / lpGBT</span></div></a><span class="top-note">CUADERNO DE CAMPO / 24 OCT 2026</span><a class="button" href="#sesion">Registro de sesión ↗</a></div></header>
+<header class="topbar"><div class="shell topbar-inner"><a class="brand" href="#modo/operar"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 28L20 5L36 28M10 20H30M20 5V35M4 28H36" fill="none" stroke="#b4dfc4" stroke-width="1.6"/><circle cx="20" cy="20" r="5" fill="#b4dfc4"/></svg><div>ATLAS / TGC<span>CHARGE MONITORING · EMP / lpGBT</span></div></a><span class="top-note">CUADERNO DE CAMPO / 25 OCT 2026</span><a class="button" href="#sesion">Registro de sesión ↗</a></div></header>
 <div class="navigation"><div class="shell nav-inner"><nav class="modes" aria-label="Formas de explorar"><button data-mode="operar">OPERAR</button><button data-mode="entender">ENTENDER</button><button data-mode="investigar">INVESTIGAR</button><button data-mode="aprender">APRENDER</button></nav><div class="search-area"><label class="search-field" for="q"><span aria-hidden="true">⌕</span><span class="sr-only">Buscar tarea, señal, registro, función o síntoma</span><input id="q" type="search" placeholder="Buscar señal, registro, síntoma…" autocomplete="off"><kbd aria-hidden="true">/</kbd></label><div id="results" class="search-results" aria-live="polite"></div></div></div></div>
 <div class="shell state-strip"><span class="dot" aria-hidden="true"></span><span>Hardware actual: <strong>DESCONOCIDO</strong> · Evidencia estática e histórica · Esta web no se conecta a la Trenz.</span></div>
 <main class="shell" id="content" tabindex="-1"></main><div class="toast" id="toast" role="status"></div>

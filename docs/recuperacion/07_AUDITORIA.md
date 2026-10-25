@@ -74,3 +74,15 @@ Una interrupción de sesión cerró la pestaña y la vista previa. Al retomarla,
 - Reiniciar recupera: no identifica la pieza responsable sin conocer alcance, estado previo y repetibilidad.
 
 No se modificaron fuentes originales, no se ejecutaron binarios de adquisición, no se abrió MMIO y no se cargó firmware. La causa histórica sigue abierta; el resultado es una investigación trazable y un procedimiento para localizarla.
+
+## Ampliación 25-10-2026 — script diagnóstico solicitado
+
+Se añade `diagnostico/atlas_diagnostico.py` y [sesión S0–S4](12_SCRIPT_DIAGNOSTICO.md), sin modificar herramientas originales. Es un supervisor de la CLI existente, no un nuevo driver ni un remedio del bloqueo. `inventario` consulta archivos Linux; `capturar` exige un plan revisado y una opción explícita de autorización de lecturas. No se ejecutó ese modo sobre hardware.
+
+**Pruebas locales:** 18 pruebas automatizadas aprobadas, incluyendo 32 posiciones de bit, datos incompletos, hash distinto, UIO ambiguo, timeout, SIGBUS sintético, exceso de salida, bloqueo cooperante, detención tras primer error e informe con diario incompleto. Un doble de proceso que sigue vivo comprueba que el supervisor no llama a una espera final ilimitada; no representa un ensayo de bloqueo AXI real. Una sesión sintética correcta comprueba archivos de salida, cambios de bits altos y liberación del lock.
+
+**Refutaciones incorporadas:** el plan no puede acreditar por sí solo la build cargada; la lista de bibliotecas no se resuelve automáticamente; `/proc` no prueba exclusividad; cada lanzamiento nuevo puede ocultar fallos de una aplicación persistente; timeout y SIGKILL no garantizan completar/abortar MMIO; igualdad no prueba antigüedad; XOR no demuestra origen ni coherencia. No se habilita barrido de direcciones, control IC, monitor de otra IP ni recuperación automática.
+
+**Web:** se incorpora el documento a búsqueda y biblioteca, con enlaces desde OPERAR e INVESTIGAR. La generación y las comprobaciones estáticas se repiten sobre 13 documentos; no se amplía la cobertura de navegador declarada en la sección anterior. Los archivos `.out` del script son compatibles por formato con el comparador de dos capturas; no se importan sesiones JSONL completas en él.
+
+**Pendiente:** S0 en Trenz, identidad de build/ELF/dependencias, semántica de lectura del capturador, estímulo FE y autorización para el ensayo corto. La investigación de la causa sigue abierta.

@@ -31,3 +31,7 @@ Investigación iniciada el 24-10-2026 sobre baseline `c02a33b`. P0 se entregó p
 - [Matriz de incompatibilidades](11_COMPATIBILIDAD.md).
 - Web local: mapa interactivo, diagnóstico condicional, comparación XOR de capturas, catálogo filtrable y registro de sesión con exportación revisable.
 - Los modelos de `analisis/contraejemplos.py` comprueban ramas reducidas; no simulan el FPGA ni prueban la causa histórica.
+
+## Diagnóstico reproducible del bloqueo
+
+[Script y sesión de laboratorio S0–S4](12_SCRIPT_DIAGNOSTICO.md): inventario pasivo, plan bloqueado hasta validar compatibilidad, envoltorio de la CLI existente, anotaciones de estímulo/recuperación e informe offline. Código en `diagnostico/atlas_diagnostico.py`. Probado con procesos sintéticos; ejecución en la Trenz pendiente. Comenzar por `inventario`, no por `capturar`.

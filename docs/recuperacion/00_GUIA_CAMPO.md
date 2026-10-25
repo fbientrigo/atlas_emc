@@ -2,6 +2,8 @@
 
 **Si los valores dejan de actualizarse:** conservar el fallo antes de reiniciar. Ver [diagnóstico ampliado y procedimientos F0/F1](10_BLOQUEO_LECTURAS.md). Distinguir comando detenido de comando que termina con una muestra repetida.
 
+**Automatización opcional:** [script de diagnóstico y sesión S0–S4](12_SCRIPT_DIAGNOSTICO.md), añadido el 25-10-2026. El inventario no ejecuta tooling hardware; la captura reutiliza la CLI y exige las mismas validaciones de esta guía.
+
 Fecha de investigación: 24 de octubre de 2026. **Validación estática; sin ejecución en la Trenz.** Esta guía puede utilizarse sin leer los demás documentos.
 
 ## Decisión inicial

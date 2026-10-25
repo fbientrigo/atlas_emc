@@ -2,6 +2,8 @@
 
 **La causa del bloqueo histórico sigue DESCONOCIDA.** Hay evidencia suficiente para separar varios mecanismos y para evitar reiniciar sin conservar el estado del fallo. La prioridad es distinguir **un comando que no termina** de **un comando que termina mostrando siempre la misma muestra**. Son fallos distintos.
 
+**Instrumento de diagnóstico, 25-10-2026:** [script y procedimientos S0–S4](12_SCRIPT_DIAGNOSTICO.md). Automatiza inventario y conservación de evidencia; las lecturas quedan condicionadas a cerrar la compatibilidad. No implementa ni ejecuta recuperación hardware.
+
 El usuario confirma el 24-10-2026 que el sistema funcionaba un tiempo, dejaba de actualizar valores y volvía a funcionar tras reiniciar. La nota `1028-1031-Testing.md`, líneas 93–96, registra el mismo síntoma. **VERIFICADO / observación histórica escrita**, sin captura de señales ni definición del alcance de «reset». No conocemos aún el ejecutable exacto ni si quedaba bloqueado el proceso, Linux o solamente los valores.
 
 ## 1. Separar el síntoma antes de buscar la causa
