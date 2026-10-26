@@ -2,7 +2,7 @@
 
 **Para el ingeniero:** [guía de campo independiente](00_GUIA_CAMPO.md). A1/A2 pueden hacerse ahora. Las lecturas MMIO requieren cerrar la identidad del firmware y su capturador. La recepción FE correcta todavía no está demostrada.
 
-**Para explorar localmente:** descargar la rama y abrir `docs/recuperacion/index.html`. [Uso sin conexión](09_USO_LOCAL.md). GitHub muestra el código del HTML; no publica automáticamente una web. No se ha habilitado hosting.
+**Entrada breve:** [guía resumida](13_GUIA_RAPIDA.md). **Web:** https://fbientrigo.github.io/atlas_emc/ — despliegue mediante Actions desde `docs/clean`; comprobar su resultado. [Construcción y uso sin conexión](09_USO_LOCAL.md).
 
 | Necesito… | Entrada |
 |---|---|

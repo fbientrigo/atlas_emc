@@ -1,0 +1,1 @@
+{"name":"atlas-emp-guia","private":true,"type":"module","scripts":{"build":"node generar_base.mjs && node empaquetar_pages.mjs","test":"node verificar_base.mjs --static && node verificar_diagramas.mjs"},"devDependencies":{"esbuild":"0.25.12","jsdom":"26.1.0","marked":"17.0.5","mermaid":"11.12.1"}}

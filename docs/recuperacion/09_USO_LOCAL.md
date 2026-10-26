@@ -1,13 +1,15 @@
 # Utilizar la web sin conexión
 
-Descargar `index.html` y abrirlo en un navegador. El archivo incluye documentos, estilos, lógica y 28 extractos de fuentes. No necesita servidor, instalación, cuenta o conexión para consultar el contenido. Los enlaces al repositorio sí requieren red. GitHub muestra el código del HTML; esta entrega no habilita hosting público.
+La publicación se realiza mediante `.github/workflows/guia-pages.yml` desde `docs/clean`. Dirección prevista: https://fbientrigo.github.io/atlas_emc/. El resultado de Actions es la autoridad sobre el estado del despliegue.
+
+Para uso offline, conservar la carpeta generada `_site` completa: `index.html`, `assets/mermaid.js` y `diagnostico/`. Abrir su `index.html` en el navegador. La consulta no requiere servicios externos; los enlaces a GitHub sí requieren conexión. El HTML aislado conserva textos y herramientas, pero necesita el recurso local para dibujar Mermaid. No se usa una CDN en tiempo de ejecución.
 
 ## Cuatro entradas y funciones reales
 
 | Entrada | Uso |
 |---|---|
 | OPERAR | Seis etapas de campo, catálogo filtrable y registro de sesión. |
-| ENTENDER | Mapa seleccionable de once componentes; relaciones verificadas y correspondencias pendientes diferenciadas. |
+| ENTENDER | Guía resumida con diagramas; mapa de once componentes accesible desde sus relaciones y búsqueda. |
 | INVESTIGAR | Diagnóstico condicional del bloqueo, pruebas F0/F1 y comparación de capturas. |
 | APRENDER | Seis recorridos conceptuales, historia experimental y contraejemplos. |
 
@@ -29,14 +31,17 @@ Cada exportación abre una vista revisable, con texto seleccionable, enlace de d
 
 ## Mantenimiento
 
-Los Markdown y `evidencias.json` contienen la fuente editorial. `web/entidades.json` define las relaciones; `web/logica.js` contiene análisis puro; `web/aplicacion.js` y `web/estilos.css` implementan la vista. El generador produce un único HTML. No editar ese HTML como fuente primaria.
+Los Markdown y `evidencias.json` son la fuente editorial; `web/` contiene la vista. El generador integra 14 documentos y 28 extractos en HTML. `empaquetar_pages.mjs` empaqueta Mermaid y copia únicamente el cuaderno y el script diagnóstico a `_site`. El respaldo y el resto del repositorio quedan fuera del artefacto.
 
-Dependencia de construcción: Node y `marked` (17.0.5 en esta entrega). Ninguna dependencia de ejecución externa.
+Node 22 y dependencias fijadas con `package-lock.json`. Desde `docs/recuperacion`:
 
 ```bash
-node generar_base.mjs /RUTA/ABSOLUTA/marked/lib/marked.esm.js
-node verificar_base.mjs --static
-python3 analisis/contraejemplos.py
+npm ci --ignore-scripts --no-audit --no-fund
+npm run build
+npm test
+python3 -m unittest discover -s diagnostico -p 'test_*.py'
 ```
 
-La ruta de marked es un parámetro del PC de mantenimiento, no de la Trenz. Los checks validan enlaces, sintaxis, metadatos, parser, XOR y decisiones condicionales. Los modelos Python son contraejemplos reducidos, no simulación RTL. Ver [alcance de auditoría](07_AUDITORIA.md).
+Abrir `_site/index.html` o servir esa carpeta con el servidor local habitual. `npm test` valida enlaces, lógica de comparación y sintaxis de los diez diagramas. Actions ejecuta esas pruebas antes de publicar mediante `actions/deploy-pages`. La primera publicación requiere Pages configurado como **GitHub Actions** y que el entorno `github-pages` permita desplegar desde `docs/clean`.
+
+La guía resumida y la documentación extensa comparten fuentes; no editar el HTML generado como fuente primaria. El recurso Mermaid se construye durante el workflow y no se guarda en Git. Cambiar las dependencias requiere actualizar el lockfile y repetir las comprobaciones.

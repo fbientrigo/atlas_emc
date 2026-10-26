@@ -86,3 +86,13 @@ Se añade `diagnostico/atlas_diagnostico.py` y [sesión S0–S4](12_SCRIPT_DIAGN
 **Web:** se incorpora el documento a búsqueda y biblioteca, con enlaces desde OPERAR e INVESTIGAR. La generación y las comprobaciones estáticas se repiten sobre 13 documentos; no se amplía la cobertura de navegador declarada en la sección anterior. Los archivos `.out` del script son compatibles por formato con el comparador de dos capturas; no se importan sesiones JSONL completas en él.
 
 **Pendiente:** S0 en Trenz, identidad de build/ELF/dependencias, semántica de lectura del capturador, estímulo FE y autorización para el ensayo corto. La investigación de la causa sigue abierta.
+
+
+## Ampliación 26-10-2026 — guía breve y publicación Pages
+
+- Interfaz simplificada siguiendo WIRED / OBSERVATORY: fondo blanco, tipografía monoespaciada, líneas finas y azul de selección. Portada por tareas y catálogo en filas desplegables; documentación extensa conservada.
+- Nueva guía resumida: ocho diagramas Mermaid, más dos del mapa técnico. Se elimina la sustitución de Mermaid por un enlace. Biblioteca fijada y empaquetada localmente, sin CDN de ejecución.
+- Diez diagramas pasan el parser real de Mermaid con JSDOM. En navegador se observó la arquitectura renderizada y, al expandir la guía, los ocho diagramas nuevos. La portada y navegación se revisaron visualmente. No se declara una prueba exhaustiva de todos los tamaños de pantalla.
+- Enlaces y lógica estática comprobados sobre 14 documentos, 28 fuentes y 39 enlaces Markdown internos. Se conservan los límites anteriores de hardware y descarga; el despliegue no valida instrumentos ni datos FE.
+- Workflow construye y verifica antes de desplegar. El artefacto incluye solo `_site`, no las fuentes originales ni el respaldo. Estado definitivo y URL: ejecución de GitHub Actions.
+- El HTML necesita el recurso `assets/mermaid.js` para los gráficos; la carpeta completa funciona sin red. La descripción antigua de un HTML único autosuficiente queda sustituida por el procedimiento actual de uso local.
