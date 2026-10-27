@@ -1,6 +1,6 @@
 # Utilizar la web sin conexión
 
-La publicación se realiza mediante `.github/workflows/guia-pages.yml` desde `docs/clean`. Dirección prevista: https://fbientrigo.github.io/atlas_emc/. El resultado de Actions es la autoridad sobre el estado del despliegue.
+La publicación se realiza mediante `.github/workflows/guia-pages.yml` desde `main`. Dirección prevista: https://fbientrigo.github.io/atlas_emc/. El resultado de Actions es la autoridad sobre el estado del despliegue.
 
 Para uso offline, conservar la carpeta generada `_site` completa: `index.html`, `assets/mermaid.js` y `diagnostico/`. Abrir su `index.html` en el navegador. La consulta no requiere servicios externos; los enlaces a GitHub sí requieren conexión. El HTML aislado conserva textos y herramientas, pero necesita el recurso local para dibujar Mermaid. No se usa una CDN en tiempo de ejecución.
 
@@ -42,6 +42,6 @@ npm test
 python3 -m unittest discover -s diagnostico -p 'test_*.py'
 ```
 
-Abrir `_site/index.html` o servir esa carpeta con el servidor local habitual. `npm test` valida enlaces, lógica de comparación y sintaxis de los diez diagramas. Actions ejecuta esas pruebas antes de publicar mediante `actions/deploy-pages`. La primera publicación requiere Pages configurado como **GitHub Actions** y que el entorno `github-pages` permita desplegar desde `docs/clean`.
+Abrir `_site/index.html` o servir esa carpeta con el servidor local habitual. `npm test` valida enlaces, lógica de comparación y sintaxis de los diez diagramas. Actions ejecuta esas pruebas antes de publicar mediante `actions/deploy-pages`. La primera publicación requiere Pages configurado como **GitHub Actions** y que el entorno `github-pages` permita desplegar desde `main`.
 
 La guía resumida y la documentación extensa comparten fuentes; no editar el HTML generado como fuente primaria. El recurso Mermaid se construye durante el workflow y no se guarda en Git. Cambiar las dependencias requiere actualizar el lockfile y repetir las comprobaciones.

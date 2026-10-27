@@ -105,7 +105,7 @@ La CLI completa ofrece `--by-name`, `--by-num`, `--read-magic`, `--read-status`,
 
 El Makefile construye bibliotecas C/C++ compartidas y estáticas, y enlaza la CLI con `libReadPRBS.a` más `libuio`. Por ello no requiere necesariamente `libReadPRBS.so` en runtime, pero aún requiere las dependencias dinámicas de su ELF. No extender ese detalle a `TgcReadUplink` sin su build.
 
-Las variantes minimal y writePRBS deben identificarse individualmente antes de usar opciones. `--selftest`, escritura de secuencia y setters modifican el generador/controles. Solo consultar ayuda del ejecutable si está confirmado que su parser sale antes de abrir; no trasladar esa propiedad a todas las CLIs.
+Las variantes minimal y writePRBS deben identificarse individualmente antes de usar opciones. En las dos fuentes CLI completas revisadas, `--selftest` solo lee magic/status y cinco veces data; imprime OK sin comparar contenido. Las escrituras de secuencia y setters sí modifican el bloque. Solo consultar ayuda del ejecutable si está confirmado que su parser sale antes de abrir; no trasladar esa propiedad a todas las CLIs.
 
 ## Scripts históricos y calidad de sus resultados
 
