@@ -25,6 +25,8 @@ Investigación iniciada el 24-10-2026 sobre baseline `c02a33b`. P0 se entregó p
 | P2 | Base local de consulta sobre evidencia disponible; lógica de búsqueda, relaciones y extractos comprobada en Node. Portada, mapa, búsqueda y diagnóstico revisados en navegador; ver límites en auditoría. |
 | P3 | Revisión adversarial de afirmaciones y comprobaciones estáticas; hardware pendiente; revisión visual parcial y pruebas de lógica completadas. |
 
+La web incluye un selector **CLARO / OSCURO** en la cabecera. Respeta inicialmente la preferencia del sistema, conserva la elección manual en este navegador y actualiza también los diagramas Mermaid.
+
 ## Revisión de lecturas congeladas y web mejorada
 
 - [Análisis del bloqueo y procedimientos F0/F1](10_BLOQUEO_LECTURAS.md).

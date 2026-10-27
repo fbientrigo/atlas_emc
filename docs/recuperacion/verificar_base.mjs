@@ -5,11 +5,40 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import vm from 'node:vm';
+import {JSDOM} from 'jsdom';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const html=await readFile(path.join(root,'index.html'),'utf8');
 const data=JSON.parse(html.match(/<script id="data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
 const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 new vm.Script(script);
+assert(html.includes('id="theme-toggle"'), 'Falta el selector claro/oscuro');
+assert(html.includes('id="theme-init"'), 'El tema debe inicializarse antes del CSS para evitar parpadeos');
+assert(html.includes(':root[data-theme="dark"]'), 'Falta la paleta nocturna');
+assert(html.includes('window.AtlasMermaidSetTheme'), 'Los diagramas deben actualizar el tema');
+assert(html.includes('renderDiagrams(true)'), 'Cambiar apariencia debe redibujar diagramas');
+
+const browser = new JSDOM(html, {url:'https://fbientrigo.github.io/atlas_emc/', runScripts:'outside-only'});
+browser.window.scrollTo = () => {};
+browser.window.matchMedia = () => ({matches:true, addEventListener:() => {}});
+browser.window.eval(browser.window.document.getElementById('theme-init').textContent);
+assert.equal(browser.window.document.documentElement.dataset.theme, 'dark', 'Debe respetar el tema del sistema');
+const redrawn = [];
+browser.window.AtlasMermaid = {run:async () => {}};
+browser.window.AtlasMermaidSetTheme = value => redrawn.push(value);
+browser.window.eval(script);
+const toggle = browser.window.document.getElementById('theme-toggle');
+assert.equal(toggle.getAttribute('aria-pressed'), 'true');
+toggle.click();
+assert.equal(browser.window.document.documentElement.dataset.theme, 'light');
+assert.equal(browser.window.localStorage.getItem('atlas-guide-theme'), 'light');
+assert.equal(toggle.getAttribute('aria-pressed'), 'false');
+toggle.click();
+assert.equal(browser.window.document.documentElement.dataset.theme, 'dark');
+assert.equal(browser.window.localStorage.getItem('atlas-guide-theme'), 'dark');
+assert.equal(toggle.getAttribute('aria-pressed'), 'true');
+browser.window.close();
+
+
 const docs=new Map(data.docs.map(d=>[d.id,d]));let links=0;
 for(const d of data.docs)for(const s of d.sections)for(const m of s.html.matchAll(/href="(?:\.\/)?(\d\d_[^#"]+)\.md(?:#([^"\s]+))?"/g)){
  const target=docs.get(m[1]);assert(target,'Documento inexistente: '+m[1]);

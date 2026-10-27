@@ -116,8 +116,62 @@ function notFound(){content.innerHTML='<div class="empty"><h2>No encontramos est
 function route(){let p;try{p=location.hash.slice(1).split('/').map(decodeURIComponent)}catch{notFound();return}results.replaceChildren();query.value='';if(p[0]==='content'){content.focus();return}if(p[0]==='doc')showDoc(p[1],p[2]);else if(p[0]==='fuente')showSource(p[1]);else if(p[0]==='nodo')showEntity(p[1]);else if(p[0]==='tarea')showTask(p[1]);else if(p[0]==='diagnostico')showDiagnostic();else if(p[0]==='comparar')showCompare();else if(p[0]==='sesion')showSession();else if(p[0]==='herramientas')showTools();else if(p[0]==='historia')showHistory();else if(p[0]==='biblioteca')showLibrary();else if(!p[0]||p[0]==='modo')home(p[1]||'operar');else notFound();document.title='ATLAS · '+(content.querySelector('h1,h2')?.innerText?.replace(/\s+/g,' ')||'Recuperación EMP / lpGBT');if(p[0]!=='doc'||!p[2])window.scrollTo(0,0)}
 document.addEventListener('click',event=>{const mode=event.target.closest('[data-mode]');if(mode){location.hash='modo/'+mode.dataset.mode;return}const a=event.target.closest('a');if(!a)return;const href=a.getAttribute('href');const match=href?.match(/^(?:\.\/)?(\d\d_[^#]+)\.md(?:#(.+))?$/);if(match&&DB.docs.some(d=>d.id===match[1])){event.preventDefault();try{location.hash=go(match[1],decodeURIComponent(match[2]||''))}catch{toast('El enlace tiene un ancla inválida.')}}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){results.replaceChildren();query.blur()}if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();query.focus()}});
+// Preferencia visual independiente del registro de sesión.
+const THEME_KEY = 'atlas-guide-theme';
+const themeToggle = document.getElementById('theme-toggle');
+function syncThemeToggle() {
+ const dark = document.documentElement.dataset.theme === 'dark';
+ themeToggle.setAttribute('aria-pressed', String(dark));
+ themeToggle.setAttribute('aria-label', dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+ themeToggle.title = dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+ themeToggle.querySelector('[data-theme-icon]').textContent = dark ? '☀' : '☾';
+ themeToggle.querySelector('[data-theme-text]').textContent = dark ? 'CLARO' : 'OSCURO';
+}
+function applyTheme(theme, persist) {
+ document.documentElement.dataset.theme = theme;
+ if (persist) { try { localStorage.setItem(THEME_KEY, theme); } catch {} }
+ syncThemeToggle();
+ renderDiagrams(true);
+}
+themeToggle.addEventListener('click', () => applyTheme(
+ document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true
+));
+const systemDark = window.matchMedia?.('(prefers-color-scheme: dark)');
+systemDark?.addEventListener?.('change', event => {
+ let saved;
+ try { saved = localStorage.getItem(THEME_KEY); } catch {}
+ if (saved !== 'light' && saved !== 'dark') applyTheme(event.matches ? 'dark' : 'light', false);
+});
+syncThemeToggle();
+
 query.addEventListener('input',search);window.addEventListener('hashchange',()=>{route();renderDiagrams()});route();renderDiagrams();
 
 
-function renderDiagrams(){diagramQueue=diagramQueue.then(async()=>{const nodes=[...content.querySelectorAll('pre.mermaid:not([data-processed])')].filter(n=>n.isConnected&&!n.closest('details:not([open])'));if(!nodes.length)return;if(!window.AtlasMermaid){nodes.forEach(n=>{n.insertAdjacentHTML('beforebegin','<p class="notice">Mermaid no disponible. Abrir la carpeta publicada completa para ver los diagramas.</p>');n.dataset.processed='unavailable'});return}try{await AtlasMermaid.run({nodes})}catch(e){toast('No se pudo renderizar un diagrama. Su fuente queda disponible.');console.error(e)}})}
+const diagramSources = new WeakMap();
+function renderDiagrams(force = false) {
+ diagramQueue = diagramQueue.then(async () => {
+  const visible = [...content.querySelectorAll('pre.mermaid')].filter(n => n.isConnected && !n.closest('details:not([open])'));
+  if (!visible.length) return;
+  if (!window.AtlasMermaid) {
+   visible.filter(n => !n.dataset.processed).forEach(n => {
+    n.insertAdjacentHTML('beforebegin', '<p class="notice">Mermaid no disponible. Abrir la carpeta publicada completa para ver los diagramas.</p>');
+    n.dataset.processed = 'unavailable';
+   });
+   return;
+  }
+  try {
+   if (force) visible.forEach(n => {
+    if (diagramSources.has(n)) { n.textContent = diagramSources.get(n); delete n.dataset.processed; }
+   });
+   const pending = visible.filter(n => !n.dataset.processed);
+   if (!pending.length) return;
+   pending.forEach(n => { if (!diagramSources.has(n)) diagramSources.set(n, n.textContent); });
+   window.AtlasMermaidSetTheme?.(document.documentElement.dataset.theme);
+   await window.AtlasMermaid.run({nodes:pending});
+  } catch (e) {
+   toast('No se pudo renderizar un diagrama. Su fuente queda disponible.');
+   console.error(e);
+  }
+ });
+}
 content.addEventListener('toggle',e=>{if(e.target.open)renderDiagrams()},true);
