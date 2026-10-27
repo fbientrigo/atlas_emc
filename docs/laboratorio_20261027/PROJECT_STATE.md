@@ -1,6 +1,6 @@
 # Checkpoint de continuación — laboratorio ATLAS
 
-Estado al 27-10-2026. **Ocho entregables completos y verificados offline; publicación final en curso.** Actualizar este archivo; no crear otra serie de estados. Primer checkpoint persistido: commit `49b273018b533bb13b9b8bf897491dceda673d65`.
+Estado al 27-10-2026. **Entrega documental completa; [PR #4 abierto](https://github.com/fbientrigo/atlas_emc/pull/4), sin merge.** Actualizar este archivo; no crear otra serie de estados. Checkpoints persistidos: `49b273018b533bb13b9b8bf897491dceda673d65` y `90f2f43d54f32ba264ff9f8d2a92f76142ccad03`.
 
 ## Objetivo y autorización
 
@@ -36,17 +36,17 @@ Hallazgos de continuidad que no hay que redescubrir:
 
 `python -m unittest discover -s docs/recuperacion/diagnostico -p 'test_*.py' -v`: **18 tests aprobados**, sintéticos, sin hardware. `npm ci --ignore-scripts --no-audit --no-fund` completó para usar Mermaid/jsdom existentes. No se regeneró la web.
 
-Verificaciones finales: **110 enlaces/anclas locales válidos**, **15 bloques Bash aceptados por bash -n**, **un diagrama Mermaid aceptado por mermaid.parse**, ocho entregables obligatorios presentes, seis etapas contiguas sumando120 minutos. Se corrigieron dos anclas de rangos horarios. `git diff --check` sin errores. Se volvieron a cotejar selftest, página Si5345, unidad systemd, muestras históricas y acceso TGC contra fuentes. El diff se limita a esta carpeta documental; ningún código de adquisición ni web se modifica.
+Verificaciones finales: enlaces/anclas locales válidos, **15 bloques Bash aceptados por bash -n**, **un diagrama Mermaid aceptado por mermaid.parse**, ocho entregables obligatorios presentes, seis etapas contiguas sumando 120 minutos. Se corrigieron dos anclas de rangos horarios. `git diff --check` sin errores. Se volvieron a cotejar selftest, página Si5345, unidad systemd, muestras históricas y acceso TGC contra fuentes. El diff se limita a esta carpeta documental; ningún código de adquisición ni web se modifica. La copia de trabajo se restauró desde el segundo checkpoint tras vaciarse el entorno temporal; los análisis privados transitorios deben regenerarse desde el adjunto si vuelven a necesitarse.
 
 ## Puerta abierta y siguiente acción
 
-**Puerta:** persistir el segundo checkpoint y abrir el PR revisable; luego la siguiente puerta experimental depende del inventario y contrato del equipo.
+**Puerta experimental pendiente:** identificar en el equipo la build y su contrato de lectura. La documentación no demuestra recepción actual ni causa raíz del congelamiento.
 
-**Siguiente acción:** publicar los documentos validados en la misma rama y crear PR a main; añadir el enlace a este estado. Si se interrumpe, comprobar primero la rama/PR: no recrear ni duplicar una publicación ya realizada.
+**Siguiente acción:** abrir START_HERE con el ingeniero y realizar etapa A del laboratorio, solo inventario pasivo. Si el usuario prefiere aprender primero, iniciar lección 1 con una pregunta y esperar su respuesta antes de mostrar pauta. No rehacer investigación ni duplicar PR.
 
 Auditoría ya revisada: 00 guía sólida con alcance 77 archivos antiguo; 01/11 mapas incompletos frente a XSA/overlays nuevos; 02 error selftest; 03 cronología histórica; 04 algunas incógnitas ELF ahora parcialmente resueltas; 05 futuro útil no urgente; 06 conceptual útil, añadir ejercicios separados; 07 auditoría histórica; 08 hashes/canonicalización; 09 rama deploy incorrecta; 10 congelamiento condicional sólido; 12 supervisor con 18 pruebas; 13 guía rápida útil; README índice. No reescribir documentos antiguos: recoger correcciones en auditoría nueva.
 
-**Correcto si:** rama remota contiene los ocho entregables y este estado, PR revisable contra main, validaciones anteriores conservadas y sin merge. Para retomar en laboratorio, empezar por START_HERE y cerrar identidad/semántica antes de cualquier MMIO.
+**Correcto si:** el inventario registra plataforma, UIO/mapas y lector, y el ingeniero aporta el vínculo verificable bitstream/DT/ABI. Hasta cerrar identidad/semántica, no avanzar a MMIO. La entrega documental está en la rama remota y PR #4; no se solicita ni se realiza merge. La revisión automática de GitHub estaba en curso al abrir el PR; no confundirla con las verificaciones offline anteriores.
 
 ## Congelado y presentación final
 

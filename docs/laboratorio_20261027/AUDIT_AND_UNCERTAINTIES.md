@@ -113,7 +113,7 @@ python3 -m unittest discover -s docs/recuperacion/diagnostico -p 'test_*.py' -v
 
 **Resultado: 18 pruebas aprobadas.** Comprueban parser, validaciones, errores, timeout y persistencia del supervisor en escenarios sintéticos. No reproducen un AXI atascado ni certifican que SIGKILL termine un proceso kernel no interrumpible.
 
-Inspección estática adicional: inventario/hashes del TAR, ELF con file/readelf/nm, fuentes de lectores y bibliotecas, scripts, registros, HWH/XSA/BSP, DTSI y propiedades DTBO, extractos históricos y workflow. No se recompiló adquisición, no se ejecutó firmware ni se conectó hardware. Verificación documental: 110 enlaces/anclas locales, un Mermaid y 15 bloques shell válidos; ocho entregables y 120 minutos comprobados. Estado de continuación en [PROJECT_STATE](PROJECT_STATE.md).
+Inspección estática adicional: inventario/hashes del TAR, ELF con file/readelf/nm, fuentes de lectores y bibliotecas, scripts, registros, HWH/XSA/BSP, DTSI y propiedades DTBO, extractos históricos y workflow. No se recompiló adquisición, no se ejecutó firmware ni se conectó hardware. Verificación documental: enlaces/anclas locales, un Mermaid y 15 bloques shell válidos; ocho entregables y 120 minutos comprobados. Estado de continuación en [PROJECT_STATE](PROJECT_STATE.md).
 
 Las evidencias R antiguas merecen una precisión: 15 extractos coinciden con las líneas actuales, aunque sus hashes declarados no coinciden con todos los archivos crudos. Once se explican normalizando el salto de línea final; no se ha cerrado la canonicalización de las cuatro restantes. Esto reduce confianza en esos hashes como identidad de archivo, no invalida extractos comprobados ni demuestra cambios de código.
 
