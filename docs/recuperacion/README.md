@@ -1,4 +1,7 @@
-# Recuperación operativa EMP / lpGBT
+# Notas de trabajo EMP / lpGBT
+
+[Orden de trabajo y herramientas](14_NOTAS_DE_TRABAJO.md): firmware, reloj, lpGBT y lectura; rutas desde el home, opciones y ejemplos. Esta es la entrada actual de la web.
+
 
 **Para el ingeniero:** [guía de campo independiente](00_GUIA_CAMPO.md). A1/A2 pueden hacerse ahora. Las lecturas MMIO requieren cerrar la identidad del firmware y su capturador. La recepción FE correcta todavía no está demostrada.
 
