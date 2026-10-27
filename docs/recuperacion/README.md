@@ -2,7 +2,7 @@
 
 **Para el ingeniero:** [guía de campo independiente](00_GUIA_CAMPO.md). A1/A2 pueden hacerse ahora. Las lecturas MMIO requieren cerrar la identidad del firmware y su capturador. La recepción FE correcta todavía no está demostrada.
 
-**Entrada breve:** [guía resumida](13_GUIA_RAPIDA.md). **Web:** https://fbientrigo.github.io/atlas_emc/ — despliegue mediante Actions desde `docs/clean`; comprobar su resultado. [Construcción y uso sin conexión](09_USO_LOCAL.md).
+**Entrada breve:** [guía resumida](13_GUIA_RAPIDA.md). **Web:** https://fbientrigo.github.io/atlas_emc/ — despliegue mediante GitHub Actions desde `main`. [Construcción y uso sin conexión](09_USO_LOCAL.md).
 
 | Necesito… | Entrada |
 |---|---|
@@ -16,7 +16,7 @@
 | Revisar rigor y límites | [Auditoría](07_AUDITORIA.md) |
 | Rastrear afirmaciones | [Fuentes y cobertura](08_FUENTES.md) |
 
-Investigación iniciada el 24-10-2026 sobre baseline `c02a33b`. P0 se entregó primero en el commit `a73b65b`; después se amplió P1 y se preparó el acceso local. No se ha operado hardware ni modificado código original. La documentación y sus archivos de soporte se añaden solo en `docs/clean`.
+Investigación iniciada el 24-10-2026 sobre baseline `c02a33b`. P0 se entregó primero en el commit `a73b65b`; después se amplió P1 y se preparó el acceso local. No se ha operado hardware ni modificado código original. La documentación se desarrolló en `docs/clean` y se publica desde `main`.
 
 | Hito | Estado y alcance |
 |---|---|
