@@ -1,6 +1,6 @@
 # Checkpoint de continuación — laboratorio ATLAS
 
-Estado al 27-10-2026. **Checkpoint parcial, no entrega terminada.** Actualizar este archivo; no crear otra serie de estados.
+Estado al 27-10-2026. **Ocho entregables completos y verificados offline; publicación final en curso.** Actualizar este archivo; no crear otra serie de estados. Primer checkpoint persistido: commit `49b273018b533bb13b9b8bf897491dceda673d65`.
 
 ## Objetivo y autorización
 
@@ -17,7 +17,7 @@ Completar ocho documentos en español para recuperar contexto y preparar una ses
 
 ## Resultado verificado y delta
 
-Redactados: [START_HERE](START_HERE.md), [ENGINEER_BRIEFING](ENGINEER_BRIEFING.md), [SYSTEM_MAP](SYSTEM_MAP.md), [TOOL_AND_PATH_ATLAS](TOOL_AND_PATH_ATLAS.md), [LAB_SESSION](LAB_SESSION.md). Los tres primeros contienen síntesis; el atlas concentra paths exactos, hashes y referencias B/R/X. LAB tiene etapas 25+15+15+20+25+20 = 120 minutos, puertas y comandos condicionados.
+Redactados: [START_HERE](START_HERE.md), [ENGINEER_BRIEFING](ENGINEER_BRIEFING.md), [SYSTEM_MAP](SYSTEM_MAP.md), [TOOL_AND_PATH_ATLAS](TOOL_AND_PATH_ATLAS.md), [LAB_SESSION](LAB_SESSION.md), [TEACHING_SESSION](TEACHING_SESSION.md), [AUDIT_AND_UNCERTAINTIES](AUDIT_AND_UNCERTAINTIES.md) y [QUICK_REFERENCE](QUICK_REFERENCE.md). El atlas concentra paths exactos, hashes y referencias B/R/X. LAB tiene etapas 25+15+15+20+25+20 = 120 minutos, puertas y comandos condicionados. Enseñanza contiene cinco ciclos activos con pauta separada; auditoría puntúa los quince Markdown anteriores.
 
 Hallazgos de continuidad que no hay que redescubrir:
 
@@ -34,17 +34,19 @@ Hallazgos de continuidad que no hay que redescubrir:
 
 ## Validación ejecutada
 
-`python -m unittest discover -s docs/recuperacion/diagnostico -p 'test_*.py' -v`: **18 tests aprobados**, sintéticos, sin hardware. `npm ci --ignore-scripts --no-audit --no-fund` completó para usar Mermaid/jsdom existentes. No se regeneró la web. Pendientes validación de enlaces/anclas, Mermaid nuevo, sintaxis shell y revisión final de los ocho documentos.
+`python -m unittest discover -s docs/recuperacion/diagnostico -p 'test_*.py' -v`: **18 tests aprobados**, sintéticos, sin hardware. `npm ci --ignore-scripts --no-audit --no-fund` completó para usar Mermaid/jsdom existentes. No se regeneró la web.
+
+Verificaciones finales: **110 enlaces/anclas locales válidos**, **15 bloques Bash aceptados por bash -n**, **un diagrama Mermaid aceptado por mermaid.parse**, ocho entregables obligatorios presentes, seis etapas contiguas sumando120 minutos. Se corrigieron dos anclas de rangos horarios. `git diff --check` sin errores. Se volvieron a cotejar selftest, página Si5345, unidad systemd, muestras históricas y acceso TGC contra fuentes. El diff se limita a esta carpeta documental; ningún código de adquisición ni web se modifica.
 
 ## Puerta abierta y siguiente acción
 
-**Puerta:** completar los tres documentos restantes y verificar coherencia de la entrega antes de marcar PR listo.
+**Puerta:** persistir el segundo checkpoint y abrir el PR revisable; luego la siguiente puerta experimental depende del inventario y contrato del equipo.
 
-**Siguiente acción:** redactar `TEACHING_SESSION.md` (cinco lecciones con ciclo intuición→arquitectura→código→predicción→comprobación→interpretación; pauta separada), `AUDIT_AND_UNCERTAINTIES.md` (15 Markdown de docs/recuperacion, utilidad/confiabilidad 0–5, vigencia, errores/P0–P2, hipótesis y límites) y `QUICK_REFERENCE.md`.
+**Siguiente acción:** publicar los documentos validados en la misma rama y crear PR a main; añadir el enlace a este estado. Si se interrumpe, comprobar primero la rama/PR: no recrear ni duplicar una publicación ya realizada.
 
 Auditoría ya revisada: 00 guía sólida con alcance 77 archivos antiguo; 01/11 mapas incompletos frente a XSA/overlays nuevos; 02 error selftest; 03 cronología histórica; 04 algunas incógnitas ELF ahora parcialmente resueltas; 05 futuro útil no urgente; 06 conceptual útil, añadir ejercicios separados; 07 auditoría histórica; 08 hashes/canonicalización; 09 rama deploy incorrecta; 10 congelamiento condicional sólido; 12 supervisor con 18 pruebas; 13 guía rápida útil; README índice. No reescribir documentos antiguos: recoger correcciones en auditoría nueva.
 
-**Correcto si:** ocho entregables presentes, enlaces locales/anclas válidos, Mermaid parsea, comandos coinciden con CLI real y riesgos etiquetados, 120 minutos suman, ninguna afirmación certifica hardware actual, diff solo documental revisado. Después actualizar este estado, publicar rama y crear/actualizar PR revisable; no merge.
+**Correcto si:** rama remota contiene los ocho entregables y este estado, PR revisable contra main, validaciones anteriores conservadas y sin merge. Para retomar en laboratorio, empezar por START_HERE y cerrar identidad/semántica antes de cualquier MMIO.
 
 ## Congelado y presentación final
 

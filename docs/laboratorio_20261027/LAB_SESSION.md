@@ -27,7 +27,7 @@ read -r LECTOR
 
 Usar nombres nuevos de archivos/carpetas en cada intento. Las órdenes siguientes son **pendientes de ejecución en laboratorio**, no resultados obtenidos durante esta investigación.
 
-## Etapa A — Identidad (0–25 min)
+## Etapa A — Identidad (0-25 min)
 
 **Objetivo:** identificar plataforma, instalación y procesos existentes. Conocimiento mínimo: Linux corre en el PS; el PL y su Device Tree pueden pertenecer a builds distintas. Abrir [matriz de versiones](SYSTEM_MAP.md#versiones-incompatibles), [B09/X01–X04/R06](TOOL_AND_PATH_ATLAS.md#b09) y [procedimiento del inventario](../recuperacion/12_SCRIPT_DIAGNOSTICO.md).
 
@@ -70,7 +70,7 @@ ps -eo pid,ppid,stat,wchan:24,comm
 
 **Puerta A:** conocemos la plataforma y tenemos un candidato de build/DT con procedencia. Si Linux no responde, detener accesos y registrar consola/estado físico mediante el procedimiento existente. Si no se identifica firmware, continuar B solo como inspección de archivos; no avanzar a MMIO. No cargar un XSA/overlay para «hacer coincidir» la documentación.
 
-## Etapa B — Elegir herramientas (25–40 min)
+## Etapa B — Elegir herramientas (25-40 min)
 
 **Objetivo:** fijar un lector y su contrato. Conocimiento mínimo: payload, estado del enlace y control del chip son caminos distintos. Abrir [tabla de herramientas](TOOL_AND_PATH_ATLAS.md#elegir-la-herramienta), B01–B03 y el mapa de registros en [SYSTEM_MAP](SYSTEM_MAP.md#qué-significa-cada-palabra-del-lector-tgc).
 
@@ -107,7 +107,7 @@ Añadir los objetos resultantes a `libraries` del plan. El script verifica hashe
 
 **Guardar:** plan, hashes, origen de bibliotecas y mapa documentado; incertidumbres sin marcar como confirmadas. **Riesgo:** un nombre/hash correcto puede acompañar PL distinto; tampoco prueba los efectos del registro. **Puerta B:** cinco confirmaciones sustentadas y dependencias completas. Si falta RTL/ABI del capturador, parar las lecturas y pedir esa pieza. Alternativa: trabajar con una captura histórica etiquetada como tal y realizar las lecciones 2–3; no inventar direcciones.
 
-## Etapa C — Estado del enlace (40–55 min)
+## Etapa C — Estado del enlace (40-55 min)
 
 **Objetivo:** distinguir transporte disponible de recepción FE demostrada. Conocimiento mínimo: lock, ready y progreso no significan lo mismo. Abrir B05, R03 y [estados del sistema](SYSTEM_MAP.md#estados-que-no-equivalen-a-datos).
 
@@ -130,7 +130,7 @@ printf '%s\n' "$RC" > estado_enlace_01.rc
 
 **Guardar:** estados, identificación del monitor, conexión física, configuración efectiva y pruebas de exclusión de PRBS/loopback. **Puerta C:** sin errores de acceso y con estados coherentes para el ensayo; anotar cualquier campo no observable. Si no se puede validar el monitor, no ejecutarlo: usar evidencia independiente existente o declarar transporte desconocido. No «arreglar» clocks/resets dentro de este paso.
 
-## Etapa D — Captura corta (55–75 min)
+## Etapa D — Captura corta (55-75 min)
 
 **Objetivo:** obtener palabras completas y evidencia de ejecución. Conocimiento mínimo: doce registros leídos en secuencia no forman necesariamente una captura atómica. Abrir B01–B03 y [S2 del supervisor](../recuperacion/12_SCRIPT_DIAGNOSTICO.md#5-procedimiento-s2--ensayo-corto-después-observación-prolongada).
 
@@ -151,7 +151,7 @@ Revisar archivos `.out`, `.err`, retorno, duración y resultado parseado. Un res
 
 **Guardar:** carpeta completa, plan, inventario, configuración y notas. **Puerta D:** lectura completa y comportamiento de acceso estable. Si falla, ir a F; no ejecutar un lector alternativo sobre el mismo bus pendiente. Si no hay captura permitida, hacer informe offline de evidencia previa o localizar la pieza que bloquea B.
 
-## Etapa E — Prueba física A/B/A (75–100 min)
+## Etapa E — Prueba física A/B/A (75-100 min)
 
 **Objetivo:** intentar refutar que observamos una fuente interna, un canal distinto o datos retenidos. Conocimiento mínimo: variar cualquier bit no demuestra causalidad. Abrir [lección 4](TEACHING_SESSION.md#lección-4--qué-demuestra-una-captura) y [hipótesis](AUDIT_AND_UNCERTAINTIES.md#hipótesis-de-congelamiento-y-pruebas-discriminantes).
 
@@ -189,7 +189,7 @@ El informe compara dentro de una sesión. Para A/B usar los `.out` seleccionados
 
 **Guardar:** predicción anterior a la prueba, datos completos, configuración sin cambios, tiempos de transición, mediciones externas y selección de muestras. **Puerta E:** conclusión acotada con controles negativos. Si el estímulo no puede medirse o aislarse, documentar prueba pendiente y pasar F; no presentar correlación casual como validación.
 
-## Etapa F — Congelamiento (100–120 min)
+## Etapa F — Congelamiento (100-120 min)
 
 **Objetivo:** localizar la primera frontera sin progreso. Si no falla hoy, ensayar esta clasificación con una captura previa sin provocarlo. Conocimiento mínimo: bloqueo del proceso, transacción pendiente y datos constantes son fenómenos distintos. Abrir B10, [análisis del fallo](../recuperacion/10_BLOQUEO_LECTURAS.md) y la tabla siguiente.
 
