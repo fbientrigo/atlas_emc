@@ -1,87 +1,87 @@
 # Lecturas congeladas: qué sabemos y cómo localizar el fallo
 
-**La causa del bloqueo histórico sigue DESCONOCIDA.** Hay evidencia suficiente para separar varios mecanismos y para evitar reiniciar sin conservar el estado del fallo. La prioridad es distinguir **un comando que no termina** de **un comando que termina mostrando siempre la misma muestra**. Son fallos distintos.
+Todavía no sabemos por qué se bloqueaban las lecturas. Sí sabemos lo suficiente para separar varios mecanismos y para no reiniciar sin guardar antes el estado del fallo. Lo primero es distinguir dos fallos diferentes: un comando que no termina, y un comando que termina pero muestra siempre la misma muestra.
 
-**Instrumento de diagnóstico, 25-10-2026:** [script y procedimientos S0–S4](12_SCRIPT_DIAGNOSTICO.md). Automatiza inventario y conservación de evidencia; las lecturas quedan condicionadas a cerrar la compatibilidad. No implementa ni ejecuta recuperación hardware.
+Desde el 25-10-2026 hay un [script con los procedimientos S0–S4](12_SCRIPT_DIAGNOSTICO.md). Hace el inventario y guarda la evidencia; las lecturas esperan a que se confirme la compatibilidad. No reinicia ni recupera nada.
 
-El usuario confirma el 24-10-2026 que el sistema funcionaba un tiempo, dejaba de actualizar valores y volvía a funcionar tras reiniciar. La nota `1028-1031-Testing.md`, líneas 93–96, registra el mismo síntoma. **VERIFICADO / observación histórica escrita**, sin captura de señales ni definición del alcance de «reset». No conocemos aún el ejecutable exacto ni si quedaba bloqueado el proceso, Linux o solamente los valores.
+El 24-10-2026 el usuario confirmó que el sistema funcionaba un rato, dejaba de actualizar valores y volvía a funcionar al reiniciar. La nota `1028-1031-Testing.md`, líneas 93–96, cuenta lo mismo. Es una observación escrita, sin captura de señales y sin decir qué se reiniciaba. No sabemos qué ejecutable era ni si se colgaba el proceso, Linux o solo los valores.
 
 ## 1. Separar el síntoma antes de buscar la causa
 
-| Observación durante el fallo | Qué permite concluir | Qué no demuestra |
+| Qué ves durante el fallo | Qué puedes concluir | Qué no puedes concluir |
 |---|---|---|
-| Cada ejecución devuelve todas las líneas y vuelve al prompt | Esa ejecución terminó sus accesos y su impresión | Que el capturador reciba eventos nuevos, que el dato sea FE o que nueve palabras sean coherentes |
-| No vuelve al prompt; una segunda terminal funciona | El sistema operativo sigue atendiendo esa sesión | Que la instrucción bloqueada sea MMIO: puede ser una espera, un bucle, `sudo` o salida a terminal |
-| Ninguna sesión responde | Hay una afectación más amplia o un problema de comunicación | Que el origen sea el capturador; distinguir red, CPU, kernel y alimentación mediante consola disponible |
-| Solo falla `lpGbtRegister`; el lector payload ya validado sigue funcionando | La ruta de control IC merece investigación separada | Que todo el uplink esté muerto |
-| Solo deja de imprimir `read_lpgbt10.sh` | El byte bajo no cambió, falló un acceso o la ejecución se detuvo | Que los 32 bits o el resto de grupos no cambien: el script observa únicamente `& 0xff` |
+| Cada ejecución imprime todas las líneas y vuelve al prompt | Esa ejecución terminó sus accesos e imprimió | Que el capturador reciba eventos nuevos, que el dato sea del FE o que las nueve palabras sean coherentes |
+| No vuelve al prompt, pero otra terminal funciona | Linux sigue atendiendo | Que lo bloqueado sea MMIO; puede ser una espera, un bucle, `sudo` o la salida a la terminal |
+| No responde ninguna sesión | El problema es más amplio, o es de comunicación | Que venga del capturador; hay que separar red, CPU, kernel y alimentación con la consola que haya |
+| Solo falla `lpGbtRegister` y el lector de payload validado sigue bien | La ruta de control IC merece mirarse aparte | Que el uplink entero esté muerto |
+| Solo deja de imprimir `read_lpgbt10.sh` | No cambió el byte bajo, falló un acceso o se detuvo la ejecución | Que no cambien los 32 bits u otros grupos: el script solo mira `& 0xff` |
 
-**INFERIDO:** si la CLI termina repetidamente, un AXI permanentemente sin respuesta durante esas mismas lecturas pierde fuerza como explicación. Puede haber un capturador congelado detrás de un slave AXI perfectamente accesible. Un reset global altera demasiadas piezas para localizar cuál era responsable.
+Si la CLI termina una y otra vez, es poco probable que AXI esté sin responder en esas mismas lecturas. Puede haber un capturador congelado detrás de un slave AXI que responde bien. Y un reset global toca tantas piezas que no dice cuál fallaba.
 
 ## 2. Hipótesis priorizadas por prueba discriminante
 
-El orden indica utilidad para investigar; no es una probabilidad calculada.
+El orden es por utilidad para investigar, no por probabilidad.
 
-| ID | Mecanismo candidato | Evidencia y alcance | Prueba discriminante / condición para descartarlo |
+| ID | Mecanismo | Qué hay y hasta dónde llega | Cómo comprobarlo o descartarlo |
 |---|---|---|---|
-| H1 | Captura sin nuevo trigger, contador/enable detenido o FSM sin rearme | **INFERIDO.** Nota 1028–1031 L66–67 liga la captura a una señal interna de envío y a contar relojes. El RTL del capturador de nueve grupos falta. | Si `UserData` cambia y la señal de actualización del registro no, localizar el capturador. Si el registro se actualiza con cada evento documentado, H1 pierde fuerza. Obtener RTL y build antes de programar triggers. |
-| H2 | Presentación o criterio de cambio engañoso | **VERIFICADO / estático.** `read_lpgbt10.sh` L5–15 espera solo cambios del byte bajo. `watch_devmem.sh` L22 oculta stderr y L25 no duerme. El sweep convierte salida vacía en cero. | Comparar salida completa, código de salida y stderr del lector existente validado, con el mismo estímulo. Que cambien bits altos refuta «todo está congelado». No introducir una segunda lectura si la primera está bloqueada. |
-| H3 | Se pierde reloj, alineación o avance del camino uplink/CDC | **INFERIDO.** Hay dependencia explícita de relojes, strobes y reset en RTL. Los bits de estado no son contadores de muestras. | Captura simultánea antes/después de `uplinkStrobe320`, `lpgbtfpga_uplinkData_320`, `lpgbtfpga_uplinkData_40`, relojes/reset y registro final, si existe instrumentación. Si el camino hasta el registro avanza, buscar presentación. |
-| H4 | Acceso AXI sin respuesta, slave en reset o mapa incorrecto | **INFERIDO.** El mapa BD y el de los scripts son incompatibles; `libuio` no valida respuesta funcional antes del acceso. | Un lector que no termina requiere observar bus/CPU; `ARVALID/ARREADY` y `RVALID/RREADY` separan aceptación de dirección y respuesta. Hace falta ILA ya disponible o una futura build autorizada. `Bus error` no es la misma firma que dato repetido. |
-| H5 | Control IC atrapado en software | **VERIFICADO / mecanismo condicional.** Dos bucles sin límite en `LpGbtUioFunctions.cpp`; puede no alcanzarse siquiera `waitIntr`. | Solo relevante si el comando fallido usa `LpGbtSw`. Identificar el bucle/estado de IRQ/FIFO. No aplicar esta explicación a la CLI payload, que no llama esas funciones. |
-| H6 | FSM de `eLink_Interface_v1` retenida o protocolo de lectura incompleto | **VERIFICADO / mecanismo en una fuente, despliegue DESCONOCIDO.** Hay lectura con efecto lateral y estado no reinicializado explícitamente. | Primero demostrar que esa entidad o su lógica están en la build. Si el capturador activo es otro y no comparte esa FSM, no usar H6 como causa. |
-| H7 | Fuente FE o selección de origen dejan de producir el estímulo | **DESCONOCIDO.** No tenemos configuración vigente, reloj FE ni método de estímulo homologado. | Comparación externa A/B/A acompañada de medida eléctrica y configuración efectiva. Un generador interno que cambia no acredita que el FE funcione. |
+| H1 | Captura sin trigger nuevo, contador o enable detenido, o FSM sin rearme | INFERIDO. La nota 1028–1031 (L66–67) liga la captura a una señal interna de envío y a contar relojes. Falta el RTL del capturador de nueve grupos. | Si `UserData` cambia y la señal de actualización del registro no, el problema está en el capturador. Si el registro se actualiza con cada evento documentado, H1 pierde peso. Consigue el RTL y la build antes de programar triggers. |
+| H2 | La forma de mostrar o de detectar cambios engaña | Comprobado en el código. `read_lpgbt10.sh` (L5–15) solo espera cambios del byte bajo. `watch_devmem.sh` oculta stderr (L22) y no duerme (L25). El sweep convierte una salida vacía en cero. | Compara la salida completa, el código de salida y stderr del lector validado, con el mismo estímulo. Si cambian bits altos, no está «todo congelado». No lances una segunda lectura si la primera está bloqueada. |
+| H3 | Se pierde reloj, alineación o avance en el uplink o el CDC | INFERIDO. El RTL depende de relojes, strobes y reset. Los bits de estado no cuentan muestras. | Captura a la vez `uplinkStrobe320`, `lpgbtfpga_uplinkData_320`, `lpgbtfpga_uplinkData_40`, relojes, reset y registro final, si hay instrumentación. Si el camino avanza hasta el registro, el problema está en cómo se muestra. |
+| H4 | AXI sin respuesta, slave en reset o mapa equivocado | INFERIDO. El mapa del BD y el de los scripts no encajan, y `libuio` no comprueba la respuesta antes de acceder. | Si el lector no termina, hay que mirar bus y CPU: `ARVALID/ARREADY` y `RVALID/RREADY` separan la dirección aceptada de la respuesta. Hace falta un ILA ya existente o una build futura autorizada. Un `Bus error` no se parece a un dato repetido. |
+| H5 | El control IC se queda atrapado en el software | Comprobado en el código, en ciertas condiciones. Hay dos bucles sin límite en `LpGbtUioFunctions.cpp`, y puede que ni se llegue a `waitIntr`. | Solo aplica si el comando que falló usa `LpGbtSw`. Mira en qué bucle está y el estado de IRQ y FIFO. La CLI de payload no llama a esas funciones. |
+| H6 | La FSM de `eLink_Interface_v1` se queda retenida o el protocolo de lectura queda a medias | El mecanismo está en una fuente; no sabemos si está montada. Leer tiene efectos y hay un estado que el reset no reinicia. | Primero demuestra que esa entidad o su lógica están en la build. Si el capturador es otro y no comparte esa FSM, H6 no es la causa. |
+| H7 | El FE o la fuente seleccionada dejan de producir el estímulo | DESCONOCIDO. No hay configuración en uso, reloj del FE ni método de estímulo aprobado. | A/B/A externo con medida eléctrica y la configuración en uso. Que cambie un generador interno no prueba que el FE funcione. |
 
 ## 3. Hallazgos nuevos en RTL y software
 
-### F1 — `ready` retenido no es un latido de recepción
+### F1. `ready` retenido no es un latido de recepción
 
-**VERIFICADO / estática, R07 y R09.** En `cdc_rx.vhd` L178–191, `ready_b_o` se pone a cero durante `reset_a_strobe_sync` y a uno después de un `strobe_a_r`. No hay rama que lo vuelva a cero solo porque dejen de aparecer strobes. El reloj A detenido tampoco puede ejecutar ese proceso. La captura intermedia sigue un contador de fase; no se habilita exclusivamente por cada strobe válido. El módulo exige relojes relacionados por un factor entero (L36–39), no es una FIFO asíncrona genérica.
+Comprobado en el código (R07, R09). En `cdc_rx.vhd` L178–191, `ready_b_o` baja durante `reset_a_strobe_sync` y sube tras un `strobe_a_r`. No hay nada que lo baje solo porque dejen de llegar strobes, y con el reloj A parado ese proceso tampoco corre. La captura intermedia sigue un contador de fase, no cada strobe válido. El módulo necesita relojes relacionados por un factor entero (L36–39); no es una FIFO asíncrona cualquiera.
 
-**Límite adversarial:** el wrapper conecta `cdc_uplink_reset <= not uplinkReady_s`; una pérdida del `ready` del core puede resetear el CDC. Por tanto, no se afirma que siempre mantenga `ready=1` al perder enlace. El contraejemplo válido es «ausencia de strobe sin reset efectivo»; comprobar si puede ocurrir en la build y relojes reales. `fwMonitor` ni siquiera imprime este `cdc_rx_ready`: `RX locked` corresponde a la cabecera. No confundir ambos indicadores.
+Pero el wrapper hace `cdc_uplink_reset <= not uplinkReady_s`, así que si el core pierde su ready, el CDC se resetea. Por eso no se puede decir que `ready` se quede siempre en 1 al perder el enlace. El caso que sí vale es «no llegan strobes y no hay reset»; hay que ver si eso puede pasar con la build y los relojes reales. Además, `fwMonitor` ni siquiera muestra `cdc_rx_ready`: su `RX locked` es la cabecera.
 
-**Consecuencia práctica:** un bit de estado a uno no exonera la cadena de captura. Registrar simultáneamente progreso y datos, no solamente niveles.
+En la práctica, un bit de estado en 1 no libra de culpa a la cadena de captura. Registra a la vez el progreso y los datos, no solo niveles.
 
-### F2 — `eLink_Interface_v1` puede retener estado; leer tiene efectos
+### F2. `eLink_Interface_v1` puede retener estado y leer tiene efectos
 
-**VERIFICADO / estática, R08. Esta entidad NO está instanciada en el BD recuperado.** No es prueba del capturador `tgc_readUplink_regs` de nueve grupos.
+Comprobado en el código (R08). Esta entidad no está en el BD recuperado, así que esto no prueba nada sobre el capturador `tgc_readUplink_regs` de nueve grupos.
 
-- La FSM sale de `idle` al escribir downlink (L268–272). No es un receptor autónomo continuo.
-- En `waiting_resp`, `or rx_out` determina respuesta válida, sin consultar `ulFIFO_empty_s` en esa decisión (L278–293). Un payload de ceros no se acepta como respuesta. La semántica de `dout` con FIFO vacía requiere inspeccionar la IP concreta; no suponemos que sea nueva información.
-- Al leer cada grupo se borra su valor y su bit `regStatus` (L295–318). Omitir un grupo impide completar esa condición; existe una salida alternativa por nueva escritura downlink (L319–324). **No es un bloqueo inevitable ni necesariamente irrecuperable.**
-- El reset limpia `regStatus`, `intr`, `TX_WrEN` y `tx_in`, pero no asigna `fsm_state <= idle` (L259–265). La inicialización declarativa `:= idle` no equivale a ejecutar esa asignación ante cada reset. Si el estado era `waiting_resp`, un reset por ese puerto no lo fuerza a `idle`.
-- La escritura RX usa `dlFIFO_full_s`, el flag de la FIFO TX (L243–246), y no el de RX; `check_bit` se evalúa con el valor del ciclo anterior porque es una señal VHDL. Debe verificarse la intención de diseño.
-- `rd_en => '1'` en RX (L355–368) consume continuamente, mientras la FSM solo conserva una respuesta. No garantiza una captura por evento ni ausencia de pérdidas.
+- La FSM sale de `idle` cuando se escribe en el downlink (L268–272). No recibe de forma continua por su cuenta.
+- En `waiting_resp`, la respuesta se da por válida con `or rx_out`, sin mirar `ulFIFO_empty_s` (L278–293). Un payload de ceros no cuenta como respuesta. Qué devuelve `dout` con la FIFO vacía depende de la IP concreta; no lo damos por información nueva.
+- Leer cada grupo borra su valor y su bit de `regStatus` (L295–318). Si se salta un grupo, esa condición no se completa, aunque hay una salida alternativa con otra escritura downlink (L319–324). No es un bloqueo inevitable ni necesariamente permanente.
+- El reset limpia `regStatus`, `intr`, `TX_WrEN` y `tx_in`, pero no pone `fsm_state <= idle` (L259–265). El `:= idle` de la declaración no se aplica en cada reset. Si estaba en `waiting_resp`, un reset por ese puerto no la devuelve a `idle`.
+- La escritura en RX usa `dlFIFO_full_s`, que es el flag de la FIFO TX (L243–246), no el de RX. Y `check_bit` se evalúa con el valor del ciclo anterior porque es una señal VHDL. Hay que confirmar si era intencional.
+- `rd_en => '1'` en RX (L355–368) vacía la FIFO todo el rato, mientras la FSM guarda una sola respuesta. No garantiza una captura por evento ni que no se pierdan datos.
 
-**INFERIDO:** una reconfiguración completa puede restaurar un estado que un reset parcial no restablece. Esto es compatible con algunas formas de «reiniciar lo arregla», pero requiere demostrar entidad activa y alcance del reinicio. No se prescribe escribir un ACK: `ctrlACK_s` se conecta al mapa y no se usa en las transiciones mostradas.
+Una reconfiguración completa puede arreglar un estado que un reset parcial no arregla. Eso encaja con algunos «reiniciar lo arregla», pero hay que probar que la entidad está montada y qué se reinicia. No se recomienda escribir un ACK: `ctrlACK_s` está en el mapa pero no se usa en las transiciones.
 
-### F3 — Un timeout IC no limita la operación completa
+### F3. Un timeout IC no limita la operación completa
 
-**VERIFICADO / estática, B06 y B10.** `readRegister()` limpia IRQ, la habilita, envía `0x10004`, espera IRQ y vacía FIFO. `clearIntr()` L221–230 puede repetir indefinidamente mientras el flag no se limpie. `readICRxFifo()` L109–125 repite hasta que `empty` se active y añade elementos a un vector sin límite de tamaño. Cada vuelta hace MMIO; si el estado nunca progresa, puede consumir CPU/memoria. `waitIntr(...,1)` no limita ninguno de esos dos bucles.
+Comprobado en el código (B06, B10). `readRegister()` limpia la IRQ, la habilita, manda `0x10004`, espera la IRQ y vacía la FIFO. `clearIntr()` (L221–230) puede repetirse para siempre si el flag no se limpia. `readICRxFifo()` (L109–125) repite hasta que se active `empty` y va llenando un vector sin límite. Cada vuelta hace MMIO, así que si el estado no avanza puede comerse CPU y memoria. `waitIntr(...,1)` no corta ninguno de esos dos bucles.
 
-Una respuesta corta lleva además a `readValues[6]` sin comprobar longitud. El resultado es comportamiento indefinido, no un error bien diagnosticado. El timeout provoca excepción; no afirmar que siempre continúa después de expirar.
+Además, una respuesta corta lleva a leer `readValues[6]` sin comprobar la longitud. Eso es comportamiento indefinido, no un error bien informado. El timeout lanza una excepción, así que no se puede decir que el programa siga siempre después.
 
-**Separación crucial:** la CLI de payload lee registros directamente y no espera IRQ. Añadir polling de IRQ a esa CLI no está justificado por estos hallazgos. `read()` sobre `/dev/uioN` espera un evento de interrupción; no equivale a leer el payload mapeado [K1].
+Lo importante: la CLI de payload lee los registros directamente y no espera IRQ. Nada de esto justifica añadirle polling de IRQ. Un `read()` sobre `/dev/uioN` espera una interrupción; no lee el payload mapeado [K1].
 
-### F4 — Watchdog de la FSM IC con prioridad problemática
+### F4. El watchdog de la FSM IC tiene la prioridad mal puesta
 
-**VERIFICADO / estática, R10.** En `reading_FIFO` de `emp_lpgbt.vhd` L731–768, el contador se decrementa antes del `if`. Si `status_empty_flag='1'`, siempre se toma la primera rama y se omite el `elsif lpgbt_resp_timeout = 0`. Con FIFO permanentemente vacía, el cero no conduce a `finish`; la siguiente resta sale del rango declarado `0 to 100000000`. Un simulador con chequeo de rango debe denunciarlo. No predecimos cómo se manifiesta el circuito sintetizado sin informes y simulación de esa build.
+Comprobado en el código (R10). En `reading_FIFO` de `emp_lpgbt.vhd` (L731–768), el contador se decrementa antes del `if`. Si `status_empty_flag='1'`, siempre entra en la primera rama y nunca llega al `elsif lpgbt_resp_timeout = 0`. Con la FIFO siempre vacía, llegar a cero no lleva a `finish`, y la siguiente resta se sale del rango `0 to 100000000`. Un simulador que compruebe rangos debería avisar. Sin los informes y la simulación de esa build no podemos decir qué hace el circuito sintetizado.
 
-**Límite que reduce su prioridad:** el control `0x10004` usado por `LpGbtSw` deja el bit 4 (`single_write_read`) en cero, según `emp_lpgbt_ic_clerk_regs_pkg.vhd` L94–100. Selecciona la ruta de gestión por PS, no esta FSM de operación única. Por tanto, este defecto no explica directamente las llamadas recuperadas de `readRegister()` y tampoco el payload FE.
+Esto pesa menos de lo que parece. El control `0x10004` que usa `LpGbtSw` deja en cero el bit 4 (`single_write_read`), según `emp_lpgbt_ic_clerk_regs_pkg.vhd` L94–100. Eso elige la ruta gestionada por el PS, no esta FSM de operación única. Así que este defecto no explica las llamadas a `readRegister()` recuperadas, ni tampoco el payload del FE.
 
-### F5 — Hipótesis de acumulación IC descartada en su forma simple
+### F5. La idea de que la FIFO IC se va llenando no se sostiene
 
-`ic_rx_fifo.vhd` incrementa punteros sin wrap ni control de lleno (L96–108), pero `ic_top.vhd` L206–217 resetea RX cuando inicia una lectura o escritura. **VERIFICADO / estática, R11.** No se puede deducir «se llena después de muchas transacciones correctas» ignorando ese reset. Queda por validar longitud máxima por transacción, CDC de punteros y tráfico anómalo; eso es una investigación diferente.
+`ic_rx_fifo.vhd` avanza los punteros sin dar la vuelta ni controlar si está llena (L96–108), pero `ic_top.vhd` (L206–217) resetea RX cada vez que empieza una lectura o escritura. Comprobado en el código (R11). Por eso no se puede decir que «se llena después de muchas transacciones correctas». Quedan por mirar la longitud máxima de una transacción, el CDC de los punteros y el tráfico anómalo, pero eso es otra investigación.
 
-### F6 — Nombre de reset engañoso, no inversión demostrada
+### F6. Un nombre de reset engañoso, sin inversión demostrada
 
-El puerto del core se llama `uplinkRst_n_i`, pero el código modificado asigna directamente `rst_pattsearch_s <= uplinkRst_n_i` (L263) y el wrapper entrega `reset_general` por esa cadena. **VERIFICADO / estática, R09/R10.** El nombre heredado no basta para diagnosticar una inversión de polaridad ni para proponer un parche. Seguir la lógica efectiva hasta su consumidor.
+El puerto del core se llama `uplinkRst_n_i`, pero el código modificado hace directamente `rst_pattsearch_s <= uplinkRst_n_i` (L263), y el wrapper le pasa `reset_general` por esa cadena. Comprobado en el código (R09, R10). El nombre heredado no basta para decir que la polaridad está invertida ni para proponer un parche. Sigue la señal hasta donde se usa.
 
-## 4. Procedimiento F0 — conservar el fallo sin tocar MMIO
+## 4. F0: guardar el fallo sin tocar MMIO
 
-**Objetivo:** determinar qué se congeló y conservar evidencia antes de cualquier reinicio.
+Objetivo: ver qué se congeló y guardar la evidencia antes de cualquier reinicio.
 
-**Condiciones previas:** una sesión Linux aún operativa. No iniciar nuevas herramientas hardware si otra está atascada. Estos comandos son **propuesta diagnóstica Linux**, no comandos históricos del experimento. Comprobar disponibilidad y permisos; si fallan, conservar el error.
+Necesitas una sesión Linux que todavía responda. No abras más herramientas de hardware si hay otra atascada. Estos comandos son una propuesta para diagnosticar, no comandos del experimento original. Si fallan por permisos o porque no existen, guarda el error.
 
 ```bash
 # Terminal de diagnóstico; no ejecuta devmem ni abre /dev/uioN.
@@ -92,7 +92,7 @@ ps -eo pid,ppid,stat,etime,time,wchan:24,comm
 # Si ps no soporta estas opciones, usar: ps
 ```
 
-Seleccionar manualmente el PID del proceso que ya estaba ejecutándose; no inferirlo de `uioN`:
+Elige a mano el PID del proceso que ya estaba corriendo; no lo deduzcas de `uioN`:
 
 ```bash
 printf 'PID del proceso detenido: '
@@ -111,23 +111,23 @@ esac
 dmesg | tail -n 100
 ```
 
-**Qué hacen:** consultan estado del kernel, procesos, ejecutable y mensajes. No leen registros del dispositivo. `/proc/PID/syscall` puede fallar por permisos o mostrar `running`; no traduce el PC a una línea de código ni demuestra MMIO. `D` o un `wchan` particular son pistas, no diagnóstico AXI definitivo [K2].
+Leen el estado del kernel, los procesos, el ejecutable y los mensajes, sin tocar registros del dispositivo. `/proc/PID/syscall` puede fallar por permisos o decir `running`; no traduce el PC a una línea de código ni prueba que haya MMIO. Un estado `D` o un `wchan` concreto son pistas, no un diagnóstico de AXI [K2].
 
-**Resultado esperado:** timestamp, uptime y estado del proceso fallido. Si el proceso ya terminó, conservar salida completa, stderr y código de salida de esa ejecución, sin repetirla para recrear el fallo.
+Deberías obtener la hora, el uptime y el estado del proceso que falló. Si el proceso ya terminó, guarda su salida completa, stderr y el código de salida, sin repetirlo para provocar el fallo otra vez.
 
-**Alternativas:** si Linux no responde, usar la consola ya disponible al ingeniero para observar, sin inducir reset desde esta guía. Si tampoco existe acceso, registrar último instante operativo y alcance de la pérdida de respuesta.
+Si Linux no responde, usa la consola que tenga el ingeniero para mirar, sin forzar un reset desde esta guía. Si tampoco hay acceso, anota el último momento en que respondía y qué dejó de responder.
 
-**Riesgos:** los logs pueden contener identificadores internos; revisar antes de compartir. La inspección usa CPU y puede alterar marginalmente la temporización. No contiene escritura hardware intencional.
+Los logs pueden tener identificadores internos; revísalos antes de compartirlos. Mirar consume algo de CPU y puede cambiar un poco los tiempos. No se escribe nada en el hardware.
 
-**Siguiente decisión:** comando completo con datos repetidos → F1; comando sin finalizar → analizar ejecutable/bucle/acceso antes de nuevos sondeos. No usar `timeout` como protección eléctrica: envía señales a procesos y no garantiza completar o abortar una transacción del interconnect [K3].
+Después: si el comando terminó con datos repetidos, sigue con F1. Si no terminó, estudia el ejecutable, el bucle o el acceso antes de volver a leer. `timeout` no protege el hardware: manda señales al proceso y no asegura que una transacción del interconnect termine o se corte [K3].
 
-**Intento de refutación:** un programa que no imprime puede estar esperando entrada o salida, no al FPGA. No equiparar ausencia de texto con acceso bloqueado. `strace` no observa cada carga `volatile` como syscall y adjuntarlo modifica la temporización; no es la prueba inicial prescrita.
+Ojo: un programa que no imprime puede estar esperando entrada o salida, no a la FPGA. Que no haya texto no significa que un acceso esté bloqueado. `strace` no ve cada lectura `volatile` como syscall y además cambia los tiempos, así que no es la primera prueba.
 
-## 5. Procedimiento F1 — demostrar repetición sin confundirla con falta de datos
+## 5. F1: comprobar si se repite, sin confundirlo con que no hay datos
 
-**Objetivo:** comparar dos lecturas completas y el estímulo registrado.
+Objetivo: comparar dos lecturas completas junto con el estímulo anotado.
 
-**Condiciones previas:** todas las condiciones de [P0 etapa C](00_GUIA_CAMPO.md#etapa-c--consultar-los-datos-expuestos-por-la-fpga), mapa y semántica validados, lecturas ya autorizadas, ausencia de proceso hardware bloqueado. Un solo operador/lector. `LECTOR` debe contener la ruta absoluta del ejecutable identificado; no usar el nombre de otro binario como sustituto.
+Necesitas todas las condiciones de [P0, etapa C](00_GUIA_CAMPO.md#etapa-c-leer-los-datos-expuestos-por-la-fpga): mapa y efectos confirmados, lecturas autorizadas y ningún proceso de hardware bloqueado. Un solo operador y un solo lector. `LECTOR` tiene que ser la ruta absoluta del ejecutable identificado, no el nombre de otro binario.
 
 ```bash
 # Propuesta de envoltorio de registro; LECTOR se fija con la ruta validada en A2.
@@ -141,34 +141,34 @@ cat muestra_A.out
 cat muestra_A.err
 ```
 
-**Qué hace:** ejecuta el lector existente una sola vez, separa sus flujos de salida y registra si retorna. Si no retorna, detener el procedimiento; no lanzar la muestra B. No modifica intencionalmente registros si el ejecutable y su semántica son los verificados en P0; una lectura con efecto lateral sigue siendo un riesgo.
+Corre el lector una vez, separa la salida normal de los errores y anota si vuelve. Si no vuelve, para aquí y no lances la muestra B. Si el ejecutable y lo que hace son los confirmados en P0, no debería cambiar registros, aunque una lectura con efectos sigue siendo un riesgo.
 
-**Resultado esperado:** todas las etiquetas `data_group_0` a `data_group_8`, `data_header`, `clk_thresh` y `magic`, o la salida específica del ejecutable realmente validado. Después de un estímulo externo documentado, repetir manualmente el envoltorio con nombres `muestra_B.*`, preservando A. Usar el comparador local de la web o `diff -u muestra_A.out muestra_B.out`.
+Deberías ver `data_group_0` a `data_group_8`, `data_header`, `clk_thresh` y `magic`, o lo que imprima el ejecutable validado. Después de un estímulo externo documentado, repite con los nombres `muestra_B.*` sin pisar A. Compara con el comparador de la web o con `diff -u muestra_A.out muestra_B.out`.
 
-**Alternativas:** diferencias solo en bits altos explican un script que espera cambios del byte bajo. Nueve palabras iguales pueden representar muestras nuevas idénticas; sin contador/trigger verificable no prueban bloqueo. Palabras diferentes tampoco prueban coherencia ni origen FE. Una línea faltante es una lectura incompleta, no cero.
+Si solo cambian bits altos, eso explica que un script que mira el byte bajo no viera nada. Nueve palabras iguales pueden ser muestras nuevas idénticas: sin contador ni trigger comprobable no prueban un bloqueo. Palabras distintas tampoco prueban coherencia ni que vengan del FE. Una línea que falta es una lectura incompleta, no un cero.
 
-**Riesgos:** MMIO condicionado; dos lectores pueden consumir datos o interferir. Los timestamps son tiempos de software, no timestamps del frame. No barrer `clk_thresh`, no escribir patrones internos ni recargar firmware para esta comparación.
+Es MMIO con condiciones, y dos lectores a la vez pueden comerse datos o estorbarse. Las horas son del software, no del frame. No barras `clk_thresh`, no escribas patrones internos y no recargues firmware para esta comparación.
 
-**Siguiente decisión:** si A/B no responde al cambio externo verificado, solicitar captura simultánea del límite `UserData`→capturador. Si el FE no tiene estímulo homologado, el resultado permanece inconcluso.
+Si A y B no siguen un cambio externo comprobado, pide una captura simultánea en el paso `UserData`→capturador. Si el FE no tiene un estímulo aprobado, el resultado queda sin decidir.
 
-**Intento de refutación:** confirmar que el patrón alcanzó físicamente el e-link y que no se sigue observando loopback. Una comparación local de textos no resuelve esto.
+Ojo: confirma que el patrón llegó de verdad al e-link y que no sigues viendo un loopback. Comparar textos no resuelve eso.
 
-## 6. Qué conservar antes de una recuperación autorizada
+## 6. Qué guardar antes de una recuperación autorizada
 
-Registrar qué significa exactamente «reiniciar»: nuevo proceso, reset de capturador, reset de `emp_lpgbt`, MGT, reconfiguración PL, reboot de PS o corte completo de alimentación. Esas acciones no tienen el mismo alcance. No ejecutar una secuencia de resets exploratorios desde este documento.
+Anota qué significa exactamente «reiniciar»: un proceso nuevo, reset del capturador, de `emp_lpgbt` o del MGT, reconfigurar el PL, reiniciar el PS o cortar la alimentación. No es lo mismo. No hagas una ronda de resets a ver qué pasa.
 
-Conservar: build/DTBO/ELF y hashes; configuración FE/lpGBT; tiempo desde arranque y número de transacciones; última lectura buena y primera mala; salida y retorno de la aplicación; observaciones de enlace obtenidas bajo las condiciones ya validadas; alcance exacto de recuperación. Repetir el ensayo controlado al menos tres veces si es viable, manteniendo la misma configuración. **No hay tiempos observados suficientes para deducir un overflow periódico.**
+Guarda: build, DTBO y ELF con sus hashes; configuración del FE y del lpGBT; tiempo desde el arranque y número de transacciones; la última lectura buena y la primera mala; salida y retorno de la aplicación; las observaciones del enlace hechas con las condiciones ya validadas; y qué se reinició exactamente. Si se puede, repite el ensayo al menos tres veces con la misma configuración. No hay tiempos suficientes para hablar de un overflow periódico.
 
-Si existe una ILA en la build, pedir captura de `uplinkStrobe320`, `lpgbtfpga_uplinkData_320`, `lpgbtfpga_uplinkData_40`, `cdc_rx_ready`, reset/enable del capturador y sus señales de actualización, junto con AXI AR/R. Verificar los nombres en esa build. Una ILA nueva implica otra build y autorización; no se ha creado ni cargado aquí.
+Si la build tiene un ILA, pide capturar `uplinkStrobe320`, `lpgbtfpga_uplinkData_320`, `lpgbtfpga_uplinkData_40`, `cdc_rx_ready`, el reset y el enable del capturador y sus señales de actualización, junto con AXI AR/R. Comprueba los nombres en esa build. Un ILA nuevo es otra build y necesita autorización; aquí no se creó ni se cargó ninguno.
 
 ## 7. Evidencia reproducible y límites
 
-`analisis/contraejemplos.py` reproduce en Python **fragmentos de transición extraídos del RTL**, con precondiciones artificiales explícitas: ready sin strobe, reset sin cambiar FSM, lectura parcial y prioridad del watchdog. No compila ni simula el diseño VHDL completo, no incluye temporización física, y no prueba la causa histórica. La salida esperada está en `analisis/resultado_contraejemplos.json`.
+`analisis/contraejemplos.py` reproduce en Python trozos de transiciones sacados del RTL, con condiciones de partida puestas a propósito: ready sin strobe, reset que no cambia la FSM, lectura parcial y prioridad del watchdog. No compila ni simula el VHDL completo, no tiene tiempos físicos y no prueba la causa original. La salida esperada está en `analisis/resultado_contraejemplos.json`.
 
-Fuentes del repositorio fijadas a `c02a33b645dc70fb4076add25b78c5246589676e`; extractos numerados R07–R12 y B10–B11 disponibles offline en la web y en `evidencias.json`. No se ha corregido el firmware ni el tooling original.
+Las fuentes del repositorio están fijadas en `c02a33b645dc70fb4076add25b78c5246589676e`. Los extractos numerados R07–R12 y B10–B11 están en la web y en `evidencias.json`. No se corrigió ni el firmware ni las herramientas originales.
 
-Referencias de sistema operativo, consultadas el 24-10-2026:
+Referencias del sistema operativo, consultadas el 24-10-2026:
 
-- [K1 — Linux UIO HOWTO](https://docs.kernel.org/driver-api/uio-howto.html): separación entre mmap, eventos IRQ y atributos sysfs.
-- [K2 — Linux, /proc](https://docs.kernel.org/filesystems/proc.html): estado de procesos y límites de observación.
-- [K3 — GNU timeout](https://www.gnu.org/software/coreutils/manual/html_node/timeout-invocation.html): límite mediante señales, no watchdog AXI.
+- [K1, Linux UIO HOWTO](https://docs.kernel.org/driver-api/uio-howto.html): diferencia entre mmap, eventos IRQ y atributos sysfs.
+- [K2, Linux /proc](https://docs.kernel.org/filesystems/proc.html): estado de los procesos y lo que se puede ver.
+- [K3, GNU timeout](https://www.gnu.org/software/coreutils/manual/html_node/timeout-invocation.html): corta con señales; no es un watchdog de AXI.

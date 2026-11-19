@@ -1,8 +1,8 @@
 {
   "fe": {
     "name": "Front-end y e-link",
-    "status": "DESCONOCIDO actual",
-    "text": "Origen externo que debemos distinguir de los patrones internos. Faltan firmware FE, pinout homologado, estímulo reproducible y configuración vigente.",
+    "status": "Sin confirmar",
+    "text": "Es el origen externo que hay que distinguir de los patrones internos. Faltan el firmware del FE, un pinout aprobado, un estímulo repetible y la configuración en uso.",
     "related": [
       "chip",
       "captura"
@@ -15,8 +15,8 @@
   },
   "chip": {
     "name": "lpGBT y Serializer",
-    "status": "PARCIAL / notas",
-    "text": "Concentra e-links y transmite por uplink. Las notas usan tanto loopback como modo normal. Normal no excluye un cable físico de retorno. No hay receta validada para la selección actual.",
+    "status": "Parcial, según notas",
+    "text": "Junta los e-links y los envía por el uplink. Las notas usan tanto loopback como modo normal, y el modo normal no descarta un cable de retorno. No hay receta probada para elegir la fuente actual.",
     "related": [
       "fe",
       "mgt",
@@ -33,8 +33,8 @@
   },
   "mgt": {
     "name": "MGT y cabecera",
-    "status": "VERIFICADO / estática",
-    "text": "El BD conecta CH10_MGT_USRWORD_o con MGT_USRWORD_i del wrapper. El core busca el patrón de cabecera 01 y devuelve bitslip. No implica alineación de palabras FE.",
+    "status": "Comprobado en el código",
+    "text": "El BD conecta CH10_MGT_USRWORD_o con MGT_USRWORD_i del wrapper. El core busca la cabecera 01 y devuelve bitslip. Esto alinea el enlace óptico, no las palabras del FE.",
     "related": [
       "chip",
       "core",
@@ -51,8 +51,8 @@
   },
   "core": {
     "name": "Core uplink",
-    "status": "VERIFICADO / estática",
-    "text": "Gearbox, deinterleaver, FEC y descrambler. FEC5/10G24 ofrece UserData[229:0], EC y IC. El gearbox usa enable dentro del reloj RX; no es el CDC posterior.",
+    "status": "Comprobado en el código",
+    "text": "Gearbox, deinterleaver, FEC y descrambler. Con FEC5/10G24 entrega UserData[229:0], EC e IC. El gearbox usa un enable dentro del reloj RX; el cruce de reloj viene después, en el CDC.",
     "related": [
       "mgt",
       "cdc",
@@ -68,8 +68,8 @@
   },
   "cdc": {
     "name": "CDC y UserData",
-    "status": "VERIFICADO / estática",
-    "text": "cdc_rx lleva 234 bits del dominio RX a logicclk40. El wrapper separa 230 bits de usuario. Su ready no es un contador de frames ni la condición RX locked.",
+    "status": "Comprobado en el código",
+    "text": "cdc_rx pasa 234 bits del dominio RX a logicclk40 y el wrapper separa 230 bits de usuario. Su ready no cuenta frames y es otra señal que RX locked.",
     "related": [
       "core",
       "captura"
@@ -85,12 +85,12 @@
       "R07",
       "R09"
     ],
-    "detail": "ready puede conservar 1 sin nuevos strobes si no actúa reset. En el wrapper, la pérdida de ready del core puede resetear el CDC: observar la cadena completa."
+    "detail": "ready puede quedarse en 1 sin strobes nuevos si no llega un reset. En el wrapper, si el core pierde ready se resetea el CDC, así que conviene mirar la cadena entera."
   },
   "captura": {
     "name": "Capturador de payload",
-    "status": "DESCONOCIDO / RTL ausente",
-    "text": "El software declara nueve grupos, header y clk_thresh. Falta el RTL de la build de lectura: trigger, packing, coherencia y actualización con FE autónomo. El BD consultado no instancia este módulo.",
+    "status": "Sin RTL",
+    "text": "El software espera nueve grupos, header y clk_thresh. Falta el RTL de la build de lectura: trigger, packing, coherencia y si se actualiza con el FE solo. El BD que tenemos no incluye este módulo.",
     "related": [
       "cdc",
       "axi",
@@ -107,12 +107,12 @@
       "R12",
       "R08"
     ],
-    "detail": "Las notas describen contar desde una señal de envío. Falta probar el rearme y el trigger en la build de nueve grupos; no sustituirla por eLink_Interface_v1."
+    "detail": "Las notas hablan de contar desde una señal de envío. Falta comprobar el rearme y el trigger en la build de nueve grupos. eLink_Interface_v1 es otro módulo y no sirve de sustituto."
   },
   "axi": {
     "name": "AXI y mapa de direcciones",
-    "status": "CONTRADICTORIO entre versiones",
-    "text": "En el BD, A00D/A00E son interrupt controllers. En scripts históricos son generador/lector. No trasladar direcciones entre builds. Device Tree describe un contrato, no prueba respuesta eléctrica.",
+    "status": "Contradictorio entre versiones",
+    "text": "En el BD, A00D y A00E son interrupt controllers. En los scripts antiguos son el generador y el lector. Las direcciones no se pueden pasar de una build a otra. El Device Tree dice qué debería haber, no que responda.",
     "related": [
       "captura",
       "uio",
@@ -129,8 +129,8 @@
   },
   "uio": {
     "name": "Device Tree / UIO",
-    "status": "VERIFICADO / software",
-    "text": "libuio busca nombres en sysfs, abre el nodo y mapea sus regiones. Un UIO visible no prueba que el slave responda. El número uioN no es el canal óptico.",
+    "status": "Comprobado en el código",
+    "text": "libuio busca el nombre en sysfs, abre el nodo y mapea sus regiones. Que el UIO aparezca no significa que el slave responda. El número uioN no es el canal óptico.",
     "related": [
       "axi",
       "cpp",
@@ -147,8 +147,8 @@
   },
   "cpp": {
     "name": "TgcReadUplink / CLI",
-    "status": "VERIFICADO / software",
-    "text": "Nombre fijo tgc_readUplink_regs, sin parser ni espera por evento. Lee cada registro por separado. --help tampoco evita MMIO en la copia recuperada. No concatena un frame coherente.",
+    "status": "Comprobado en el código",
+    "text": "Abre siempre tgc_readUplink_regs. No lee argumentos ni espera eventos, y lee cada registro por separado. Incluso con --help hace las lecturas MMIO. Las nueve palabras no forman un frame coherente.",
     "related": [
       "uio",
       "captura"
@@ -165,8 +165,8 @@
   },
   "ic": {
     "name": "Control IC / LpGbtSw",
-    "status": "VERIFICADO / software y RTL",
-    "text": "Consulta registros del chip remoto. Incluso -r modifica dirección, control e IRQ del controlador y consume su FIFO. No es extracción de payload FE.",
+    "status": "Comprobado en código y RTL",
+    "text": "Consulta registros del chip remoto. Incluso -r escribe dirección, control e IRQ en el controlador y vacía su FIFO. No lee el payload del FE.",
     "related": [
       "chip",
       "core",
@@ -183,12 +183,12 @@
       "B10",
       "R11"
     ],
-    "detail": "clearIntr y readICRxFifo no tienen límite de iteraciones. El timeout IRQ no limita la transacción completa; esta ruta no es la lectura de payload."
+    "detail": "clearIntr y readICRxFifo no tienen límite de vueltas. El timeout de IRQ no cubre la transacción completa. Esta ruta no es la de lectura del payload."
   },
   "monitor": {
     "name": "fwMonitor / debughub",
-    "status": "VERIFICADO / estática",
-    "text": "RX locked viene de cabecera FPGA; TX ready del downlink; XCVR Ready es AND de TX/RX del MGT. Estados no certifican fuente FE ni integridad del dato.",
+    "status": "Comprobado en el código",
+    "text": "RX locked viene de la cabecera en la FPGA, TX ready del downlink y XCVR Ready es el AND de TX y RX del MGT. Ninguno dice de dónde viene el dato ni si está íntegro.",
     "related": [
       "mgt",
       "uio"
@@ -201,6 +201,6 @@
       "B05",
       "R03"
     ],
-    "detail": "Un estado a uno no es evidencia de progreso. fwMonitor no imprime el ready del CDC ni un contador de capturas."
+    "detail": "Un estado en 1 no indica que lleguen datos nuevos. fwMonitor no muestra el ready del CDC ni cuenta capturas."
   }
 }

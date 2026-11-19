@@ -1,39 +1,39 @@
-# Utilizar la web sin conexión
+# Usar la web sin conexión
 
-La publicación se realiza mediante `.github/workflows/guia-pages.yml` desde `main`. El sitio está en [GitHub Pages](https://fbientrigo.github.io/atlas_emc/). El resultado de Actions es la autoridad sobre el estado del despliegue.
+La web se publica con `.github/workflows/guia-pages.yml` desde `main` y está en [GitHub Pages](https://fbientrigo.github.io/atlas_emc/). Si dudas de si un cambio ya salió, mira el resultado en Actions.
 
-Para uso offline, conservar la carpeta generada `_site` completa: `index.html`, `assets/mermaid.js`, `diagnostico/` y `emp-capture.tar.gz`. Abrir su `index.html` en el navegador. La consulta no requiere servicios externos; los enlaces a GitHub sí requieren conexión. El HTML aislado conserva textos y herramientas, pero necesita el recurso local para dibujar Mermaid. No se usa una CDN en tiempo de ejecución.
+Para usarla sin red, copia la carpeta `_site` entera: `index.html`, `assets/mermaid.js`, `diagnostico/` y `emp-capture.tar.gz`. Abre `index.html` en el navegador. Todo funciona sin servicios externos, salvo los enlaces a GitHub. Si copias solo el HTML, verás textos y herramientas pero no los diagramas, porque necesitan `assets/mermaid.js`.
 
-## Cuatro entradas y funciones reales
+## Las cuatro secciones
 
-| Entrada | Uso |
+| Sección | Para qué |
 |---|---|
-| OPERAR | Lectura, captura CSV, mapa UIO y herramientas. |
-| ENTENDER | Guía resumida con diagramas; mapa de once componentes accesible desde sus relaciones y búsqueda. |
-| INVESTIGAR | Diagnóstico condicional del bloqueo, pruebas F0/F1 y comparación de capturas. |
-| APRENDER | Seis recorridos conceptuales, historia experimental y contraejemplos. |
+| OPERAR | Leer, guardar el CSV, mapa UIO y herramientas. |
+| ENTENDER | Guía resumida con diagramas. El mapa de once componentes se abre desde la búsqueda o desde las relaciones. |
+| INVESTIGAR | Diagnóstico del bloqueo, procedimientos F0/F1 y comparación de capturas. |
+| APRENDER | Seis temas, las pruebas anteriores y los contraejemplos. |
 
-La búsqueda acepta palabras de tareas, funciones, registros y señales. `/` enfoca el campo. Los resultados abren secciones o extractos numerados. Los documentos permiten expandir, resumir, preparar una descarga Markdown e imprimir. Copiar un bloque no lo ejecuta.
+La búsqueda acepta tareas, funciones, registros y señales. La tecla `/` lleva al buscador. Cada resultado abre una sección o un extracto con líneas numeradas. En los documentos puedes abrir y cerrar secciones, descargar el Markdown e imprimir. Copiar un bloque de código no lo ejecuta.
 
 ## Comparar capturas
 
-Pegar una salida de `emp read` o `tgc_readuplink_cli` por lado. Se reconocen `magic`, `data_group_0` a `data_group_8`, `data_header` y `clk_thresh`, seguidos de espacio o dos puntos, y un hexadecimal `0x` de hasta ocho dígitos. No se interpretan logs como valores. Se rechazan etiquetas duplicadas, grupos fuera de rango y valores inválidos. La ausencia de un registro se muestra como ausencia, nunca se reemplaza por cero.
+Pega una salida de `emp read` o `tgc_readuplink_cli` en cada lado. Se reconocen `magic`, `data_group_0` a `data_group_8`, `data_header` y `clk_thresh`, seguidos de espacio o dos puntos y un hexadecimal `0x` de hasta ocho dígitos. Las líneas de log se ignoran. Se rechazan etiquetas repetidas, grupos fuera de rango y valores inválidos. Si falta un registro aparece como ausente; nunca se rellena con cero.
 
-El resultado muestra A, B, XOR y posiciones de bits diferentes. Detecta cambios en magic/threshold y advierte de comparación parcial. **No certifica novedad, coherencia, integridad ni origen FE.** Los archivos se leen en el navegador, con límite de 200 kB. No se suben ni se guardan automáticamente.
+El resultado muestra A, B, el XOR y qué bits cambiaron. Avisa si cambió magic o threshold y si la comparación es parcial. Solo compara valores: no dice si las muestras son nuevas, coherentes, íntegras o del FE. Los archivos se leen en el navegador, hasta 200 kB, y no se suben ni se guardan.
 
-## Diagnóstico y registro de sesión
+## Diagnóstico y notas de sesión
 
-El diagnóstico recomienda la próxima prueba según observaciones declaradas. “No observado” evita inventar evidencia. No ofrece probabilidades ni confirma una causa.
+El diagnóstico sugiere la próxima prueba a partir de lo que marques. Si no lo miraste, deja "No lo miré"; así no inventas datos. No da probabilidades ni confirma causas.
 
-El registro vive en memoria. Solo “Guardar en este navegador” usa almacenamiento local. Su disponibilidad con `file://` depende del navegador; exportar conserva una copia independiente. Los checks no validan hardware ni autorizan comandos. Las capturas del comparador no se incluyen automáticamente en el registro.
+Las notas viven en memoria. Solo "Guardar en este navegador" usa el almacenamiento local, y con `file://` depende del navegador. Exportar deja una copia aparte. Marcar casillas no valida el hardware ni autoriza comandos. Las capturas del comparador no entran en las notas.
 
-Cada exportación abre una vista revisable, con texto seleccionable, enlace de descarga y copia. Si la descarga está limitada, seleccionar y copiar manualmente el texto a un archivo. La copia automática puede no estar disponible en contextos HTTP o file locales; el botón selecciona el texto como alternativa. La descarga automática del navegador remoto de pruebas no pudo verificarse; la generación visible del informe sí.
+Al exportar se abre una ventana con el texto, un enlace de descarga y un botón de copiar. Si el navegador bloquea la descarga, copia el texto a mano. En HTTP o `file://` la copia automática puede fallar; entonces el botón selecciona el texto. En las pruebas no se pudo comprobar la descarga automática, pero sí que el informe se genera y se ve.
 
 ## Mantenimiento
 
-Los Markdown y `evidencias.json` son la fuente editorial; `web/` contiene la vista. El generador integra los documentos y extractos en HTML. `empaquetar_pages.mjs` incluye Mermaid, el script de diagnóstico y el paquete de captura en `_site`. El respaldo y el resto del repositorio quedan fuera del artefacto.
+La fuente son los Markdown y `evidencias.json`. La vista está en `web/`. El generador junta documentos y extractos en el HTML, y `empaquetar_pages.mjs` añade Mermaid, el script de diagnóstico y el paquete de captura a `_site`. El respaldo y el resto del repositorio no se publican.
 
-Node 22, `tar` y dependencias fijadas con `package-lock.json`. Desde `docs/recuperacion`:
+Necesitas Node 22, `tar` y las dependencias fijadas en `package-lock.json`. Desde `docs/recuperacion`:
 
 ```bash
 npm ci --ignore-scripts --no-audit --no-fund
@@ -42,6 +42,6 @@ npm test
 python3 -m unittest discover -s diagnostico -p 'test_*.py'
 ```
 
-Abrir `_site/index.html` o servir esa carpeta con el servidor local habitual. `npm test` valida enlaces, lógica de comparación y sintaxis de los diagramas. Actions ejecuta esas pruebas antes de publicar mediante `actions/deploy-pages`. La primera publicación requiere Pages configurado como **GitHub Actions** y que el entorno `github-pages` permita desplegar desde `main`.
+Abre `_site/index.html` o sirve esa carpeta con cualquier servidor local. `npm test` revisa enlaces, la lógica de comparación y la sintaxis de los diagramas. Actions corre esas pruebas antes de publicar con `actions/deploy-pages`. La primera vez, Pages tiene que estar configurado como GitHub Actions y el entorno `github-pages` tiene que permitir desplegar desde `main`.
 
-La guía resumida y la documentación extensa comparten fuentes; no editar el HTML generado como fuente primaria. El recurso Mermaid se construye durante el workflow y no se guarda en Git. Cambiar las dependencias requiere actualizar el lockfile y repetir las comprobaciones.
+La guía resumida y los documentos largos salen de los mismos Markdown, así que edita los `.md`, no el HTML generado. `mermaid.js` se construye en el workflow y no está en Git. Si cambias dependencias, actualiza el lockfile y vuelve a correr las pruebas.

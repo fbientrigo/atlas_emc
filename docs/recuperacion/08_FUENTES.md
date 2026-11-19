@@ -4,9 +4,9 @@ Baseline GitHub: `c02a33b645dc70fb4076add25b78c5246589676e`. Consulta del 24-10-
 
 ## Procedencia y límites
 
-El archivo ZIP adjunto se analizó desde la copia local suministrada. El respaldo completo `.tar.gz` no estaba entre los archivos materializados en esta sesión. El paquete indica su procedencia; no equivale a inspección forense del disco completo. Se verificó SHA-256 de los 77 elementos contra el MANIFEST del ZIP: 77 coincidencias. No se han ejecutado binarios ni scripts del respaldo.
+El ZIP adjunto se analizó desde la copia local. El respaldo completo `.tar.gz` no estaba disponible en esta sesión, así que esto no es una revisión del disco entero. Los SHA-256 de los 77 archivos coinciden con el MANIFEST del ZIP. No se ejecutó ningún binario ni script del respaldo.
 
-Los gitingest adjuntos sirven para comparación estática. No contienen un commit/fecha de extracción identificados. Las comparaciones focales de `libuio/base.c`, `mem.c`, `LpGbtUioBackend.cpp` y `lpGbtRegister.cpp` no muestran diferencias de código, solo líneas vacías finales. Esto no demuestra igualdad de repos completos o binarios.
+Los gitingest adjuntos sirven para comparar código, pero no dicen de qué commit ni de qué fecha son. `libuio/base.c`, `mem.c`, `LpGbtUioBackend.cpp` y `lpGbtRegister.cpp` coinciden con el backup salvo líneas vacías al final. Eso no prueba que los repositorios completos o los binarios sean iguales.
 
 | Archivo de entrada | SHA-256 |
 |---|---|
@@ -16,7 +16,7 @@ Los gitingest adjuntos sirven para comparación estática. No contienen un commi
 
 ## Extractos navegables
 
-Los extractos de `evidencias.json` conservan números de línea del archivo completo y su hash; son cortes documentales, no fuentes de build. No incluyen historiales completos, credenciales, SSH ni logs personales. Los archivos originales no se han modificado.
+Los extractos de `evidencias.json` mantienen los números de línea del archivo completo y su hash. Son trozos para consultar, no fuentes para compilar. No incluyen historiales, credenciales, SSH ni logs personales, y los archivos originales no se tocaron.
 
 | ID | Tema | Ruta original |
 |---|---|---|
@@ -38,7 +38,7 @@ Los extractos de `evidencias.json` conservan números de línea del archivo comp
 
 ## Archivos GitHub consultados
 
-Inventario selectivo guiado por el índice del ZIP; se leyeron las notas P0 completas y se hicieron inspecciones focales de código RTL/software. Consultar el mapa para los rangos concretos utilizados. Listar un archivo aquí no certifica revisión exhaustiva de todas sus líneas.
+La selección siguió el índice del ZIP. Las notas P0 se leyeron enteras; del RTL y del software se leyeron las partes necesarias, con los rangos indicados en el mapa técnico. Que un archivo aparezca aquí no significa que se haya leído entero.
 
 | Archivo | Git blob SHA |
 |---|---|
@@ -87,7 +87,7 @@ Inventario selectivo guiado por el índice del ZIP; se leyeron las notas P0 comp
 
 ## Respaldo: integridad del material seleccionado
 
-La lista siguiente registra integridad y cobertura disponible; no implica análisis exhaustivo de todos los archivos. Las referencias F1–F12 de la guía identifican los puntos inspeccionados que respaldan el procedimiento.
+Esta lista sirve para comprobar integridad; no todos los archivos se analizaron a fondo. Las referencias F1–F12 de la guía marcan los puntos revisados en los que se apoya el procedimiento.
 
 | Ruta original relativa | Líneas | SHA-256 |
 |---|---|---|
@@ -171,15 +171,15 @@ La lista siguiente registra integridad y cobertura disponible; no implica análi
 
 ## Búsquedas negativas y sus límites
 
-- Árbol completo del baseline: 2526 entradas, respuesta no truncada. Se usó para localizar rutas, no para leer todo su contenido.
+- El árbol completo del baseline tiene 2526 entradas y vino entero. Se usó para encontrar rutas, no para leerlo todo.
 - No hay `AGENTS.md` en ese árbol.
-- No se encontraron fuentes `.vhd/.v/.sv` con nombre `tgc_readUplink`, `Read_PRBS` o variantes del nombre en el árbol; el BD tampoco contiene esas instancias. No se excluye una implementación con otro nombre, en otro repositorio, dentro de artefactos binarios o fuera del backup curado.
-- El BD sí contiene una asignación explícita A00D/A00E a interrupt controllers. La incompatibilidad con scripts históricos no es solo una ausencia de archivos.
-- Las fichas TDR/Interaction/Elink consultadas enlazan PDFs y están vacías; los PDFs no se leyeron en esta entrega.
-- Las imágenes citadas por las notas no se interpretaron como prueba de conexión actual. Los estados posteriores de hardware y otras ramas no se han auditado exhaustivamente.
+- No aparece ninguna fuente `.vhd/.v/.sv` llamada `tgc_readUplink`, `Read_PRBS` o parecido, y el BD tampoco tiene esas instancias. Podría existir con otro nombre, en otro repositorio, dentro de un binario o fuera del backup curado.
+- El BD sí asigna A00D y A00E a interrupt controllers, así que el choque con los scripts antiguos es real y no solo falta de archivos.
+- Las fichas TDR, Interaction y Elink están vacías y enlazan PDFs que no se leyeron.
+- Las imágenes de las notas no se tomaron como prueba de conexión actual. No se revisaron a fondo los estados posteriores del hardware ni las otras ramas.
 
 ## Ampliación del 24-10-2026: bloqueo intermitente
 
-La edición ampliada contiene 28 extractos identificados, incluyendo R07–R15 y B10–B13. Sus rutas, rangos y SHA-256 están en `evidencias.json`. Se inspeccionaron además `ic_top.vhd`, `ic_rx.vhd`, `ic_rx_fifo.vhd` y el package del controlador IC en el mismo baseline c02a33b. Los hashes corresponden a los archivos locales inspeccionados; los enlaces remotos están fijados al commit. La observación del usuario sobre recuperación temporal tras reiniciar es testimonio histórico recibido el 24-10-2026, no una prueba actual.
+Ahora hay 28 extractos, incluidos R07–R15 y B10–B13, con sus rutas, rangos y SHA-256 en `evidencias.json`. También se revisaron `ic_top.vhd`, `ic_rx.vhd`, `ic_rx_fifo.vhd` y el package del controlador IC en el mismo baseline c02a33b. Los hashes son de los archivos locales revisados y los enlaces apuntan a ese commit. Que el sistema volviera a funcionar al reiniciar lo contó el usuario el 24-10-2026; es un testimonio, no una prueba actual.
 
-La documentación oficial de Linux UIO, /proc y GNU timeout respalda únicamente conceptos de sistema operativo; no acredita el firmware. Enlaces en el documento 10. No se inspeccionó hardware real ni se compiló/simuló el diseño completo.
+La documentación de Linux UIO, /proc y GNU timeout solo respalda conceptos del sistema operativo, no el firmware. Los enlaces están en el documento 10. No se revisó hardware real ni se compiló o simuló el diseño completo.

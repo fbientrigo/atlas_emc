@@ -1,42 +1,42 @@
 # Notas de trabajo EMP / lpGBT
 
-[Leer y guardar datos del EMP](15_OPERAR_EMP.md) es la guía de operación. Incluye comandos, ubicación del CSV y resultados de la Trenz del 19-11-2026. [Orden de trabajo y herramientas](14_NOTAS_DE_TRABAJO.md) cubre firmware, reloj y CLIs anteriores.
+Para leer datos en la Trenz y guardar el CSV, abre [Leer y guardar datos del EMP](15_OPERAR_EMP.md). Ahí están los comandos y los resultados del 19-11-2026. El firmware, el reloj y las CLI anteriores están en [Orden de trabajo y herramientas](14_NOTAS_DE_TRABAJO.md).
 
-**Para el ingeniero:** [guía de campo independiente](00_GUIA_CAMPO.md). A1/A2 pueden hacerse ahora. Las lecturas MMIO requieren cerrar la identidad del firmware y su capturador. Para atribuir los datos al front-end queda pendiente la prueba A/B/A.
+Si eres el ingeniero en la placa, la [guía de campo](00_GUIA_CAMPO.md) se lee sola. El inventario (A1 y A2) se puede hacer ya. Para leer registros MMIO hay que saber antes qué firmware está cargado y qué capturador tiene. Para decir que los datos vienen del front-end falta la prueba A/B/A.
 
-**Entrada breve:** [guía resumida](13_GUIA_RAPIDA.md). **Web:** https://fbientrigo.github.io/atlas_emc/ — despliegue mediante GitHub Actions desde `main`. [Construcción y uso sin conexión](09_USO_LOCAL.md).
+Hay una [guía resumida](13_GUIA_RAPIDA.md) con diagramas. La web está en https://fbientrigo.github.io/atlas_emc/ y se publica con GitHub Actions desde `main`. Para usarla sin conexión, ver [Uso local](09_USO_LOCAL.md).
 
-| Necesito… | Entrada |
+| Si necesitas… | Abre |
 |---|---|
 | Leer, grabar y encontrar el CSV | [Guía de operación](15_OPERAR_EMP.md) |
-| Demostrar recepción del front-end | [Procedimiento P0](00_GUIA_CAMPO.md) |
-| Seguir señales y llamadas | [Mapa técnico y recorridos](01_MAPA_TECNICO.md) |
-| Elegir una herramienta existente | [Catálogo operacional](02_CATALOGO.md) |
-| Entender por qué llegamos a este estado | [Historia y versiones](03_HISTORIA.md) |
-| Saber qué pedir al ingeniero | [Incertidumbres y pruebas de cierre](04_INCERTIDUMBRES.md) |
-| Evaluar limpieza después de operar | [Evolución futura](05_EVOLUCION_FUTURA.md) |
-| Recuperar criterio técnico | [Itinerario de aprendizaje](06_APRENDER.md) |
-| Revisar rigor y límites | [Auditoría](07_AUDITORIA.md) |
-| Rastrear afirmaciones | [Fuentes y cobertura](08_FUENTES.md) |
+| Demostrar que llegan datos del front-end | [Guía de campo](00_GUIA_CAMPO.md) |
+| Seguir señales y llamadas | [Mapa técnico](01_MAPA_TECNICO.md) |
+| Elegir una herramienta | [Catálogo](02_CATALOGO.md) |
+| Saber cómo llegamos aquí | [Historia y versiones](03_HISTORIA.md) |
+| Saber qué pedir al ingeniero | [Incertidumbres](04_INCERTIDUMBRES.md) |
+| Ver qué limpiar más adelante | [Evolución futura](05_EVOLUCION_FUTURA.md) |
+| Repasar conceptos | [Aprender](06_APRENDER.md) |
+| Ver qué se revisó y qué no | [Auditoría](07_AUDITORIA.md) |
+| Encontrar la fuente de una afirmación | [Fuentes](08_FUENTES.md) |
 
-Investigación iniciada el 24-10-2026 sobre baseline `c02a33b`. P0 se entregó primero en el commit `a73b65b`; después se amplió P1 y se preparó el acceso local. No se ha operado hardware ni modificado código original. La documentación se desarrolló en `docs/clean` y se publica desde `main`.
+La investigación empezó el 24-10-2026 sobre el commit `c02a33b`. P0 se entregó primero, en `a73b65b`. Después se amplió P1 y se preparó la web. Durante esa investigación no se tocó el hardware ni el código original. Los documentos se escribieron en `docs/clean` y se publican desde `main`.
 
-| Hito | Estado y alcance |
+| Hito | Estado |
 |---|---|
-| P0 | Guía estática terminada; ejecución local y prueba FE pendientes. |
-| P1 | Reconstrucción acotada con fuentes, variantes y dos recorridos; falta RTL/integración del capturador, configuración FE y build activa. |
-| P2 | Base local de consulta sobre evidencia disponible; lógica de búsqueda, relaciones y extractos comprobada en Node. Portada, mapa, búsqueda y diagnóstico revisados en navegador; ver límites en auditoría. |
-| P3 | Revisión adversarial de afirmaciones y comprobaciones estáticas; hardware pendiente; revisión visual parcial y pruebas de lógica completadas. |
+| P0 | Guía terminada. Falta ejecutarla en la placa y hacer la prueba FE. |
+| P1 | Reconstrucción con fuentes, variantes y dos recorridos. Faltan el RTL del capturador, la configuración FE y la build cargada. |
+| P2 | Web de consulta sobre lo recuperado. Búsqueda, relaciones y extractos probados en Node; portada, mapa, búsqueda y diagnóstico revisados en el navegador. Límites en la auditoría. |
+| P3 | Revisión crítica de las afirmaciones y pruebas estáticas. Falta el hardware; la revisión visual es parcial. |
 
-La web incluye un selector **CLARO / OSCURO** en la cabecera. Respeta inicialmente la preferencia del sistema, conserva la elección manual en este navegador y actualiza también los diagramas Mermaid.
+La cabecera tiene un botón CLARO / OSCURO. Arranca con el tema del sistema, recuerda tu elección en ese navegador y también cambia los diagramas.
 
-## Revisión de lecturas congeladas y web mejorada
+## Lecturas congeladas
 
 - [Análisis del bloqueo y procedimientos F0/F1](10_BLOQUEO_LECTURAS.md).
-- [Matriz de incompatibilidades](11_COMPATIBILIDAD.md).
-- Web local: mapa interactivo, diagnóstico condicional, comparación XOR de capturas, catálogo filtrable y registro de sesión con exportación revisable.
-- Los modelos de `analisis/contraejemplos.py` comprueban ramas reducidas; no simulan el FPGA ni prueban la causa histórica.
+- [Tabla de incompatibilidades](11_COMPATIBILIDAD.md).
+- La web incluye el mapa interactivo, un diagnóstico por preguntas, la comparación XOR de capturas, el catálogo con filtros y un registro de sesión que se puede exportar.
+- `analisis/contraejemplos.py` prueba ramas pequeñas del RTL. No simula la FPGA ni explica la causa del fallo.
 
-## Diagnóstico reproducible del bloqueo
+## Script de diagnóstico
 
-[Script y sesión de laboratorio S0–S4](12_SCRIPT_DIAGNOSTICO.md): inventario pasivo, plan bloqueado hasta validar compatibilidad, envoltorio de la CLI existente, anotaciones de estímulo/recuperación e informe offline. Código en `diagnostico/atlas_diagnostico.py`. Probado con procesos sintéticos; ejecución en la Trenz pendiente. Comenzar por `inventario`, no por `capturar`.
+El [script y la sesión S0–S4](12_SCRIPT_DIAGNOSTICO.md) hacen un inventario sin tocar registros y dejan el plan de lectura bloqueado hasta confirmar la compatibilidad. Luego ejecutan la CLI existente, anotan el estímulo y la recuperación, y generan un informe sin conexión. El código está en `diagnostico/atlas_diagnostico.py`. Está probado con procesos falsos; falta correrlo en la Trenz. Empieza por `inventario`, no por `capturar`.

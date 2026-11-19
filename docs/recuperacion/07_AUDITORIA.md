@@ -1,98 +1,97 @@
-# Auditoría adversarial y límites de la entrega
+# Auditoría: qué se revisó y qué quedó pendiente
 
-## Revisión de afirmaciones y comandos
+## Supuestos que se pusieron a prueba
 
-| Premisa cuestionada | Hallazgo | Tratamiento en esta entrega |
+| Supuesto | Qué se encontró | Qué hace la guía |
 |---|---|---|
-| Las direcciones históricas son reutilizables | BD asigna A00D/A00E a interrupt controllers | Advertencia explícita antes de MMIO; ninguna receta de escritura histórica como procedimiento actual. |
-| UIO significa periférico operativo | Nota con UIO visible y `Bus error`; otra con CPU stalls | Inventario separado de lectura; parada ante fallo, sin barrido a ciegas. |
-| `--help` es siempre inocuo | CLI de payload no procesa argumentos | No se recomienda ayuda de esa CLI para explorar el binario. |
-| La ayuda del cargador describe todas las opciones operativas | `getopts` rechaza opciones largas antes de su comprobación | Usar únicamente `-l`/`-h` para inspección; el parser se comprobó aislado, sin ejecutar el cargador. |
-| Leer chip no modifica nada | Backend `lpGbtRegister -r` escribe controlador y consume FIFO | Fuera del inventario pasivo, con condiciones y autorización local. |
-| Nueve palabras son un frame | No hay protocolo de snapshot/contador en el software | Captura cruda sin afirmación de coherencia o eventos nuevos. |
-| Header valida el payload | JSON promete checker, RTL ausente y CLI solo imprime | Semántica marcada DESCONOCIDA; no se inventa criterio de header. |
-| «Tenemos lectura» demuestra FE | La nota 1006 usa loopback | Evidencia limitada a loopback. |
-| No se hicieron ensayos FE | Nota 1028–1031 sí los registra | Se reconocen ensayos con resultados discrepantes; no se declara éxito ni inexistencia. |
-| La nota más reciente corrige automáticamente el mapa | `Memory Directions`, añadida en enero 2026, mezcla offsets incompatibles | Contradicción conservada, pendiente de build; fecha no sustituye comprobación. |
-| El nombre Trenz identifica la FPGA | BD declara XCZU4EG/TE0807; hay otros modelos en el contexto | Modelo actual pendiente; no extrapolar Zynq-7000 a este mapa. |
-| Existe `eLink_Interface`, por tanto ya recibe FE | Fuente presente, no instanciada en BD recuperado | Alternativa existente a investigar, sin atribuir despliegue. |
-| Se analizó todo el respaldo | Solo ZIP curado y dos gitingest materializados | Alcance declarado; sin afirmar inspección del TAR completo o binarios. |
+| Las direcciones antiguas se pueden reusar | El BD pone A00D y A00E en interrupt controllers | Avisa antes de cualquier MMIO y no usa escrituras antiguas como procedimiento. |
+| Si hay UIO, el periférico funciona | Una nota tiene un UIO visible con `Bus error`, otra tiene CPU stalls | Separa inventario y lectura, y para ante un fallo en vez de barrer direcciones. |
+| `--help` siempre es inofensivo | La CLI de payload no lee argumentos | No recomienda pedirle ayuda a esa CLI. |
+| La ayuda del cargador lista opciones que funcionan | `getopts` rechaza las opciones largas antes | Solo usa `-l` y `-h`. El parser se probó aislado, sin correr el cargador. |
+| Leer el chip no cambia nada | `lpGbtRegister -r` escribe el controlador y vacía la FIFO | Lo deja fuera del inventario, con condiciones y autorización local. |
+| Nueve palabras son un frame | El software no tiene snapshot ni contador | Guarda la captura cruda sin afirmar coherencia ni eventos nuevos. |
+| El header valida el payload | El JSON promete un checker, falta el RTL y la CLI solo imprime | Lo marca DESCONOCIDO y no inventa un criterio. |
+| «Tenemos lectura» prueba el FE | La nota 1006 usó loopback | Lo trata como prueba de loopback. |
+| Nunca se probó el FE | La nota 1028–1031 sí tiene ensayos | Reconoce los ensayos y sus resultados dispares, sin declarar éxito. |
+| La nota más nueva corrige el mapa | `Memory Directions`, de enero de 2026, mezcla offsets que no encajan | Deja la contradicción abierta hasta saber la build. |
+| «Trenz» identifica la FPGA | El BD declara XCZU4EG/TE0807 y hay otros modelos en juego | Deja el modelo actual por confirmar. |
+| Si existe `eLink_Interface`, ya recibe el FE | La fuente está, pero no está en el BD recuperado | La deja como pista a investigar. |
+| Se analizó todo el respaldo | Solo el ZIP curado y dos gitingest | Lo dice así y no afirma haber visto el TAR ni los binarios. |
 
-No se modificaron fuentes originales, no se cargó firmware, no se escribieron registros y no se accedió a hardware real. Solo se añadieron documentos, extractos documentales y la lectura local generada en la rama indicada.
+No se cambiaron fuentes originales, no se cargó firmware, no se escribieron registros y no se tocó el hardware. Solo se añadieron documentos, extractos y la web en la rama indicada.
 
-## Verificaciones de integridad y trazabilidad realizadas
+## Comprobaciones de integridad
 
-- Se cotejaron los 77 archivos curados con SHA-256 del MANIFEST: todos coinciden.
-- Se comprobó baseline de `main`, árbol completo no truncado y ausencia de fuentes del capturador por nombre; se analizaron componentes, nets y segmentos del BD.
-- Se contrastaron mapa JSON de nueve grupos, clase backup y variante de un grupo.
-- Se consultó historial por rutas y archivos modificados de las revisiones posteriores que podían cambiar la interpretación.
-- Se contrastaron cuatro archivos de los gitingest con las copias del backup; no se generaliza esa igualdad al repositorio completo.
-- Los extractos navegables incluyen ruta, líneas y hash del archivo completo. Se conservan sin copiar historiales, credenciales o notas de acceso a la nueva documentación.
+- Los 77 archivos curados coinciden con los SHA-256 del MANIFEST.
+- Se comprobó el baseline de `main` con el árbol completo, y que las fuentes del capturador no aparecen por nombre. Se analizaron componentes, nets y segmentos del BD.
+- Se compararon el JSON de nueve grupos, la clase del backup y la variante de un grupo.
+- Se revisó el historial por rutas y los archivos cambiados en las revisiones que podían cambiar la lectura.
+- Se compararon cuatro archivos de los gitingest con las copias del backup. Coinciden, pero eso no se extiende al repositorio completo.
+- Cada extracto de la web lleva ruta, líneas y hash del archivo completo. No se copiaron historiales, credenciales ni notas de acceso.
 
-## Verificación de la lectura local
+## Primera verificación de la web
 
-Se ejecutó `node verificar_base.mjs --static` sobre el HTML generado. Resultado: **OK**, 10 documentos, 15 fuentes, 8 enlaces Markdown internos del contenido indexado, 4 modos, 11 nodos, 6 entradas de tareas y 5 búsquedas de términos técnicos. La prueba compila el JavaScript embebido y ejecuta sus funciones de composición/rutas con un doble DOM mínimo en Node; no es una prueba de renderizado de navegador. También verifica la intercepción de enlaces con tildes, los destinos de tareas y la ausencia de dependencias remotas automáticas en el HTML. Una comprobación adicional de todos los Markdown, incluido README, verificó 19 enlaces locales sin destinos ausentes; los 15 extractos coinciden con sus líneas y hashes originales.
+`node verificar_base.mjs --static` sobre el HTML generado dio OK: 10 documentos, 15 fuentes, 8 enlaces Markdown internos, 4 secciones, 11 nodos, 6 tareas y 5 búsquedas técnicas. La prueba compila el JavaScript y ejecuta rutas y vistas con un DOM mínimo en Node; no es una prueba en navegador. También comprueba los enlaces con tildes, los destinos de las tareas y que el HTML no carga nada remoto. Aparte, se revisaron los 19 enlaces locales de todos los Markdown, incluido el README, y los 15 extractos coinciden con sus líneas y hashes.
 
-Durante la verificación se corrigieron escapes de expresiones regulares al generar el script y el tratamiento de anclas con tildes. Los archivos Markdown se conservan como fuente editorial.
+Durante esa revisión se corrigieron escapes de expresiones regulares y las anclas con tildes.
 
-**Pendiente:** Playwright está disponible, pero no había Chromium instalado. El intento de obtenerlo no produjo un archivo válido. Por ello no se ejecutó la prueba completa en navegador, ni se certifican aquí renderizado visual, viewport móvil, foco/lectores de pantalla o funcionamiento específico de `file://` en cada navegador. El script deja esa comprobación reproducible preparada; no se presenta como aprobada. Se recomienda abrir el HTML local antes de depender de la interfaz en una sesión de laboratorio; la guía Markdown independiente sigue disponible.
+Faltó probarla en un navegador real: había Playwright pero no Chromium, y la descarga no dio un archivo válido. Por eso no se dan por probados el aspecto visual, el móvil, el foco, los lectores de pantalla ni `file://` en cada navegador. La guía en Markdown sigue disponible si la web falla.
 
-Nada de lo anterior representa ejecución en hardware. La página no ofrece botones para ejecutar comandos, cargar firmware ni enviar datos al sistema.
+La web no ejecuta comandos, no carga firmware y no envía datos a ningún sistema.
 
-## Límites que no puede cerrar una auditoría estática
+## Lo que una auditoría sin hardware no puede cerrar
 
-No se ha probado accesibilidad AXI, configuración eléctrica, fuente del Serializer, lock actual, compatibilidad del ELF, empaquetado de grupos, disparo de captura ni fidelidad FE. La prueba A/B/A está propuesta; no se ejecutó. No hay prueba de adquisición de eventos sin pérdida, incluso si una futura prueba con constantes sostenidas resulta correcta.
+No se probó el acceso AXI, la parte eléctrica, la fuente del Serializer, el lock actual, la compatibilidad del ELF, el empaquetado de los grupos, el disparo de la captura ni que los datos del FE lleguen intactos. La prueba A/B/A está propuesta, no hecha. Tampoco hay prueba de adquisición sin pérdidas, aunque una prueba futura con constantes sostenidas salga bien.
 
-P1 es una reconstrucción acotada a las fuentes recuperadas: falta unir UserData con el capturador y faltan informes PDF, detalles del FE y build activa. P2 ofrece acceso real al conocimiento disponible, no una simulación de funcionamiento ni certificación del sistema. La revisión P3 de esta entrega no homologa un procedimiento para firmware desconocido.
+P1 se limita a las fuentes recuperadas: falta unir UserData con el capturador, y faltan los PDF, los detalles del FE y la build cargada. P2 da acceso a lo que se sabe; no simula ni certifica el sistema. La revisión P3 no aprueba ningún procedimiento para un firmware desconocido.
 
-## Actualización: web mejorada y bloqueo intermitente
+## Segunda revisión: web y bloqueo intermitente
 
-Esta sección reemplaza el estado de verificación de navegador de la primera edición, que se conserva arriba como registro del trabajo inicial.
+Esta sección pone al día lo que se probó en el navegador después de la primera versión.
 
-### Verificación completada
+### Qué se probó
 
-- Revisión visual de portada y mapa en Chrome remoto mediante la vista previa local.
-- Interacción con nodos del mapa, búsqueda `clearIntr` y apertura del extracto B10 con líneas originales.
-- Dos ramas del diagnóstico: proceso IC que no termina, y lector payload que retorna con valores repetidos. Las recomendaciones difieren y mantienen explícita su condición de hipótesis.
-- Vista de exportación Markdown generada con observaciones, fecha y límites. Texto seleccionable como alternativa a descarga/copia automáticas.
-- Pruebas Node: sintaxis del JavaScript empaquetado, enlaces Markdown/anclas de etapas, 28 extractos y once entidades. Parser completo/parcial, duplicados, hexadecimales inválidos, límites de tamaño, ausencia de grupos y XOR de cada una de las 32 posiciones de bit. Diagnóstico distingue rutas IC/payload/script y no atribuye bucles IC a la CLI payload.
-- Modelos Python: cinco contraejemplos reducidos. No es una simulación del diseño ni una ejecución en hardware.
+- Revisión visual de la portada y del mapa en Chrome remoto, con la vista previa local.
+- Clic en nodos del mapa, búsqueda de `clearIntr` y apertura del extracto B10 con sus líneas.
+- Dos ramas del diagnóstico: un proceso IC que no termina y un lector de payload que termina repitiendo valores. Las recomendaciones son distintas y se presentan como hipótesis.
+- Exportación Markdown con observaciones, fecha y límites, con el texto seleccionable por si fallan la descarga o la copia.
+- Pruebas en Node: sintaxis del JavaScript, enlaces y anclas, 28 extractos y once componentes. Parser completo y parcial, duplicados, hexadecimales inválidos, límites de tamaño, grupos ausentes y XOR en las 32 posiciones de bit. El diagnóstico separa las rutas IC, payload y script, y no culpa a la CLI de payload de los bucles IC.
+- Cinco contraejemplos reducidos en Python. No simulan el diseño ni se ejecutaron en hardware.
 
-### Limitaciones de verificación de la web
+### Qué no se pudo probar
 
-La descarga Blob no produjo un archivo verificable mediante el navegador remoto. La copia automática tampoco estuvo disponible; sí se observó la selección alternativa del texto. No se presenta la descarga como validada de extremo a extremo. Se añadió una vista revisable para que el informe pueda copiarse manualmente.
+La descarga con Blob no dio un archivo comprobable en el navegador remoto, y la copia automática tampoco funcionó; sí funcionó seleccionar el texto. Por eso se añadió la ventana para copiar el informe a mano.
 
-Una interrupción de sesión cerró la pestaña y la vista previa. Al retomarla, el navegador no pudo adquirir la pestaña de error por su política de URL. No se intentó sortear esa restricción. El comparador completo en navegador, la persistencia tras recargar y el viewport móvil quedan pendientes; su lógica y estructura se revisaron estáticamente. No se declara una cobertura visual universal.
+Una interrupción cerró la pestaña y la vista previa, y al volver el navegador no pudo tomar la pestaña de error por su política de URL. No se intentó saltar esa restricción. Quedan sin probar en el navegador el comparador completo, la persistencia al recargar y el móvil; su lógica y estructura se revisaron sobre el código.
 
-### Refutación de hipótesis del fallo
+### Hipótesis del fallo que no se sostienen
 
-- `ready` retenido: el reset derivado del core puede borrarlo; no atribuir toda pérdida de enlace a un ready pegado.
-- FSM eLink: existe salida alternativa por escritura downlink; falta demostrar integración en la build. No llamar al fallo inevitable.
-- Watchdog IC: `0x10004` no selecciona la ruta single afectada. No usar el defecto como explicación de la CLI payload.
-- FIFO IC: se resetea al iniciar cada transacción. La explicación de acumulación entre consultas correctas queda refutada en su forma simple.
-- Script silencioso: el byte bajo puede ser constante aunque cambie el resto. El silencio no es prueba de bloqueo completo.
-- Reiniciar recupera: no identifica la pieza responsable sin conocer alcance, estado previo y repetibilidad.
+- `ready` retenido: el reset que viene del core puede borrarlo, así que no toda pérdida de enlace es un ready pegado.
+- FSM eLink: puede salir por una escritura downlink, y falta probar que esté en la build. El fallo no es inevitable.
+- Watchdog IC: `0x10004` no elige la ruta single afectada, así que ese defecto no explica la CLI de payload.
+- FIFO IC: se vacía al empezar cada transacción, así que la idea de que se llena entre consultas correctas no se sostiene.
+- Script callado: el byte bajo puede quedarse quieto aunque cambie el resto. Que no imprima no prueba un bloqueo.
+- Reiniciar lo arregla: sin saber qué se reinició, el estado anterior y si se repite, no dice qué pieza fallaba.
 
-No se modificaron fuentes originales, no se ejecutaron binarios de adquisición, no se abrió MMIO y no se cargó firmware. La causa histórica sigue abierta; el resultado es una investigación trazable y un procedimiento para localizarla.
+No se tocaron fuentes, no se ejecutaron binarios de adquisición, no se abrió MMIO y no se cargó firmware. La causa sigue abierta; lo que hay es una investigación con fuentes y un procedimiento para encontrarla.
 
-## Ampliación 25-10-2026 — script diagnóstico solicitado
+## Ampliación del 25-10-2026: script de diagnóstico
 
-Se añade `diagnostico/atlas_diagnostico.py` y [sesión S0–S4](12_SCRIPT_DIAGNOSTICO.md), sin modificar herramientas originales. Es un supervisor de la CLI existente, no un nuevo driver ni un remedio del bloqueo. `inventario` consulta archivos Linux; `capturar` exige un plan revisado y una opción explícita de autorización de lecturas. No se ejecutó ese modo sobre hardware.
+Se añadieron `diagnostico/atlas_diagnostico.py` y la [sesión S0–S4](12_SCRIPT_DIAGNOSTICO.md), sin tocar las herramientas originales. Es un supervisor de la CLI existente; no es un driver ni arregla el bloqueo. `inventario` solo lee archivos de Linux. `capturar` exige un plan revisado y una opción explícita para autorizar las lecturas. Ese modo no se ejecutó sobre hardware.
 
-**Pruebas locales:** 18 pruebas automatizadas aprobadas, incluyendo 32 posiciones de bit, datos incompletos, hash distinto, UIO ambiguo, timeout, SIGBUS sintético, exceso de salida, bloqueo cooperante, detención tras primer error e informe con diario incompleto. Un doble de proceso que sigue vivo comprueba que el supervisor no llama a una espera final ilimitada; no representa un ensayo de bloqueo AXI real. Una sesión sintética correcta comprueba archivos de salida, cambios de bits altos y liberación del lock.
+Pasan 18 pruebas automáticas: 32 posiciones de bit, datos incompletos, hash distinto, UIO ambiguo, timeout, SIGBUS simulado, salida demasiado grande, lock entre sesiones, parada tras el primer error e informe con el diario a medias. Un proceso falso que no termina comprueba que el supervisor no se queda esperando para siempre; no reproduce un bloqueo AXI real. Una sesión falsa correcta comprueba los archivos de salida, los cambios en bits altos y que el lock se libera.
 
-**Refutaciones incorporadas:** el plan no puede acreditar por sí solo la build cargada; la lista de bibliotecas no se resuelve automáticamente; `/proc` no prueba exclusividad; cada lanzamiento nuevo puede ocultar fallos de una aplicación persistente; timeout y SIGKILL no garantizan completar/abortar MMIO; igualdad no prueba antigüedad; XOR no demuestra origen ni coherencia. No se habilita barrido de direcciones, control IC, monitor de otra IP ni recuperación automática.
+Límites que se tuvieron en cuenta: el plan no prueba qué build está cargada; la lista de bibliotecas no se resuelve sola; `/proc` no garantiza exclusividad; lanzar el programa cada vez puede esconder fallos de una aplicación que corre seguido; timeout y SIGKILL no garantizan que termine o se corte el MMIO; que dos muestras sean iguales no dice que sean viejas; y el XOR no prueba origen ni coherencia. No hay barrido de direcciones, control IC, monitor de otra IP ni recuperación automática.
 
-**Web:** se incorpora el documento a búsqueda y biblioteca, con enlaces desde OPERAR e INVESTIGAR. La generación y las comprobaciones estáticas se repiten sobre 13 documentos; no se amplía la cobertura de navegador declarada en la sección anterior. Los archivos `.out` del script son compatibles por formato con el comparador de dos capturas; no se importan sesiones JSONL completas en él.
+En la web, el documento aparece en la búsqueda y en la documentación, con enlaces desde OPERAR e INVESTIGAR. Las pruebas estáticas se repitieron con 13 documentos; la cobertura en navegador no cambió. Los `.out` del script se pueden cargar en el comparador; las sesiones JSONL completas no.
 
-**Pendiente:** S0 en Trenz, identidad de build/ELF/dependencias, semántica de lectura del capturador, estímulo FE y autorización para el ensayo corto. La investigación de la causa sigue abierta.
+Falta: S0 en la Trenz, identificar build, ELF y dependencias, saber qué hace la lectura del capturador, el estímulo FE y la autorización para el ensayo corto. La causa sigue abierta.
 
+## Ampliación del 26-10-2026: guía breve y Pages
 
-## Ampliación 26-10-2026 — guía breve y publicación Pages
-
-- Interfaz simplificada siguiendo WIRED / OBSERVATORY: fondo blanco, tipografía monoespaciada, líneas finas y azul de selección. Portada por tareas y catálogo en filas desplegables; documentación extensa conservada.
-- Nueva guía resumida: ocho diagramas Mermaid, más dos del mapa técnico. Se elimina la sustitución de Mermaid por un enlace. Biblioteca fijada y empaquetada localmente, sin CDN de ejecución.
-- Diez diagramas pasan el parser real de Mermaid con JSDOM. En navegador se observó la arquitectura renderizada y, al expandir la guía, los ocho diagramas nuevos. La portada y navegación se revisaron visualmente. No se declara una prueba exhaustiva de todos los tamaños de pantalla.
-- Enlaces y lógica estática comprobados sobre 14 documentos, 28 fuentes y 39 enlaces Markdown internos. Se conservan los límites anteriores de hardware y descarga; el despliegue no valida instrumentos ni datos FE.
-- Workflow construye y verifica antes de desplegar. El artefacto incluye solo `_site`, no las fuentes originales ni el respaldo. Estado definitivo y URL: ejecución de GitHub Actions.
-- El HTML necesita el recurso `assets/mermaid.js` para los gráficos; la carpeta completa funciona sin red. La descripción antigua de un HTML único autosuficiente queda sustituida por el procedimiento actual de uso local.
+- Interfaz más simple al estilo WIRED / OBSERVATORY: fondo blanco, letra monoespaciada, líneas finas y azul para la selección. Portada por tareas y catálogo en filas desplegables, sin perder la documentación larga.
+- Guía resumida nueva con ocho diagramas Mermaid, más dos del mapa técnico. Mermaid va empaquetado en local, sin CDN.
+- Los diez diagramas pasan el parser de Mermaid con JSDOM. En el navegador se vio la arquitectura y, al abrir la guía, los ocho diagramas nuevos. Portada y navegación se revisaron a ojo, no en todos los tamaños de pantalla.
+- Enlaces y lógica comprobados sobre 14 documentos, 28 fuentes y 39 enlaces Markdown internos. Siguen los mismos límites de hardware y descarga; publicar no valida instrumentos ni datos del FE.
+- El workflow construye y prueba antes de publicar. Solo se sube `_site`, sin fuentes originales ni respaldo. El estado final y la URL los da GitHub Actions.
+- El HTML necesita `assets/mermaid.js` para los diagramas, y la carpeta completa funciona sin red. Ya no es un HTML único autosuficiente; ver [uso local](09_USO_LOCAL.md).

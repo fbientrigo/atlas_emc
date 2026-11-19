@@ -1,21 +1,21 @@
 # Evolución futura
 
-Estas son oportunidades identificadas, **sin implementar cambios en software de hardware, firmware ni fuentes originales**. Ninguna sustituye el cierre de P0.
+Cosas que se podrían mejorar más adelante. No se cambió nada en el software de hardware, el firmware ni las fuentes originales, y nada de esto reemplaza terminar P0.
 
-| Orden | Problema demostrado / riesgo | Cambio mínimo que se podría evaluar | Evidencia de utilidad antes de ampliar |
+| Orden | Problema o riesgo | Cambio mínimo a evaluar | Cómo saber que sirvió |
 |---|---|---|---|
-| 1 | Artefactos sin correspondencia verificable; mapas distintos comparten direcciones | Manifiesto de release con SHA de fuentes, BD, DTBO, bitstream y binarios | Identificar una instalación sin recurrir a memoria o ensayo MMIO. |
-| 2 | Capturador sin RTL recuperado, novedad/atomicidad sin contrato | Recuperar fuente y documentar snapshot/trigger; si faltan, evaluar la mínima señal de actualización | Demostrar coherencia o límite explícito con un estímulo externo. |
-| 3 | CLI de payload ignora argumentos y fija nombre | Solo si `readuio` existente no basta, exponer selección inequívoca y ayuda sin tocar hardware | Lectura del canal correcto y ayuda verificable sin MMIO. |
-| 4 | Plantilla genera máscara con desplazamiento indefinido para 32 bits | Corregir la plantilla y acotar widths/offsets; regenerar solo con comparación de mapa | Pruebas de campos 1/31/32 y preservación de bits ajenos; no cambiar mapas por accidente. |
-| 5 | `lsuio` libera puntero desplazado; backends pueden seguir tras fallo | Corregir manejo de recursos/errores en rama de mantenimiento separada | Enumeración termina bien; ausencia de UIO aborta antes de cualquier acceso. |
-| 6 | `readValues[6]` sin validar; espera IRQ corta y bucles sin límite claro | Validar trama/longitud/error y acotar esperas antes de presentar un byte como válido | Respuesta corta, ausencia de IRQ y FIFO inválida producen diagnósticos explícitos. |
-| 7 | Scripts descartan stderr, mezclan error y cero, omiten grupo 5, sobrescriben logs | Unificar captura solo después de fijar semántica del lector y necesidad real | Un registro de ensayo conserva identidad/configuración, retornos y datos completos. |
-| 8 | Builds duplicadas y dependencia de entorno; `build.sh` borra build | Receta reproducible aislada, dependencias identificadas y comparación de binarios | Reproducir una herramienta necesaria sin perder artefactos anteriores. |
-| 9 | `eLink_Interface` existe pero no está conectado en el BD recuperado | Revisar si alguna build funcional ya lo integra antes de crear otra interfaz | Evidencia de despliegue y captura con el FE real; no basta con tener el VHDL. |
+| 1 | No se puede relacionar cada artefacto con su origen, y mapas distintos usan las mismas direcciones | Un manifiesto por release con SHA de fuentes, BD, DTBO, bitstream y binarios | Poder identificar una instalación sin depender de la memoria ni probar MMIO. |
+| 2 | Falta el RTL del capturador y no está definido cuándo una muestra es nueva o atómica | Recuperar la fuente y documentar snapshot y trigger; si no aparece, ver qué señal de actualización mínima haría falta | Mostrar coherencia, o su límite exacto, con un estímulo externo. |
+| 3 | La CLI de payload ignora los argumentos y tiene el nombre fijo | Solo si el `readuio` existente no alcanza: permitir elegir el dispositivo y dar una ayuda que no toque el hardware | Leer el canal correcto y ver la ayuda sin MMIO. |
+| 4 | La plantilla genera una máscara con desplazamiento indefinido para 32 bits | Corregir la plantilla y limitar widths y offsets; regenerar solo comparando el mapa | Probar campos de 1, 31 y 32 bits sin tocar bits vecinos ni cambiar mapas por accidente. |
+| 5 | `lsuio` libera un puntero desplazado y los backends siguen tras un fallo | Arreglar recursos y errores en una rama de mantenimiento aparte | La enumeración termina bien y, sin UIO, se aborta antes de cualquier acceso. |
+| 6 | `readValues[6]` sin comprobar, espera de IRQ corta y bucles sin límite | Validar trama, longitud y errores, y limitar las esperas antes de dar un byte por bueno | Una respuesta corta, una IRQ que no llega o una FIFO inválida dan errores claros. |
+| 7 | Los scripts tiran stderr, confunden error con cero, se saltan el grupo 5 y pisan logs | Unificar la captura solo cuando se sepa qué hace el lector y haga falta de verdad | Cada ensayo guarda identidad, configuración, retornos y datos completos. |
+| 8 | Builds duplicadas que dependen del entorno; `build.sh` borra `build` | Receta reproducible aislada, dependencias identificadas y comparación de binarios | Rehacer una herramienta sin perder artefactos anteriores. |
+| 9 | `eLink_Interface` existe pero no está conectada en el BD recuperado | Ver si alguna build que funcionó ya la integra antes de crear otra interfaz | Pruebas de que está montada y captura con el FE real. Tener el VHDL no alcanza. |
 
-No se recomienda migrar frameworks, cambiar distribución Linux, rehacer la adquisición ni consolidar todos los repositorios antes de saber qué herramientas se usan y qué problema actual resuelve el cambio.
+No migres frameworks, cambies de distribución, rehagas la adquisición ni juntes repositorios hasta saber qué herramientas se usan y qué problema resuelve el cambio.
 
-## Hallazgos de la revisión del bloqueo
+## Lo que salió de la revisión del bloqueo
 
-Priorizar, solo en las versiones que se confirmen desplegadas: timeout global y límite de respuesta IC; validar `readValues[6]`; reset explícito de FSM; watchdog independiente de ramas prioritarias; validez de payload independiente de ser distinto de cero; contador de captura y snapshot. No se implementaron cambios. Detalles y límites en [el análisis](10_BLOQUEO_LECTURAS.md).
+Solo en las versiones que se confirme que están montadas, por este orden: timeout global y límite a la respuesta IC; comprobar `readValues[6]`; reset explícito de la FSM; un watchdog que no dependa de las ramas prioritarias; validar el payload sin usar «distinto de cero»; contador de capturas y snapshot. No se implementó nada. Detalles y límites en [el análisis](10_BLOQUEO_LECTURAS.md).
