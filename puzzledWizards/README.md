@@ -3,6 +3,8 @@ PuzzledLizardWizard
 
 Author: Piotr P. Nikiel <piotr@nikiel.info>
 
+For the Trenz tools, see [the recovered TGC and PRBS CLIs](compilados/) and the [CMB event map](../airhdl/).
+
 What is this?
 -------------
 

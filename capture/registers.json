@@ -1,0 +1,29 @@
+{
+  "device": "tgc_readUplink_regs",
+  "expected_base": "0xA00E0000",
+  "registers": {
+    "magic": "0x00",
+    "data_group_0": "0x04",
+    "data_group_1": "0x08",
+    "data_group_2": "0x0C",
+    "data_group_3": "0x10",
+    "data_group_4": "0x14",
+    "data_group_5": "0x18",
+    "data_group_6": "0x1C",
+    "data_group_7": "0x20",
+    "data_group_8": "0x24",
+    "data_header": "0x28",
+    "clk_thresh": "0x2C"
+  },
+  "compare": [
+    "data_group_0",
+    "data_group_1",
+    "data_group_2",
+    "data_group_3",
+    "data_group_4",
+    "data_group_5",
+    "data_group_6",
+    "data_group_7"
+  ],
+  "lpGbtRegister": "~/LpGbtSw/build/Demonstrators/LpGbtRegister/lpGbtRegister"
+}

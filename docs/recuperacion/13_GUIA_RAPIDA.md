@@ -1,29 +1,10 @@
 # EMP / lpGBT · guía de trabajo
 
-**Objetivo:** leer datos del front-end y demostrar su origen. La recepción externa y el firmware activo siguen **DESCONOCIDOS**. Código recuperado y pruebas de loopback no bastan para validarlos.
+La Trenz expone los registros del EMP y el enlace IC 10 respondió durante la sesión del 19-11-2026. Para demostrar el origen del payload queda la prueba con un estímulo conocido del front-end.
 
 ## Leer datos
 
-1. **Inventariar.** Identificar Linux, ELF, UIO y mapas. [P0 / A1–A2](00_GUIA_CAMPO.md#etapa-a1--inventario-de-linux-device-tree-y-firmware).
-2. **Relacionar la build.** Verificar bitstream, Device Tree, offsets y efectos de lectura. [Compatibilidad](11_COMPATIBILIDAD.md).
-3. **Leer con la CLI existente.** Solo después del punto de parada de P0. Conservar salida completa, stderr y retorno.
-4. **Aplicar un estímulo externo A/B/A.** Documentar selección de origen y respuesta esperada. El mecanismo FE concreto aún falta.
-
-Primer comando propuesto, desde la raíz del repositorio, en la Trenz. Solo inventario Linux:
-
-```bash
-python3 docs/recuperacion/diagnostico/atlas_diagnostico.py inventario --salida inventario_trenz.json
-```
-
-Lectura condicionada: `LECTOR` debe contener la ruta absoluta de la CLI validada; un solo lector y sin accesos pendientes. Requiere autorización y semántica del capturador confirmadas:
-
-```bash
-"$LECTOR" > muestra_A.out 2> muestra_A.err
-rc=$?
-printf 'RC=%s\n' "$rc"
-```
-
-**Esperado:** doce etiquetas completas: `magic`, nueve `data_group_N`, `data_header`, `clk_thresh`. Sin contador de frescura ni snapshot demostrado. Si no termina, conservar el proceso y detener nuevas lecturas. [Procedimiento completo y riesgos](00_GUIA_CAMPO.md#etapa-c--consultar-los-datos-expuestos-por-la-fpga).
+Usa la [guía de operación con emp](15_OPERAR_EMP.md) para diagnosticar, leer y guardar CSV. En la guía de campo quedan la [prueba A/B/A del front-end](00_GUIA_CAMPO.md#etapa-d--prueba-externa-aba) y el [procedimiento con la CLI anterior](00_GUIA_CAMPO.md#etapa-c--consultar-los-datos-expuestos-por-la-fpga).
 
 ## Arquitectura
 

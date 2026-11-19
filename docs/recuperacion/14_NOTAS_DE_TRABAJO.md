@@ -2,7 +2,7 @@
 
 Herramientas, rutas y notas para volver a trabajar con la Trenz. Uso `~` como el home de la placa: por ejemplo, `~/read_all_lpgbt/`. Las rutas `atlas_emc/...` son del repositorio. Si una carpeta se movió, ajustar esa parte.
 
-Tenemos los programas y las notas de las pruebas anteriores. Falta revisar qué quedó cargado y recuperar la configuración que se estaba usando. Los ejemplos de hardware se ejecutan en la placa, después de confirmar el mapa y los efectos de los registros. La web solo muestra texto.
+Para operar la Trenz con el mapa de noviembre, empieza por [emp y la captura CSV](15_OPERAR_EMP.md). Aquí quedan las rutas de firmware, reloj y herramientas de los ensayos anteriores.
 
 ## Orden de trabajo
 
@@ -10,12 +10,12 @@ Si hay una configuración funcionando, primero anotarla; no hace falta recargar 
 
 | Paso | Qué haríamos | Programa / archivo |
 |---|---|---|
-| 1. Firmware | Buscar qué está cargado y qué archivos hay. Para retomar las pruebas de octubre, buscaría `reading_1006.dtbo`: aparece en la nota 1028. `emp_read_fixed_1003.dtbo` es anterior, de 1002. Falta vincular esos nombres con un bitstream y mapa comprobados. | `~/epos/etools/loadFirmare.sh -l`; `/lib/firmware/` |
-| 2. Reloj | Revisar si el servicio de arranque ya programó el Si5345. Si hay que programarlo, las notas usan `sudo clkProgrammer -c`. Confirmar variante y configuración antes de repetirlo. | `/usr/bin/clkProgrammer`; `systemd-programclock.service` |
-| 3. lpGBT | Recuperar la configuración de PiGBT o el `.cnf` usado. Confirmar canal, tasas y fuente del Serializer. En las notas se usa **Loopback Downlink Frame @ 10G24** para loopback y funcionamiento normal para FE. No quedó identificado un `.cnf` definitivo. | PiGBT o `~/LpGbtSw/build/Demonstrators/LpGbtConfiguration/lpGbtConfiguration` |
-| 4. Enlace | Consultar el pipeline conectado. El canal 10 funcionó en notas de septiembre; algunos XSA de otra versión conectan la interfaz e-link al 11. Confirmar la conexión de hoy. | `fwMonitor --id N` |
-| 5. Lectura | Con el mapa TGC confirmado, guardar unas lecturas completas. `readprbs_cli` se usa para generar un patrón de prueba; no es un paso necesario para leer el FE. | `~/read_all_lpgbt/tgc_readuplink_cli` |
-| 6. Comparación | Cambiar una señal conocida del FE y volver al estado anterior. Mirar qué palabras responden. Si se queda pegado, guardar lo último antes de reiniciar. | [Comparador de capturas](#comparar); [registros pegados](14_NOTAS_DE_TRABAJO.md#si-los-registros-se-quedan-pegados) |
+| 1. Firmware | Con la placa ya operativa, revisar el mapa con `emp doctor`. `reading_1006.dtbo` corresponde a ensayos de octubre. | `~/capture/emp`, `~/epos/etools/loadFirmare.sh -l` |
+| 2. Reloj | Revisar si el servicio de arranque programó el Si5345. Confirmar variante y bus I²C antes de repetir una configuración. | `/usr/bin/clkProgrammer`, `systemd-programclock.service` |
+| 3. lpGBT | Confirmar canal, tasas y fuente del serializer en PiGBT o el `.cnf`. | PiGBT o `~/LpGbtSw/build/Demonstrators/LpGbtConfiguration/lpGbtConfiguration` |
+| 4. Enlace | `emp doctor --probe 10` comprobó respuesta IC en noviembre. Usar `fwMonitor --id N` para los estados del pipeline elegido. | `~/capture/emp`, `fwMonitor` |
+| 5. Lectura | Guardar palabras crudas del banco validado. | [`emp read`, `watch` y `start`](15_OPERAR_EMP.md) |
+| 6. Comparación | Aplicar un patrón conocido y volver al estado anterior. Guardar las tres lecturas. | [Comparador de capturas](#comparar), [prueba A/B/A](00_GUIA_CAMPO.md#etapa-d--prueba-externa-aba) |
 
 Para empezar, estas órdenes solo consultan archivos y metadatos:
 
@@ -46,7 +46,8 @@ Referencias en `atlas_emc/ChargeMonitoringSystem_obsidian/30_Notes/`: `1002-Prog
 
 | Quiero revisar | Programa | Qué devuelve | Dónde está |
 |---|---|---|---|
-| Palabras del capturador | `tgc_readuplink_cli` | magic, nueve grupos, header y threshold | `~/read_all_lpgbt/` |
+| Leer, vigilar o guardar CSV | [`emp` y `raw.sh`](15_OPERAR_EMP.md) | Sondeos de registros y diagnóstico | `~/capture/` |
+| Palabras del capturador (CLI anterior) | `tgc_readuplink_cli` | magic, nueve grupos, header y threshold | `~/read_all_lpgbt/` |
 | Un registro por nombre y offset | `readuio` / `libuio` | Palabras de 32 bits | `~/test_uio/`; `~/libuio/` |
 | Estado del enlace | `fwMonitor` | RX locked, TX ready/aligned y XCVR Ready | `~/EMPToolsArtifacts/bin_TRENZ/` |
 | Patrón de prueba | `readprbs_cli` | Lecturas o escrituras del bloque PRBS | `~/puzzled_working/` |
@@ -240,6 +241,8 @@ En el repo hay tres parejas DTBO/bit.bin bajo `atlas_epos/etools/xsa-to-overlays
 
 ## Mapas y versiones
 
+El [mapa UIO observado en noviembre](15_OPERAR_EMP.md#bancos-y-mapa) tiene trece bancos de lectura y el bloque CMB. La tabla siguiente resume variantes anteriores.
+
 Las direcciones siguientes comparan archivos; no autorizan accesos:
 
 | Diseño | A00D0000 | A00E0000 |
@@ -251,6 +254,8 @@ Las direcciones siguientes comparan archivos; no autorizan accesos:
 Para el lector TGC de nueve grupos: magic `0x00`; grupo g en `0x04+4g`; header `0x28`; threshold `0x2C`. Todavía falta el RTL del capturador activo para entender packing, rearme, retención y coherencia. No asumir que nueve palabras son una trama ni que threshold está expresado en Hz.
 
 ## Guardar una lectura
+
+Para guardar datos hoy, usa la [captura CSV con emp](15_OPERAR_EMP.md#guardar-una-captura). El procedimiento de abajo usa la CLI anterior y conserva también stderr y el código de salida.
 
 El supervisor ya existe en `atlas_emc/docs/recuperacion/diagnostico/atlas_diagnostico.py`. Desde la raíz del repo en la placa:
 

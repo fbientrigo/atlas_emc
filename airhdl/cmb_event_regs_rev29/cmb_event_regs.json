@@ -1,0 +1,218 @@
+{
+  "jsonVersion": 2,
+  "registerMap": {
+    "name": "cmb_event",
+    "description": "Evento del ChargeMonitoring Board teniendo en cuenta ACK, FSM, VETO, Overflow y un buen almacenamiento de datos",
+    "width": 32,
+    "baseAddress": 2686124032,
+    "addrWidthBits": 32,
+    "registers": [
+      {
+        "type": "Register",
+        "name": "magic",
+        "description": "Identificar el periférico",
+        "access": "READ_ONLY",
+        "addressOffset": 0,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "control",
+        "description": "Enable, ACK, reset, test_start",
+        "access": "READ_WRITE",
+        "addressOffset": 4,
+        "size": 32,
+        "fields": [
+          {
+            "name": "enable",
+            "description": "",
+            "bitWidth": 1,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          },
+          {
+            "name": "ack",
+            "description": "",
+            "bitWidth": 1,
+            "bitOffset": 1,
+            "reset": 0,
+            "selfClear": true,
+            "enumValues": [],
+            "volatile": false
+          },
+          {
+            "name": "soft_reset",
+            "description": "",
+            "bitWidth": 1,
+            "bitOffset": 2,
+            "reset": 0,
+            "selfClear": true,
+            "enumValues": [],
+            "volatile": false
+          },
+          {
+            "name": "test_start",
+            "description": "",
+            "bitWidth": 1,
+            "bitOffset": 3,
+            "reset": 0,
+            "selfClear": true,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "status",
+        "description": "Busy, ready, overflow, veto",
+        "access": "READ_ONLY",
+        "addressOffset": 8,
+        "size": 32,
+        "fields": [
+          {
+            "name": "busy",
+            "description": "",
+            "bitWidth": 1,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          },
+          {
+            "name": "ready",
+            "description": "",
+            "bitWidth": 1,
+            "bitOffset": 1,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          },
+          {
+            "name": "overflow",
+            "description": "",
+            "bitWidth": 1,
+            "bitOffset": 2,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          },
+          {
+            "name": "veto",
+            "description": "",
+            "bitWidth": 1,
+            "bitOffset": 3,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "event_size",
+        "description": "Bytes capturados",
+        "access": "READ_ONLY",
+        "addressOffset": 12,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "event_id",
+        "description": "Numero de evento",
+        "access": "READ_ONLY",
+        "addressOffset": 16,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Register",
+        "name": "overflow_count",
+        "description": "Control de perdidas",
+        "access": "READ_ONLY",
+        "addressOffset": 20,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      },
+      {
+        "type": "Memory",
+        "depth": 10272,
+        "readLatency": 1,
+        "name": "data_mem",
+        "description": "Memoria de datos",
+        "access": "READ_ONLY",
+        "addressOffset": 4096,
+        "size": 32,
+        "fields": [
+          {
+            "name": "value",
+            "description": "",
+            "bitWidth": 32,
+            "bitOffset": 0,
+            "reset": 0,
+            "selfClear": false,
+            "enumValues": [],
+            "volatile": false
+          }
+        ]
+      }
+    ],
+    "revision": 29,
+    "generateRecordPorts": false,
+    "generatePackedStructs": false,
+    "disableTimestamps": false
+  }
+}

@@ -1,15 +1,15 @@
 # Notas de trabajo EMP / lpGBT
 
-[Orden de trabajo y herramientas](14_NOTAS_DE_TRABAJO.md): firmware, reloj, lpGBT y lectura; rutas desde el home, opciones y ejemplos. Esta es la entrada actual de la web.
+[Leer y guardar datos del EMP](15_OPERAR_EMP.md) es la guía de operación. Incluye comandos, ubicación del CSV y resultados de la Trenz del 19-11-2026. [Orden de trabajo y herramientas](14_NOTAS_DE_TRABAJO.md) cubre firmware, reloj y CLIs anteriores.
 
-
-**Para el ingeniero:** [guía de campo independiente](00_GUIA_CAMPO.md). A1/A2 pueden hacerse ahora. Las lecturas MMIO requieren cerrar la identidad del firmware y su capturador. La recepción FE correcta todavía no está demostrada.
+**Para el ingeniero:** [guía de campo independiente](00_GUIA_CAMPO.md). A1/A2 pueden hacerse ahora. Las lecturas MMIO requieren cerrar la identidad del firmware y su capturador. Para atribuir los datos al front-end queda pendiente la prueba A/B/A.
 
 **Entrada breve:** [guía resumida](13_GUIA_RAPIDA.md). **Web:** https://fbientrigo.github.io/atlas_emc/ — despliegue mediante GitHub Actions desde `main`. [Construcción y uso sin conexión](09_USO_LOCAL.md).
 
 | Necesito… | Entrada |
 |---|---|
-| Operar y registrar una sesión | [Procedimiento P0](00_GUIA_CAMPO.md) |
+| Leer, grabar y encontrar el CSV | [Guía de operación](15_OPERAR_EMP.md) |
+| Demostrar recepción del front-end | [Procedimiento P0](00_GUIA_CAMPO.md) |
 | Seguir señales y llamadas | [Mapa técnico y recorridos](01_MAPA_TECNICO.md) |
 | Elegir una herramienta existente | [Catálogo operacional](02_CATALOGO.md) |
 | Entender por qué llegamos a este estado | [Historia y versiones](03_HISTORIA.md) |

@@ -1,5 +1,7 @@
 # Guía de campo: comprobar recepción real del front-end
 
+Para leer o capturar en el mapa comprobado en noviembre, abre la [guía de operación con emp](15_OPERAR_EMP.md). Este procedimiento cubre la prueba de origen de los datos.
+
 **Si los valores dejan de actualizarse:** conservar el fallo antes de reiniciar. Ver [diagnóstico ampliado y procedimientos F0/F1](10_BLOQUEO_LECTURAS.md). Distinguir comando detenido de comando que termina con una muestra repetida.
 
 **Automatización opcional:** [script de diagnóstico y sesión S0–S4](12_SCRIPT_DIAGNOSTICO.md), añadido el 25-10-2026. El inventario no ejecuta tooling hardware; la captura reutiliza la CLI y exige las mismas validaciones de esta guía.

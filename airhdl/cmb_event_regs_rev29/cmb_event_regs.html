@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>cmb_event Register Map</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+        <style>
+            .dl-horizontal dt {
+                text-align: left;
+                margin-bottom: 1em;
+            }
+
+            .dl-horizontal dl {
+                margin-bottom: 1em;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="row">
+            <div class="col-md-offset-2 col-md-8">
+                <h2 class="page-header">cmb_event
+                    <small>register map</small>
+                </h2>
+
+                <dl class="dl-horizontal">
+                    <dt><strong>Description</strong></dt><dd>Evento del ChargeMonitoring Board teniendo en cuenta ACK, FSM, VETO, Overflow y un buen almacenamiento de datos</dd>
+                    <dt><strong>Default base address</strong></dt><dd style="font-family:monospace;">0xA01B0000</dd>
+                    <dt><strong>Register width</strong></dt><dd>32 bits</dd>
+                    <dt><strong>Default address width</strong></dt><dd>32 bits</dd>
+                    <dt><strong>Register count</strong></dt><dd>7</dd>
+                    <dt>Range</dt>
+                    <dd>45184 bytes
+                    </dd>
+                    <dt><strong>Revision</strong></dt><dd>29</dd>
+                </dl>
+<a id="OVERVIEW"></a>
+                <h3 class="page-header">Overview</h3>
+                <div class="panel panel-default">
+                    <table class="table table-hover">
+                        <colgroup>
+                            <col class="col-md-1">
+                            <col class="col-md-2">
+                            <col class="col-md-8">
+                            <col class="col-md-1">
+                        </colgroup>
+                        <tr class="active">
+                            <th style="padding-left: 2em;">Offset</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                        </tr>
+                        <tr onclick="window.location='#REG@magic';">
+                            <td style="font-family: monospace; padding-left: 2em;">0x0</td>
+                            <td>magic</td>
+                            <td>Identificar el periférico</td>
+                            <td style="font-family: monospace;">REG</td>
+                        </tr>
+                        <tr onclick="window.location='#REG@control';">
+                            <td style="font-family: monospace; padding-left: 2em;">0x4</td>
+                            <td>control</td>
+                            <td>Enable, ACK, reset, test_start</td>
+                            <td style="font-family: monospace;">REG</td>
+                        </tr>
+                        <tr onclick="window.location='#REG@status';">
+                            <td style="font-family: monospace; padding-left: 2em;">0x8</td>
+                            <td>status</td>
+                            <td>Busy, ready, overflow, veto</td>
+                            <td style="font-family: monospace;">REG</td>
+                        </tr>
+                        <tr onclick="window.location='#REG@event_size';">
+                            <td style="font-family: monospace; padding-left: 2em;">0xC</td>
+                            <td>event_size</td>
+                            <td>Bytes capturados</td>
+                            <td style="font-family: monospace;">REG</td>
+                        </tr>
+                        <tr onclick="window.location='#REG@event_id';">
+                            <td style="font-family: monospace; padding-left: 2em;">0x10</td>
+                            <td>event_id</td>
+                            <td>Numero de evento</td>
+                            <td style="font-family: monospace;">REG</td>
+                        </tr>
+                        <tr onclick="window.location='#REG@overflow_count';">
+                            <td style="font-family: monospace; padding-left: 2em;">0x14</td>
+                            <td>overflow_count</td>
+                            <td>Control de perdidas</td>
+                            <td style="font-family: monospace;">REG</td>
+                        </tr>
+                        <tr onclick="window.location='#REG@data_mem';">
+                            <td style="font-family: monospace; padding-left: 2em;">0x1000</td>
+                            <td>data_mem</td>
+                            <td>Memoria de datos</td>
+                            <td style="font-family: monospace;">MEM[10272]</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3 class="page-header">Registers</h3>
+
+<a id="REG@magic"></a>
+<div class="panel panel-default">
+                <table class="table">
+                    <tr class="active">
+                        <td colspan="3"><span class="lead"><strong>magic&nbsp;</span></strong><br/>Identificar el periférico</td>
+                        <td colspan="2" style="font-family:monospace;">
+                            Register
+                            <br/>Offset: 0x0
+                            <br/>Access: READ_ONLY
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[31:0]</td>
+                        <td><strong>value</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                        </td>
+                    </tr>
+                </table>
+</div>
+<a id="REG@control"></a>
+<div class="panel panel-default">
+                <table class="table">
+                    <tr class="active">
+                        <td colspan="3"><span class="lead"><strong>control&nbsp;</span></strong><br/>Enable, ACK, reset, test_start</td>
+                        <td colspan="2" style="font-family:monospace;">
+                            Register
+                            <br/>Offset: 0x4
+                            <br/>Access: READ_WRITE
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[0]</td>
+                        <td><strong>enable</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[1]</td>
+                        <td><strong>ack</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                                <br/><span class="badge">self-clearing</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[2]</td>
+                        <td><strong>soft_reset</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                                <br/><span class="badge">self-clearing</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[3]</td>
+                        <td><strong>test_start</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                                <br/><span class="badge">self-clearing</span>
+                        </td>
+                    </tr>
+                </table>
+</div>
+<a id="REG@status"></a>
+<div class="panel panel-default">
+                <table class="table">
+                    <tr class="active">
+                        <td colspan="3"><span class="lead"><strong>status&nbsp;</span></strong><br/>Busy, ready, overflow, veto</td>
+                        <td colspan="2" style="font-family:monospace;">
+                            Register
+                            <br/>Offset: 0x8
+                            <br/>Access: READ_ONLY
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[0]</td>
+                        <td><strong>busy</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[1]</td>
+                        <td><strong>ready</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[2]</td>
+                        <td><strong>overflow</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[3]</td>
+                        <td><strong>veto</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                        </td>
+                    </tr>
+                </table>
+</div>
+<a id="REG@event_size"></a>
+<div class="panel panel-default">
+                <table class="table">
+                    <tr class="active">
+                        <td colspan="3"><span class="lead"><strong>event_size&nbsp;</span></strong><br/>Bytes capturados</td>
+                        <td colspan="2" style="font-family:monospace;">
+                            Register
+                            <br/>Offset: 0xC
+                            <br/>Access: READ_ONLY
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[31:0]</td>
+                        <td><strong>value</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                        </td>
+                    </tr>
+                </table>
+</div>
+<a id="REG@event_id"></a>
+<div class="panel panel-default">
+                <table class="table">
+                    <tr class="active">
+                        <td colspan="3"><span class="lead"><strong>event_id&nbsp;</span></strong><br/>Numero de evento</td>
+                        <td colspan="2" style="font-family:monospace;">
+                            Register
+                            <br/>Offset: 0x10
+                            <br/>Access: READ_ONLY
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[31:0]</td>
+                        <td><strong>value</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                        </td>
+                    </tr>
+                </table>
+</div>
+<a id="REG@overflow_count"></a>
+<div class="panel panel-default">
+                <table class="table">
+                    <tr class="active">
+                        <td colspan="3"><span class="lead"><strong>overflow_count&nbsp;</span></strong><br/>Control de perdidas</td>
+                        <td colspan="2" style="font-family:monospace;">
+                            Register
+                            <br/>Offset: 0x14
+                            <br/>Access: READ_ONLY
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[31:0]</td>
+                        <td><strong>value</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                        </td>
+                    </tr>
+                </table>
+</div>
+<a id="REG@data_mem"></a>
+<div class="panel panel-default">
+                <table class="table">
+                    <tr class="active">
+                        <td colspan="3"><span class="lead"><strong>data_mem&nbsp;</span></strong><br/>Memoria de datos</td>
+                        <td colspan="2" style="font-family:monospace;">
+                            Memory
+                            (depth: 10272, read latency: 1)
+                            <br/>Offset: 0x1000
+                            <br/>Access: READ_ONLY
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right" style="font-family:monospace; width:4em;">[31:0]</td>
+                        <td><strong>value</strong><br/>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                        <td class="text-left" style="width:20em;">Reset: <span style="font-family:monospace;">0x0</span>
+                        </td>
+                    </tr>
+                </table>
+</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-offset-3 col-md-6">
+                <p class="text-center" style="padding-top:1em; color:#888;">Generated on 2026-11-17 at 04:50 (UTC) by airhdl version 2023.07.1-936312266</p>
+            </div>
+        </div>
+    </body>
+</html>

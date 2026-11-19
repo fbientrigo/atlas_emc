@@ -26,7 +26,13 @@ const redrawn = [];
 browser.window.AtlasMermaid = {run:async () => {}};
 browser.window.AtlasMermaidSetTheme = value => redrawn.push(value);
 browser.window.eval(script);
-assert(browser.window.document.getElementById('content').textContent.includes('reading_1006.dtbo'), 'La portada debe mostrar el orden de trabajo actualizado');
+const page = browser.window.document.getElementById('content');
+assert(page.textContent.includes('sudo ./emp read'), 'La portada debe mostrar cómo leer con emp');
+assert(page.querySelector('a[href$="/emp-capture.tar.gz"]'), 'La portada debe enlazar la descarga');
+browser.window.location.hash = '#biblioteca';
+browser.window.dispatchEvent(new browser.window.HashChangeEvent('hashchange'));
+assert.equal(page.querySelector('.doc-index a').getAttribute('href'), '#doc/15_OPERAR_EMP');
+assert.equal(page.querySelectorAll('details[open]').length, 0);
 browser.window.location.hash = '#herramientas';
 browser.window.dispatchEvent(new browser.window.HashChangeEvent('hashchange'));
 assert.equal(browser.window.document.querySelectorAll('.tool-row').length, 9, 'Faltan fichas ampliadas');
@@ -72,6 +78,11 @@ assert(!/<(?:script|link|img)[^>]+(?:src|href)="https?:/i.test(html),'Dependenci
 assert(!/\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/.test(app),'Red no esperada');
 const ctx=vm.createContext({});vm.runInContext(await readFile(path.join(root,'web/logica.js'),'utf8'),ctx);const L=ctx.AtlasLogic;
 const capture=(x=0)=>['magic: 0x12345678',...Array.from({length:9},(_,i)=>'data_group_'+i+': 0x'+(i===0?x:0).toString(16).padStart(8,'0')),'data_header: 0x00000001','clk_thresh: 0x0000000e','14'].join('\n');
+const empRead = capture(0x80000001).split('\n').slice(0,-1).map(line=>line.replace(': ', '       ')).join('\n');
+assert(L.parseCapture(empRead).complete, 'El comparador debe aceptar la salida de emp read');
+assert.equal(L.compareCaptures(L.parseCapture(capture()),L.parseCapture(empRead)).rows[1].xor,0x80000001);
+assert(L.parseCapture(empRead+'\ndata_group_0 0x0').errors.length);
+assert(L.parseCapture('data_group_9 0x0').errors.length);
 const a=L.parseCapture(capture()),b=L.parseCapture(capture(0x80000001));assert(a.complete);assert.equal(a.ignored.length,1);let r=L.compareCaptures(a,b);assert.equal(r.changedGroups,1);assert.equal(r.rows[1].xor,0x80000001);assert.equal(r.rows[1].bits.join(','),'31,0');
 for(let i=0;i<32;i++){const v=2**i;const r=L.compareCaptures(a,L.parseCapture(capture(v)));assert.equal(r.rows[1].bits.join(','),String(i));assert.equal(r.rows[1].xor,v)}
 r=L.compareCaptures(a,a);assert.equal(r.changedGroups,0);assert.equal(r.comparableGroups,9);

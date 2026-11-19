@@ -7,9 +7,9 @@ function parseCapture(text){
  const values={}, errors=[], ignored=[];
  if(text.length>200000){return {values,errors:['El texto supera 200 kB. Seleccionar una única captura.'],ignored,missing:fields,complete:false}}
  text.split(/\r?\n/).forEach((line,i)=>{
-  const m=line.match(/^\s*(magic|data_group_[0-8]|data_header|clk_thresh):\s*0x([\da-fA-F]{1,8})\s*$/);
+  const m=line.match(/^\s*(magic|data_group_[0-8]|data_header|clk_thresh)(?:\s*:\s*|\s+)0x([\da-fA-F]{1,8})\s*$/);
   if(m){if(Object.hasOwn(values,m[1]))errors.push('Línea '+(i+1)+': etiqueta duplicada '+m[1]+'. No mezclar capturas.');else values[m[1]]=parseInt(m[2],16)>>>0;}
-  else if(/^\s*(magic|data_group_\d+|data_header|clk_thresh)\s*:/.test(line))errors.push('Línea '+(i+1)+': etiqueta o hexadecimal de 32 bits no válido.');
+  else if(/^\s*(magic|data_group_\d+|data_header|clk_thresh)(?:\s*:|\s+\S)/.test(line))errors.push('Línea '+(i+1)+': etiqueta o hexadecimal de 32 bits no válido.');
   else if(line.trim())ignored.push(i+1);
  });
  const missing=fields.filter(k=>!Object.hasOwn(values,k));

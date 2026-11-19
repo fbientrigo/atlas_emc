@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""Interfaz de operación para el EMP."""
+import argparse
+import math
+import sys
+import time
+from datetime import datetime
+
+import doctor
+import night
+from registers import ROOT, config, drop_sudo, reader
+
+
+def positive_int(value):
+    n = int(value)
+    if n < 1:
+        raise argparse.ArgumentTypeError('se requiere un entero positivo')
+    return n
+
+
+def nonnegative(value):
+    n = float(value)
+    if not math.isfinite(n) or n < 0:
+        raise argparse.ArgumentTypeError('se requiere un número finito >= 0')
+    return n
+
+
+def main():
+    p = argparse.ArgumentParser(description='Captura de registros EMP')
+    sub = p.add_subparsers(dest='cmd', required=True)
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument('--config', default=ROOT/'registers.json', help='mapa de registros JSON')
+    common.add_argument('--mock', action='store_true', help='usar datos simulados')
+    for cmd, help_text in [('read','una lectura'), ('watch','primera lectura y cambios en compare'),
+                           ('start','captura en segundo plano'), ('doctor','diagnóstico por banco y enlace')]:
+        parser = sub.add_parser(cmd, parents=[common], help=help_text)
+        if cmd == 'watch':
+            parser.add_argument('--count', type=positive_int, help='límite de observaciones examinadas')
+            parser.add_argument('--interval-ms', type=nonnegative, default=0, help='pausa entre lecturas (0 = continua)')
+            parser.add_argument('--all', action='store_true', help='imprimir también observaciones repetidas')
+        if cmd == 'start':
+            parser.add_argument('--delay-min', type=nonnegative, default=0, help='espera inicial')
+            parser.add_argument('--bursts', type=positive_int, default=96, help='número de ráfagas')
+            parser.add_argument('--every-min', type=nonnegative, default=5, help='minutos entre inicios')
+            parser.add_argument('--count', type=positive_int, default=10000, help='observaciones por ráfaga')
+            parser.add_argument('--interval-ms', type=nonnegative, default=1, help='intervalo entre muestras')
+        if cmd == 'doctor':
+            parser.add_argument('--all', action='store_true', help='leer todos los bancos tgc enumerados')
+            parser.add_argument('--probe', metavar='N|all', help='transacción IC activa en el enlace N o en todos')
+    for cmd, desc in [('status','avance y ruta'),('stop','detener la última captura')]:
+        sub.add_parser(cmd, help=desc)
+    a = p.parse_args()
+    if a.cmd in ('status','stop'):
+        drop_sudo()
+        return night.control(a.cmd)
+    cfg = config(a.config)
+    if a.cmd == 'doctor':
+        return doctor.run(cfg, a)
+    with reader(cfg, a.mock) as read:
+        drop_sudo()
+        if a.cmd == 'start':
+            night.start(cfg, a, read)
+            return 0
+        names = list(cfg['registers'])
+        if a.cmd == 'read':
+            if a.mock:
+                print('SIMULADO')
+            for name, word in zip(names, read()):
+                print(f'{name:18} 0x{word:08X}')
+            return 0
+        compare = [names.index(n) for n in cfg['compare']]
+        print(('SIMULADO ' if a.mock else '') + 'muestra hora_local ' + ' '.join(names), flush=True)
+        previous = None
+        n = 0
+        while a.count is None or n < a.count:
+            n += 1
+            words = read()
+            key = tuple(words[i] for i in compare)
+            if a.all or key != previous:
+                print(n, datetime.now().astimezone().isoformat(timespec='microseconds'),
+                      *(f'0x{word:08X}' for word in words), flush=True)
+            previous = key
+            if a.interval_ms and (a.count is None or n < a.count):
+                time.sleep(a.interval_ms / 1000)
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)
+    except BrokenPipeError:
+        sys.exit(0)
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, OverflowError) as exc:
+        sys.exit(f'ERROR: {exc}')

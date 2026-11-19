@@ -1,6 +1,6 @@
 # Catálogo operacional de herramientas existentes
 
-Para ejecutar, seguir primero [las condiciones y comandos de campo](00_GUIA_CAMPO.md). Este catálogo describe implementación estática, no disponibilidad actual. Las ubicaciones son relativas al entorno histórico; ningún ELF está incluido en el ZIP curado.
+Para lectura y captura del despliegue de noviembre, ver [emp y raw.sh](15_OPERAR_EMP.md). Para las herramientas anteriores, seguir primero [las condiciones y comandos de campo](00_GUIA_CAMPO.md). Este catálogo describe implementación estática, no disponibilidad actual. Las ubicaciones son relativas al entorno histórico; ningún ELF está incluido en el ZIP curado.
 
 ## Elegir por tarea
 
@@ -9,7 +9,7 @@ Para ejecutar, seguir primero [las condiciones y comandos de campo](00_GUIA_CAMP
 | Identificar dispositivos | sysfs; opcional `lsuio -v` | A1, sin `-a`; el enumerador recuperado tiene un defecto de liberación. |
 | Ver disponibilidad de artefactos | `loadFirmare.sh -l` | Leer la copia local antes; no pasar un nombre de firmware. |
 | Diagnosticar transporte | `fwMonitor --id N` | Identificar `empfw_debughub` y su mapa. |
-| Ver grupos de payload | `tgc_readuplink_cli` | Nombre fijo único y firmware con mapa de nueve grupos. |
+| Ver grupos de payload | [`emp read`](15_OPERAR_EMP.md#leer-en-la-trenz) o `tgc_readuplink_cli` | Confirmar nombre UIO y mapa. |
 | Consultar otro nombre UIO con offsets explícitos | `readuio` existente | Identificar la variante; ambas fuentes recuperadas usan `NOMBRE OFFSET...`. |
 | Consultar configuración del chip | `lpGbtRegister` o exportación PiGBT existente | Operación IC activa, fuera del inventario pasivo. |
 | Estimular patrones FPGA | `readprbs_cli`, scripts `devmem` | Pruebas internas que escriben, no recepción FE. No ejecutar como P0. |
