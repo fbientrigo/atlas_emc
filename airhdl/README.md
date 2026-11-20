@@ -35,3 +35,20 @@ bash captura10.sh noche
 ```
 
 Las corridas quedan en `~/capturas/uplink10/`. Cada CSV contiene dos frames completos consecutivos y los cuatro bytes consecutivos `d0…d6` del canal 0 de cada grupo. Cada ejecución programada del FPGA genera un snapshot a 100 Hz. Para evaluar continuidad entre snapshots, consulta SEQ. Para evaluar alternancia dentro de un snapshot, usa el resumen por grupo. La captura de ocho horas necesita aproximadamente 0,9 GB.
+
+## Graficar una corrida terminada
+
+Usa [graficar10.py](coherent-capture/graficar10.py) con Python 3 y Matplotlib 3.6 o posterior. Se puede instalar en un entorno virtual del usuario:
+
+```bash
+python3 -m venv "$HOME/.venvs/emp-plot"
+"$HOME/.venvs/emp-plot/bin/python" -m pip install 'matplotlib>=3.6'
+```
+
+Pasa la ruta que mostró `captura10.sh estado`:
+
+```bash
+"$HOME/.venvs/emp-plot/bin/python" graficar10.py /RUTA/A/LA/CORRIDA
+```
+
+El ZIP `graficos.zip` queda junto a `data.csv`. Contiene cuatro PNG (adquisición y saltos, estabilidad AAAA/ABAB en el tiempo, diferencias A/B por palabra y distribución de bytes por fase), tablas CSV y un resumen. Por defecto agrega en intervalos de 60 s. Usa `--intervalo 5` para una prueba corta. El ZIP contiene los resultados derivados y el log, mientras que el CSV crudo queda en la carpeta de la corrida.
