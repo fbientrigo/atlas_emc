@@ -38,22 +38,23 @@ Las corridas quedan en `~/capturas/uplink10/`. Cada CSV contiene dos frames comp
 
 ## Ver g0/c0 y g1/c0 en vivo
 
-Desde `coherent-capture`, si ya hay una captura en curso:
+Desde la raíz de la copia Git en la EMP, con el capturador libre:
+
+```bash
+git pull --ff-only
+./airhdl/coherent-capture/quick_watch.sh
+```
+
+El script compila `emp_acq_capture` si hace falta, pide `sudo` y abre una lectura en vivo. Los datos pasan al visor sin guardar un CSV. Con Ctrl+C se cierra esta lectura.
+
+La vista muestra N a N+3 en crudo. Cuenta las ventanas con desvíos y los bytes distintos en los **últimos 60 segundos** según el reloj de captura. Una ventana con dos bytes distintos suma un desvío y dos bytes. BABA exacto se cuenta aparte. Los contadores recientes expiran incluso si dejan de llegar datos. Las referencias por defecto son `--g0 18:80 --g1 40:0C`. Se pueden pasar otros valores al script.
+
+Si ya hay una captura guardando un CSV, se puede seguir su salida sin abrir un lector adicional. Desde `airhdl/coherent-capture`:
 
 ```bash
 corrida=$(cat "$HOME/capturas/uplink10/ultima")
-tail -n 0 -F "$corrida/data.csv" | python3 ver10.py
+tail -n 0 -F "$corrida/data.csv" | python3 ver10.py --segundos 60
 ```
-
-La vista muestra N a N+3 en crudo y cuenta desvíos desde que se abre. Procesa todas las filas nuevas aunque redibuje la pantalla cada medio segundo. La captura normalmente entrega datos al CSV en bloques de aproximadamente un segundo. La columna Recientes usa las últimas 1000 ventanas válidas, unos 10 s a 100 Hz. BABA exacto cuenta aparte como fase opuesta. Si los dos patrones empatan, el visor muestra fase ambigua y la cantidad de bytes distintos es el mínimo de las dos comparaciones. Ctrl+C cierra la vista y la captura continúa.
-
-Para ver datos en vivo cuando no hay ninguna captura escribiendo un CSV:
-
-```bash
-sudo ./emp_acq_capture --seconds 0 --out - | python3 ver10.py
-```
-
-Los valores de referencia por defecto son `--g0 18:80 --g1 40:0C`. Cambia esos argumentos según el patrón esperado.
 
 ## Graficar una corrida terminada
 

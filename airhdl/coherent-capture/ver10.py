@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 import select
 import sys
-from time import monotonic
+from time import monotonic, time_ns
 
 
 def reference(value):
@@ -38,15 +38,21 @@ def inspect(word, phases):
 
 
 class Monitor:
-    def __init__(self, phases, size):
+    def __init__(self, phases, size, seconds=None):
         self.phases = phases
         self.size = size
+        self.seconds = seconds
         self.history = deque()
         self.total = Counter()
         self.recent = Counter()
         self.last = None
         self.last_error = None
         self.updated = monotonic()
+
+    def expire(self, now):
+        cutoff = now - self.seconds * 10**9
+        while self.history and self.history[0][0] <= cutoff:
+            self.recent.subtract(self.history.popleft()[1])
 
     def consume(self, line):
         if not line or line.startswith(b"#") or line.startswith(b"t_unix_ns,"):
@@ -71,15 +77,19 @@ class Monitor:
                            f"g{i}_fase": int(label == "fase BABA")})
         self.total.update(counts)
         self.recent.update(counts)
-        self.history.append(counts)
-        if len(self.history) > self.size:
-            self.recent.subtract(self.history.popleft())
+        self.history.append((when, counts))
+        if self.seconds is not None:
+            self.expire(when)
+        elif len(self.history) > self.size:
+            self.recent.subtract(self.history.popleft()[1])
         if any(reading[1] for reading in readings):
             self.last_error = self.last
 
     def screen(self):
         if self.last is None:
             return "EMP · esperando ventanas de la captura…"
+        if self.seconds is not None:
+            self.expire(time_ns())
         when, seq, ready, readings = self.last
         stamp = datetime.fromtimestamp(when / 1e9).strftime("%H:%M:%S.%f")[:-3]
         age = monotonic() - self.updated
@@ -89,7 +99,7 @@ class Monitor:
             f"Ventanas válidas {self.total['válidas']}  |  sin READY {self.total['sin_ready']}"
             f"  |  omitidas según SEQ {self.total['omitidas']}",
             "",
-            "Canal     N     N+1   N+2   N+3   Estado           Recientes   Total   Bytes",
+            "Canal     N     N+1   N+2   N+3   Estado           Vent. rec. Bytes rec. Total",
         ]
         for group, (label, _, values) in enumerate(readings):
             key = f"g{group}"
@@ -97,7 +107,9 @@ class Monitor:
             recent = f"{self.recent[key+'_vent']}/{len(self.history)}"
             total = self.total[key + "_vent"]
             byte_count = self.total[key + "_bytes"]
-            lines.append(f"{key}/c0     {frames}  {label if ready else 'sin READY':16} {recent:11} {total:7} {byte_count}")
+            recent_bytes = self.recent[key + "_bytes"]
+            lines.append(f"{key}/c0     {frames}  {label if ready else 'sin READY':16} "
+                         f"{recent:10} {recent_bytes:10} {total}/{byte_count}")
         lines += [
             "",
             f"Ambos en la misma ventana: {self.recent['ambos']}/{len(self.history)} recientes"
@@ -109,9 +121,10 @@ class Monitor:
             frames = "  |  ".join(f"g{i}/c0 " + " ".join(values)
                                  for i, (_, _, values) in enumerate(errors))
             lines.append(f"Último desvío · SEQ {last_seq}  |  {frames}")
-        lines += ["* byte distinto · ? depende de la fase",
-                  "Recientes = ventanas con desvío / ventanas válidas recientes",
-                  "Bytes = diferencias acumuladas contra la fase más cercana",
+        period = f"últimos {self.seconds} s" if self.seconds is not None else f"últimas {self.size} ventanas válidas"
+        lines += [f"Rec. ({period}): ventanas con desvío / válidas",
+                  "* byte distinto · ? depende de la fase",
+                  "Total: ventanas con desvío / bytes distintos desde el inicio",
                   "Ctrl+C para cerrar"]
         return "\n".join(lines)
 
@@ -121,11 +134,12 @@ def main():
     parser.add_argument("--g0", type=reference, default="18:80")
     parser.add_argument("--g1", type=reference, default="40:0C")
     parser.add_argument("--ventanas", type=int, default=1000, help="tamaño de la ventana móvil")
+    parser.add_argument("--segundos", type=int, help="ventana reciente en segundos del reloj de captura")
     args = parser.parse_args()
-    if args.ventanas <= 0:
-        parser.error("--ventanas debe ser positivo.")
+    if args.ventanas <= 0 or (args.segundos is not None and args.segundos <= 0):
+        parser.error("--ventanas y --segundos deben ser positivos.")
 
-    monitor = Monitor((args.g0, args.g1), args.ventanas)
+    monitor = Monitor((args.g0, args.g1), args.ventanas, args.segundos)
     terminal = sys.stdout.isatty()
 
     def draw():
