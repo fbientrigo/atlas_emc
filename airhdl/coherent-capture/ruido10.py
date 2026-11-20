@@ -2,7 +2,7 @@
 """Analiza desvíos del patrón de g0/c0 y g1/c0 en el CSV del uplink 10."""
 import argparse
 import csv
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
 from datetime import datetime, timezone
 from math import nan
 from pathlib import Path
@@ -35,6 +35,9 @@ def classify(observed, pattern):
 def analyze(path, patterns, seconds):
     columns = {"t_unix_ns", "seq_gap", "rdy_a", "rdy_b", "d0", "d1"}
     bins = defaultdict(Counter)
+    distributions = defaultdict(lambda: [Counter() for _ in patterns])
+    preview = deque(maxlen=16)
+    detail = None
     histograms = [[Counter() for _ in range(4)] for _ in patterns]
     first = last = None
     previous = None
@@ -51,8 +54,11 @@ def analyze(path, patterns, seconds):
                 first = now
             if last is not None and now < last:
                 raise ValueError(f"El reloj retrocedió en la fila {reader.line_num}.")
+            index = (now - first) // (seconds * 10**9)
+            count = bins[index]
+            if last is not None:
+                count["dt_max_ns"] = max(count["dt_max_ns"], now - last)
             last = now
-            count = bins[(now - first) // (seconds * 10**9)]
             count["filas"] += 1
             count["omitidos_seq"] += max(0, gap - 1)
             if (row["rdy_a"], row["rdy_b"]) != ("1", "1"):
@@ -65,8 +71,17 @@ def analyze(path, patterns, seconds):
             for phases, values in zip(histograms, observed):
                 for counts, value in zip(phases, values):
                     counts[value] += 1
+            for histogram, values in zip(distributions[index], observed):
+                histogram.update(values)
             result = [classify(values, pattern) for values, pattern in zip(observed, patterns)]
             flags = tuple(category == "desvio" for category, _ in result)
+            if detail is None:
+                if any(flags):
+                    detail = [*preview, (now, observed)]
+                else:
+                    preview.append((now, observed))
+            elif len(detail) < 24:
+                detail.append((now, observed))
             for i, (category, _) in enumerate(result):
                 name = f"g{i}_{category}"
                 count[name] += 1
@@ -86,7 +101,10 @@ def analyze(path, patterns, seconds):
             previous = flags
     if not bins:
         raise ValueError("El CSV está vacío.")
-    return [bins.get(index, Counter()) for index in range(max(bins) + 1)], first, times, histograms
+    indices = range(max(bins) + 1)
+    empty = [Counter() for _ in patterns]
+    return ([bins.get(index, Counter()) for index in indices], first, times, histograms,
+            [distributions.get(index, empty) for index in indices], detail if detail is not None else list(preview))
 
 
 def ratio(value, total):
@@ -126,42 +144,149 @@ def plot(rows, seconds, output, title, plt):
     plt.close(fig)
 
 
+def reversed_byte(value):
+    return int(f"{value:08b}"[::-1], 2)
+
+
 def plot_histograms(folder, histograms, patterns, title, plt):
-    fig, axes = plt.subplots(2, 1, figsize=(10, 6.5), sharex=True, layout="constrained")
-    fig.suptitle(f"{title} · histograma de bytes recibidos")
     with (folder / "histograma_valores.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.writer(stream)
-        writer.writerow(["canal", "valor_hex", "total", "N", "N+1", "N+2", "N+3", "porcentaje"])
+        writer.writerow(["canal", "valor_hex", "total", "N", "N+1", "N+2", "N+3", "porcentaje",
+                         "valor_reverse_hex"])
+        for group, phases in enumerate(histograms):
+            counts = sum(phases, Counter())
+            total = sum(counts.values())
+            for value, count in sorted(counts.items()):
+                writer.writerow([f"g{group}/c0", f"0x{value:02X}", count,
+                                 *(phase[value] for phase in phases),
+                                 f"{100 * count / total:.9g}", f"0x{reversed_byte(value):02X}"])
+
+    modes = [
+        ("histograma_valores.png", "Ocurrencias · escala logarítmica", "log"),
+        ("fig4_hist_eje0.png", "Ocurrencias", "linear"),
+        ("fig4_hist_pct.png", "% de bytes del canal", "percent"),
+    ]
+    for name, ylabel, mode in modes:
+        fig, axes = plt.subplots(1, 2, figsize=(12, 4.6), layout="constrained")
+        fig.suptitle(f"{title} · histograma de bytes · reverse\nAzul: referencia   ·   Naranja: otros valores")
         for group, (ax, phases, pattern) in enumerate(zip(axes, histograms, patterns)):
             counts = sum(phases, Counter())
             total = sum(counts.values())
-            values = sorted(counts)
-            channel = f"g{group}/c0"
-            for value in values:
-                writer.writerow([channel, f"0x{value:02X}", counts[value],
-                                 *(phase[value] for phase in phases),
-                                 f"{100 * counts[value] / total:.9g}"])
-
-            ax.set_title(f"{channel} · {total:,} bytes", loc="left")
-            ax.set_ylabel("Ocurrencias")
+            ax.set(title=f"g{group}/c0 · {total:,} bytes", xlabel="Valor observado", ylabel=ylabel)
             ax.grid(axis="y", alpha=.22)
-            if not values:
+            if not counts:
                 ax.text(.5, .5, "Sin ventanas válidas", ha="center", transform=ax.transAxes)
                 continue
-            ax.set_yscale("log")
-            ax.set_ylim(bottom=.7)
-            ax.bar(values, [counts[value] - .7 for value in values], bottom=.7,
-                   color="#206582", width=.85, zorder=2)
-            for i, value in enumerate(pattern[:2]):
-                ax.axvline(value, color="#b25225", linewidth=1, linestyle="--", zorder=1,
-                           label="Bytes de referencia" if i == 0 else None)
-            ax.legend(loc="upper right", fontsize=8)
+            raw_values = sorted(counts, key=reversed_byte)
+            heights = [counts[v] if mode != "percent" else 100 * counts[v] / total for v in raw_values]
+            bottom = .7 if mode == "log" else 0
+            if mode == "log":
+                ax.set_yscale("log")
+            ceiling = max(heights) * (2.5 if mode == "log" else 1.22)
+            ax.set_ylim(bottom, ceiling)
+            bars = ax.bar(range(len(heights)), [y - bottom for y in heights], bottom=bottom,
+                          color=["#276a8b" if v in pattern[:2] else "#ba542c" for v in raw_values],
+                          width=.68)
+            stride = max(1, (len(heights) + 15) // 16)
+            shown = sorted(set(range(0, len(heights), stride)) |
+                           {i for i, value in enumerate(raw_values) if value in pattern[:2]})
+            ax.set_xticks(shown, labels=[f"0x{reversed_byte(raw_values[i]):02X}" for i in shown],
+                          rotation=45 if len(shown) > 7 else 0)
+            if len(bars) <= 12:
+                for bar, value in zip(bars, heights):
+                    label = f"{value:.2f}%" if mode == "percent" else f"{value:,}"
+                    ax.annotate(label, (bar.get_x() + bar.get_width()/2, value),
+                                xytext=(0, 4), textcoords="offset points", ha="center", fontsize=8)
+        fig.savefig(folder / name, dpi=165)
+        plt.close(fig)
 
-    ticks = [*range(0, 256, 32), 255]
-    axes[-1].set_xticks(ticks, labels=[f"0x{value:02X}" for value in ticks])
-    axes[-1].set_xlim(-1, 256)
-    axes[-1].set_xlabel("Valor hexadecimal crudo · cuatro posiciones por ventana válida")
-    fig.savefig(folder / "histograma_valores.png", dpi=160)
+
+def plot_composition(folder, distributions, patterns, steps, title, plt):
+    from matplotlib.colors import LogNorm
+
+    t = [i * steps / 60 for i in range(len(distributions))]
+    fig, axes = plt.subplots(2, 1, figsize=(11, 6), sharex=True, layout="constrained")
+    composition_fig, composition_axes = plt.subplots(2, 1, figsize=(11, 6),
+                                                     sharex=True, layout="constrained")
+    for group, (ax, composition_ax, pattern) in enumerate(zip(axes, composition_axes, patterns)):
+        counts = [row[group] for row in distributions]
+        totals = [sum(row.values()) for row in counts]
+        x, y, frequency = [], [], []
+        for when, row, total in zip(t, counts, totals):
+            for value, count in row.items():
+                x.append(when)
+                y.append(reversed_byte(value))
+                frequency.append(100 * count / total)
+        ax.set(title=f"g{group}/c0", ylabel="Byte · reverse", ylim=(-7, 263))
+        ticks = sorted(set([0, 64, 128, 192, 255]) | {reversed_byte(value) for value in pattern[:2]})
+        ax.set_yticks(ticks, labels=[f"0x{value:02X}" for value in ticks])
+        if frequency:
+            points = ax.scatter(x, y, c=frequency, s=14, cmap="viridis",
+                                norm=LogNorm(vmin=min(min(frequency), 10), vmax=100), linewidths=0)
+            fig.colorbar(points, ax=ax, label="% de bytes del intervalo")
+        bottom = [0] * len(t)
+        segments = [(f"0x{reversed_byte(value):02X}", [row[value] for row in counts], color)
+                    for value, color in zip(pattern[:2], ("#276a8b", "#4e9683"))]
+        segments.append(("Otros", [total - row[pattern[0]] - row[pattern[1]]
+                                    for row, total in zip(counts, totals)], "#ba542c"))
+        for label, values, color in segments:
+            heights = [100 * value / total if total else 0 for value, total in zip(values, totals)]
+            composition_ax.bar(t, heights, width=steps/60, align="edge", bottom=bottom,
+                               color=color, label=label)
+            bottom = [acc + value for acc, value in zip(bottom, heights)]
+        composition_ax.set(title=f"g{group}/c0", ylabel="% de bytes", ylim=(0, 100))
+        composition_ax.legend(loc="upper right", ncols=3, fontsize=8)
+        for panel in (ax, composition_ax):
+            panel.grid(axis="y", alpha=.2)
+            panel.set_xlim(0, len(t) * steps / 60)
+    axes[-1].set_xlabel("Minutos desde el primer snapshot")
+    composition_axes[-1].set_xlabel("Minutos desde el primer snapshot")
+    fig.suptitle(f"{title} · valor frente al tiempo")
+    composition_fig.suptitle(f"{title} · composición por intervalo")
+    fig.savefig(folder / "fig1B_valor_vs_hora.png", dpi=165)
+    composition_fig.savefig(folder / "fig1A_composicion_apilada.png", dpi=165)
+    plt.close(fig)
+    plt.close(composition_fig)
+
+
+def plot_detail(folder, detail, first, title, plt):
+    fig, axes = plt.subplots(4, 1, figsize=(12, 8), sharex=True, layout="constrained")
+    fig.suptitle(f"{title} · detalle de ventanas válidas")
+    for group in range(2):
+        for row, mode in enumerate(("crudo", "reverse")):
+            ax = axes[2 * group + row]
+            for phase in range(4):
+                values = [observed[group][phase] for _, observed in detail]
+                if row:
+                    values = list(map(reversed_byte, values))
+                ax.scatter(range(len(values)), values, label=("N" if phase == 0 else f"N+{phase}"), s=35, marker="osx^"[phase])
+            ax.set_ylabel(f"g{group}/c0\n{mode}")
+            ax.set_ylim(-8, 263)
+            ax.set_yticks([0, 64, 128, 192, 255], labels=["0x00", "0x40", "0x80", "0xC0", "0xFF"])
+            ax.grid(alpha=.18)
+    if detail:
+        axes[0].legend(loc="upper right", ncols=4, fontsize=8)
+        axes[-1].set_xticks(range(len(detail)),
+                            labels=[f"{(now-first)/1e9:.3f}" for now, _ in detail], rotation=45)
+    else:
+        axes[0].text(.5, .5, "Sin ventanas válidas", transform=axes[0].transAxes, ha="center")
+    axes[-1].set_xlabel("Ventanas válidas seleccionadas · etiquetas en segundos desde el inicio")
+    fig.savefig(folder / "fig2_bloques.png", dpi=165)
+    plt.close(fig)
+
+
+def plot_timing(folder, rows, seconds, title, plt):
+    fig, axes = plt.subplots(2, 1, figsize=(11, 5.5), sharex=True, layout="constrained")
+    t = [(i + .5) * seconds / 60 for i in range(len(rows))]
+    axes[0].plot(t, [row.get("dt_max_ns", nan)/1e6 for row in rows], ".-", color="#276a8b")
+    axes[0].set(title="Mayor separación entre snapshots registrados", ylabel="Intervalo máximo (ms)")
+    axes[1].bar(t, [row["omitidos_seq"] for row in rows], width=.8 * seconds/60, color="#ba542c")
+    axes[1].set(ylabel="Omitidos según SEQ", xlabel="Minutos desde el primer snapshot")
+    for ax in axes:
+        ax.grid(axis="y", alpha=.2)
+        ax.set_ylim(bottom=0)
+    fig.suptitle(f"{title} · tiempos y oportunidades de adquisición")
+    fig.savefig(folder / "fig3_tiempos.png", dpi=165)
     plt.close(fig)
 
 
@@ -172,9 +297,10 @@ def report(folder, rows, first, times, patterns, seconds):
                "coincidencias", "coincidencias_mismo_frame", "coincidencias_fase_ambigua"]
     with (folder / "ruido_por_intervalo.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.writer(stream)
-        writer.writerow(["desde_s", *columns, "coincidencias_esperadas"])
+        writer.writerow(["desde_s", *columns, "coincidencias_esperadas", "dt_max_ms"])
         for i, row in enumerate(rows):
-            writer.writerow([i * seconds, *(row[key] for key in columns), expected(row)])
+            writer.writerow([i * seconds, *(row[key] for key in columns), expected(row),
+                             row["dt_max_ns"]/1e6 if "dt_max_ns" in row else ""])
     total = sum(rows, Counter())
     utc = datetime.fromtimestamp(first // 10**9, timezone.utc).isoformat()
     lines = [f"Primer snapshot: {utc}", f"Ventanas válidas: {total['validos']}/{total['filas']}",
@@ -217,12 +343,15 @@ def main():
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
 
-        rows, first, times, histograms = analyze(source, patterns, args.intervalo)
+        rows, first, times, histograms, distributions, detail = analyze(source, patterns, args.intervalo)
         with TemporaryDirectory(dir=source.parent) as temporary:
             folder = Path(temporary)
             plot(rows, args.intervalo, folder / "ruido_g0_g1.png", source.parent.name, plt)
             report(folder, rows, first, times, patterns, args.intervalo)
             plot_histograms(folder, histograms, patterns, source.parent.name, plt)
+            plot_composition(folder, distributions, patterns, args.intervalo, source.parent.name, plt)
+            plot_detail(folder, detail, first, source.parent.name, plt)
+            plot_timing(folder, rows, args.intervalo, source.parent.name, plt)
             target.mkdir(exist_ok=True)
             for result in folder.iterdir():
                 result.replace(target / result.name)

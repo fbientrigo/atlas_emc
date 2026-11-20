@@ -61,6 +61,14 @@ El ZIP `graficos.zip` queda junto a `data.csv`. Contiene cuatro PNG (adquisició
 "$HOME/.venvs/emp-plot/bin/python" ruido10.py /RUTA/A/LA/CORRIDA --g0 18:80 --g1 40:0C
 ```
 
-Las dos referencias son los patrones crudos dominantes registrados en la prueba. Si la referencia medida cambia, pasa los dos bytes nuevos en orden temporal. Los resultados quedan en la carpeta `resultados_ruido/` junto al CSV. `histograma_valores.png` muestra las ocurrencias de cada byte hexadecimal en escala logarítmica. `histograma_valores.csv` incluye el total y los conteos por posición N a N+3. La carpeta también contiene la gráfica temporal, los conteos por intervalo y el resumen. Usa `--intervalo 5` para revisar una prueba corta.
+Las referencias son los dos bytes crudos observados con mayor frecuencia, en orden temporal. Los resultados se guardan en `resultados_ruido/`, junto al CSV. Usa `--intervalo 5` para una prueba corta.
+
+- `histograma_valores.png`, `fig4_hist_eje0.png` y `fig4_hist_pct.png` muestran el histograma logarítmico, lineal desde cero y porcentual.
+- `fig1A_composicion_apilada.png` y `fig1B_valor_vs_hora.png` muestran la composición y los valores por intervalo. Los porcentajes se calculan con los bytes de las ventanas válidas del intervalo.
+- `fig2_bloques.png` muestra el byte crudo y con reverse alrededor del primer desvío. Si la corrida no tiene desvíos, muestra las últimas ventanas válidas.
+- `fig3_tiempos.png` muestra el mayor intervalo entre snapshots guardados y las oportunidades omitidas según SEQ.
+- `ruido_g0_g1.png` mantiene el análisis de desvíos, fases y coincidencias.
+
+Cada ventana válida aporta cuatro bytes por canal. Las figuras de valores aplican reverse dentro de cada byte, de MSB a LSB. `histograma_valores.csv` conserva ambas representaciones y los conteos por posición de frame de N a N+3. Los máximos de tiempo se refieren a la separación entre snapshots guardados. El archivo actual carece del registro diagnóstico g8 y de tiempos individuales de lectura.
 
 Un ABAB con la fase opuesta exacta se cuenta aparte. Un desvío de ambos canales en la misma ventana puede afectar frames distintos. El conteo de mismo frame incluye sólo las ventanas donde la fase más cercana es única en ambos canales. Para evaluar coincidencias se compara con el número esperado por independencia dentro de cada intervalo. Esta comparación es descriptiva y los cuatro frames de cada ventana no cubren todo el enlace.
