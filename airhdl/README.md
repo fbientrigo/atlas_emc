@@ -36,6 +36,25 @@ bash captura10.sh noche
 
 Las corridas quedan en `~/capturas/uplink10/`. Cada CSV contiene dos frames completos consecutivos y los cuatro bytes consecutivos `d0…d6` del canal 0 de cada grupo. Cada ejecución programada del FPGA genera un snapshot a 100 Hz. Para evaluar continuidad entre snapshots, consulta SEQ. Para evaluar alternancia dentro de un snapshot, usa el resumen por grupo. La captura de ocho horas necesita aproximadamente 0,9 GB.
 
+## Ver g0/c0 y g1/c0 en vivo
+
+Desde `coherent-capture`, si ya hay una captura en curso:
+
+```bash
+corrida=$(cat "$HOME/capturas/uplink10/ultima")
+tail -n 0 -F "$corrida/data.csv" | python3 ver10.py
+```
+
+La vista muestra N a N+3 en crudo y cuenta desvíos desde que se abre. Procesa todas las filas nuevas aunque redibuje la pantalla cada medio segundo. La captura normalmente entrega datos al CSV en bloques de aproximadamente un segundo. La columna Recientes usa las últimas 1000 ventanas válidas, unos 10 s a 100 Hz. BABA exacto cuenta aparte como fase opuesta. Si los dos patrones empatan, el visor muestra fase ambigua y la cantidad de bytes distintos es el mínimo de las dos comparaciones. Ctrl+C cierra la vista y la captura continúa.
+
+Para ver datos en vivo cuando no hay ninguna captura escribiendo un CSV:
+
+```bash
+sudo ./emp_acq_capture --seconds 0 --out - | python3 ver10.py
+```
+
+Los valores de referencia por defecto son `--g0 18:80 --g1 40:0C`. Cambia esos argumentos según el patrón esperado.
+
 ## Graficar una corrida terminada
 
 Usa [graficar10.py](coherent-capture/graficar10.py) con Python 3 y Matplotlib 3.6 o posterior. Se puede instalar en un entorno virtual del usuario:
