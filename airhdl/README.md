@@ -52,3 +52,15 @@ Pasa la ruta que mostró `captura10.sh estado`:
 ```
 
 El ZIP `graficos.zip` queda junto a `data.csv`. Contiene cuatro PNG (adquisición y saltos, estabilidad AAAA/ABAB en el tiempo, diferencias A/B por palabra y distribución de bytes por fase), tablas CSV y un resumen. Por defecto agrega en intervalos de 60 s. Usa `--intervalo 5` para una prueba corta. El ZIP contiene los resultados derivados y el log, mientras que el CSV crudo queda en la carpeta de la corrida.
+
+## Desvíos del patrón en g0/c0 y g1/c0
+
+`ruido10.py` usa el mismo entorno de Python y Matplotlib:
+
+```bash
+"$HOME/.venvs/emp-plot/bin/python" ruido10.py /RUTA/A/LA/CORRIDA --g0 18:80 --g1 40:0C
+```
+
+Las dos referencias son los patrones crudos dominantes registrados en la prueba. Si la referencia medida cambia, pasa los dos bytes nuevos en orden temporal. El resultado queda en `ruido_g0_g1.zip`, junto al CSV. Incluye la gráfica temporal, los conteos por intervalo y el resumen. Usa `--intervalo 5` para revisar una prueba corta.
+
+Un ABAB con la fase opuesta exacta se cuenta aparte. Un desvío de ambos canales en la misma ventana puede afectar frames distintos. El conteo de mismo frame incluye sólo las ventanas donde la fase más cercana es única en ambos canales. Para evaluar coincidencias se compara con el número esperado por independencia dentro de cada intervalo. Esta comparación es descriptiva y los cuatro frames de cada ventana no cubren todo el enlace.
