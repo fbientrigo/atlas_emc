@@ -19,4 +19,19 @@ Los headers `cmb_event_regs.h/.hpp` forman parte del export AirHDL. El programa 
 make -C airhdl/coherent-capture test
 ```
 
-La salida del 19-11 confirma la enumeración UIO de ambos bancos. La aceptación de eventos CMB y del snapshot coherente queda pendiente en la Trenz.
+## Capturar en la Trenz
+
+El banco 10 pasó la prueba del 19-11-2026 con 1001 snapshots coherentes en 10 segundos, sin saltos de SEQ ni inconsistencias. La prueba del controlador de eventos CMB sigue pendiente.
+
+Guarda [captura10.sh](coherent-capture/captura10.sh) junto al ejecutable existente. Desde esa carpeta:
+
+```bash
+bash captura10.sh check
+bash captura10.sh prueba
+bash captura10.sh estado
+bash captura10.sh resumen
+# Tras verificar que la prueba terminó bien:
+bash captura10.sh noche
+```
+
+Las corridas quedan en `~/capturas/uplink10/`. Cada CSV contiene dos frames completos consecutivos y los cuatro bytes consecutivos `d0…d6` del canal 0 de cada grupo. Cada ejecución programada del FPGA genera un snapshot a 100 Hz. Para evaluar continuidad entre snapshots, consulta SEQ. Para evaluar alternancia dentro de un snapshot, usa el resumen por grupo. La captura de ocho horas necesita aproximadamente 0,9 GB.
