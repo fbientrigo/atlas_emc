@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 from math import nan
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from zipfile import ZIP_DEFLATED, ZipFile
 
 
 def reference(value):
@@ -20,8 +19,7 @@ def reference(value):
     raise argparse.ArgumentTypeError("Usa dos bytes hexadecimales distintos, por ejemplo 18:80.")
 
 
-def classify(word, pattern):
-    observed = tuple(int(word, 16).to_bytes(4, "little"))
+def classify(observed, pattern):
     reverse = pattern[1:] + pattern[:1]
     if observed == pattern:
         return "ok", 0
@@ -37,6 +35,7 @@ def classify(word, pattern):
 def analyze(path, patterns, seconds):
     columns = {"t_unix_ns", "seq_gap", "rdy_a", "rdy_b", "d0", "d1"}
     bins = defaultdict(Counter)
+    histograms = [[Counter() for _ in range(4)] for _ in patterns]
     first = last = None
     previous = None
     times = {}
@@ -62,7 +61,11 @@ def analyze(path, patterns, seconds):
                 continue
 
             count["validos"] += 1
-            result = [classify(row[key], pattern) for key, pattern in zip(("d0", "d1"), patterns)]
+            observed = [tuple(int(row[key], 16).to_bytes(4, "little")) for key in ("d0", "d1")]
+            for phases, values in zip(histograms, observed):
+                for counts, value in zip(phases, values):
+                    counts[value] += 1
+            result = [classify(values, pattern) for values, pattern in zip(observed, patterns)]
             flags = tuple(category == "desvio" for category, _ in result)
             for i, (category, _) in enumerate(result):
                 name = f"g{i}_{category}"
@@ -83,7 +86,7 @@ def analyze(path, patterns, seconds):
             previous = flags
     if not bins:
         raise ValueError("El CSV está vacío.")
-    return [bins.get(index, Counter()) for index in range(max(bins) + 1)], first, times
+    return [bins.get(index, Counter()) for index in range(max(bins) + 1)], first, times, histograms
 
 
 def ratio(value, total):
@@ -120,6 +123,45 @@ def plot(rows, seconds, output, title, plt):
         ax.spines[["top", "right"]].set_visible(False)
     fig.suptitle(f"{title} · g0/c0 y g1/c0 · intervalos de {seconds} s")
     fig.savefig(output, dpi=160)
+    plt.close(fig)
+
+
+def plot_histograms(folder, histograms, patterns, title, plt):
+    fig, axes = plt.subplots(2, 1, figsize=(10, 6.5), sharex=True, layout="constrained")
+    fig.suptitle(f"{title} · histograma de bytes recibidos")
+    with (folder / "histograma_valores.csv").open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.writer(stream)
+        writer.writerow(["canal", "valor_hex", "total", "N", "N+1", "N+2", "N+3", "porcentaje"])
+        for group, (ax, phases, pattern) in enumerate(zip(axes, histograms, patterns)):
+            counts = sum(phases, Counter())
+            total = sum(counts.values())
+            values = sorted(counts)
+            channel = f"g{group}/c0"
+            for value in values:
+                writer.writerow([channel, f"0x{value:02X}", counts[value],
+                                 *(phase[value] for phase in phases),
+                                 f"{100 * counts[value] / total:.9g}"])
+
+            ax.set_title(f"{channel} · {total:,} bytes", loc="left")
+            ax.set_ylabel("Ocurrencias")
+            ax.grid(axis="y", alpha=.22)
+            if not values:
+                ax.text(.5, .5, "Sin ventanas válidas", ha="center", transform=ax.transAxes)
+                continue
+            ax.set_yscale("log")
+            ax.set_ylim(bottom=.7)
+            ax.bar(values, [counts[value] - .7 for value in values], bottom=.7,
+                   color="#206582", width=.85, zorder=2)
+            for i, value in enumerate(pattern[:2]):
+                ax.axvline(value, color="#b25225", linewidth=1, linestyle="--", zorder=1,
+                           label="Bytes de referencia" if i == 0 else None)
+            ax.legend(loc="upper right", fontsize=8)
+
+    ticks = [*range(0, 256, 32), 255]
+    axes[-1].set_xticks(ticks, labels=[f"0x{value:02X}" for value in ticks])
+    axes[-1].set_xlim(-1, 256)
+    axes[-1].set_xlabel("Valor hexadecimal crudo · cuatro posiciones por ventana válida")
+    fig.savefig(folder / "histograma_valores.png", dpi=160)
     plt.close(fig)
 
 
@@ -168,23 +210,22 @@ def main():
     if args.intervalo <= 0:
         parser.error("--intervalo debe ser positivo.")
     source = args.corrida / "data.csv" if args.corrida.is_dir() else args.corrida
-    target = source.parent / "ruido_g0_g1.zip"
+    target = source.parent / "resultados_ruido"
     patterns = (args.g0, args.g1)
     try:
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
 
-        rows, first, times = analyze(source, patterns, args.intervalo)
+        rows, first, times, histograms = analyze(source, patterns, args.intervalo)
         with TemporaryDirectory(dir=source.parent) as temporary:
             folder = Path(temporary)
             plot(rows, args.intervalo, folder / "ruido_g0_g1.png", source.parent.name, plt)
             report(folder, rows, first, times, patterns, args.intervalo)
-            archive = folder / target.name
-            with ZipFile(archive, "w", ZIP_DEFLATED) as output:
-                for name in ("ruido_g0_g1.png", "ruido_por_intervalo.csv", "resumen_ruido.txt"):
-                    output.write(folder / name, name)
-            archive.replace(target)
+            plot_histograms(folder, histograms, patterns, source.parent.name, plt)
+            target.mkdir(exist_ok=True)
+            for result in folder.iterdir():
+                result.replace(target / result.name)
     except (OSError, ValueError, OverflowError, ImportError) as exc:
         parser.exit(1, f"Error: {exc}\n")
     print(target)
