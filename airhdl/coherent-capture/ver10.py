@@ -63,9 +63,11 @@ class Monitor:
         when, seq, gap = (int(value) for value in fields[:3])
         ready = fields[5:7] == [b"1", b"1"]
         readings = [inspect(word, phases) for word, phases in zip(fields[23:25], self.phases)]
+        words = [tuple(fields[index + group].decode("ascii") for index in (7, 15, 23))
+                 for group in range(2)]
         if self.last is not None:
             self.total["omitidas"] += max(0, gap - 1)
-        self.last = (when, seq, ready, readings)
+        self.last = (when, seq, ready, readings, words)
         self.updated = monotonic()
         if not ready:
             self.total["sin_ready"] += 1
@@ -90,7 +92,7 @@ class Monitor:
             return "EMP · esperando ventanas de la captura…"
         if self.seconds is not None:
             self.expire(time_ns())
-        when, seq, ready, readings = self.last
+        when, seq, ready, readings, words = self.last
         stamp = datetime.fromtimestamp(when / 1e9).strftime("%H:%M:%S.%f")[:-3]
         age = monotonic() - self.updated
         state = f"sin datos nuevos por {age:.1f} s" if age > 2 else "en vivo"
@@ -98,6 +100,9 @@ class Monitor:
             f"EMP uplink 10  |  SEQ {seq}  |  {stamp}  |  {state}",
             f"Ventanas válidas {self.total['válidas']}  |  sin READY {self.total['sin_ready']}"
             f"  |  omitidas según SEQ {self.total['omitidas']}",
+            "",
+            "Grupo  Frame A         Frame B         Ventana c0",
+            *(f"g{g}     a{g} {a:12}  b{g} {b:12}  d{g} {d}" for g, (a, b, d) in enumerate(words)),
             "",
             "Canal     N     N+1   N+2   N+3   Estado           Vent. rec. Bytes rec. Total",
         ]
@@ -117,7 +122,7 @@ class Monitor:
             f"Fase BABA exacta: g0 {self.total['g0_fase']}  |  g1 {self.total['g1_fase']} (aparte)",
         ]
         if self.last_error is not None:
-            _, last_seq, _, errors = self.last_error
+            _, last_seq, _, errors, _ = self.last_error
             frames = "  |  ".join(f"g{i}/c0 " + " ".join(values)
                                  for i, (_, _, values) in enumerate(errors))
             lines.append(f"Último desvío · SEQ {last_seq}  |  {frames}")

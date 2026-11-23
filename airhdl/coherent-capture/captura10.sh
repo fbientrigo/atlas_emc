@@ -20,9 +20,11 @@ captura10.sh check
 captura10.sh prueba [segundos]     # 600 por defecto
 captura10.sh noche                 # 28800 segundos
 captura10.sh estado [corrida]
+captura10.sh stop [corrida]
+captura10.sh watch [corrida]
 captura10.sh resumen [corrida]
 
-Sin una ruta explícita, estado y resumen consultan la última corrida.
+Sin una ruta explícita, estado, stop, watch y resumen usan la última corrida.
 EMP_CAPTURE_BIN permite indicar la ruta a emp_acq_capture.
 EMP_CAPTURE_SIMULATE=1 usa el firmware simulado y su propia carpeta.
 USO
@@ -73,6 +75,62 @@ iniciar() {
     printf 'Corrida: %s\nPID: %s\n' "$corrida" "$!"
 }
 
+detener() {
+    local pid intento
+    local -a argv pids=()
+    corrida=$(realpath -- "$corrida")
+    if [[ -r "$corrida/exit" ]]; then
+        printf 'La captura ya terminó con código %s.\n' "$(<"$corrida/exit")"
+        return
+    fi
+    if (("${#privilegio[@]}")); then sudo -v || return; fi
+
+    # Busca el lector real por su salida exacta. También admite corridas iniciadas con el script anterior.
+    while IFS= read -r pid; do
+        mapfile -d '' -t argv 2>/dev/null <"/proc/$pid/cmdline" || continue
+        (( ${#argv[@]} >= 3 )) || continue
+        case ${argv[0]##*/} in
+            emp_acq_capture|"${lector##*/}") ;;
+            *) continue ;;
+        esac
+        if [[ ${argv[-2]} == --out && ${argv[-1]} == "$corrida/data.csv" ]]; then
+            pids+=("$pid")
+        fi
+    done < <(pgrep -f -- '(^|[[:space:]])--out[[:space:]]')
+
+    if (( ${#pids[@]} == 1 )); then
+        "${privilegio[@]}" kill -TERM "${pids[0]}" || [[ -r "$corrida/exit" ]] || return 1
+    elif [[ ! -r "$corrida/exit" ]]; then
+        printf 'Se esperaba un lector activo para %s y se encontraron %d. Revisa estado.\n' \
+            "$corrida" "${#pids[@]}" >&2
+        return 1
+    fi
+
+    for ((intento=0; intento<50; intento++)); do
+        if [[ -r "$corrida/exit" ]]; then
+            local rc
+            rc=$(<"$corrida/exit")
+            printf 'Captura terminó con código %s. CSV: %s/data.csv\n' "$rc" "$corrida"
+            return "$rc"
+        fi
+        sleep 0.2
+    done
+    printf 'Se solicitó el cierre. Consulta estado para confirmar que el CSV quedó cerrado.\n' >&2
+    return 1
+}
+
+ver() {
+    local pid
+    local -a opciones=(-n 6000)
+    if [[ ! -r "$corrida/exit" && -r "$corrida/pid" ]]; then
+        pid=$(<"$corrida/pid")
+        if [[ "$pid" =~ ^[1-9][0-9]*$ ]] && kill -0 "$pid" 2>/dev/null; then
+            opciones+=(-f "--pid=$pid")
+        fi
+    fi
+    tail "${opciones[@]}" -- "$corrida/data.csv" | python3 "$base/ver10.py" --segundos 60
+}
+
 case ${1:-ayuda} in
     check)
         validar_lector
@@ -81,6 +139,8 @@ case ${1:-ayuda} in
         ;;
     prueba) iniciar prueba "${2:-600}" ;;
     noche) iniciar noche 28800 ;;
+    stop) leer_corrida "${2:-}"; detener ;;
+    watch) leer_corrida "${2:-}"; ver ;;
     _worker)
         corrida=$2
         rc=0

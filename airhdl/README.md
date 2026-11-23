@@ -37,6 +37,8 @@ bash captura10.sh noche
 
 Las corridas quedan en `~/capturas/uplink10/`. Cada CSV contiene dos frames completos consecutivos y los cuatro bytes consecutivos `d0…d6` del canal 0 de cada grupo. Cada ejecución programada del FPGA genera un snapshot a 100 Hz. Para evaluar continuidad entre snapshots, consulta SEQ. Para evaluar alternancia dentro de un snapshot, usa el resumen por grupo. La captura de ocho horas necesita aproximadamente 0,9 GB.
 
+Para terminar la última corrida antes del plazo, usa `bash captura10.sh stop`. El capturador cierra el CSV y el comando muestra el código de salida. Si necesitas detener otra corrida, añade la ruta de su carpeta.
+
 ## Ver g0/c0 y g1/c0 en vivo
 
 Desde la raíz de la copia Git en la EMP, con el capturador libre:
@@ -55,14 +57,15 @@ Si vuelve al prompt sin mostrar frames, revisa el mensaje de `emp_acq_capture`. 
 sudo ./airhdl/coherent-capture/emp_acq_capture --check --check-seconds 3
 ```
 
-La vista muestra N a N+3 en crudo. Cuenta las ventanas con desvíos y los bytes distintos en los **últimos 60 segundos** según el reloj de captura. Una ventana con dos bytes distintos suma un desvío y dos bytes. BABA exacto se cuenta aparte. Los contadores recientes expiran incluso si dejan de llegar datos. Las referencias por defecto son `--g0 18:80 --g1 40:0C`. Se pueden pasar otros valores al script.
+La vista muestra `a0`, `b0`, `d0`, `a1`, `b1` y `d1` en hexadecimal. Las palabras `a` y `b` corresponden a los frames A y B. Las palabras `d` empaquetan los cuatro bytes de c0, que se muestran también por separado, de N a N+3. El visor cuenta las ventanas con desvíos y los bytes distintos en los **últimos 60 segundos** según el reloj de captura. Una ventana con dos bytes distintos suma un desvío y dos bytes. BABA exacto se cuenta aparte. Las referencias por defecto son `--g0 18:80 --g1 40:0C`. Se pueden pasar otros valores a `quick_watch.sh`.
 
 Si ya hay una captura guardando un CSV, se puede seguir su salida sin abrir un lector adicional. Desde `airhdl/coherent-capture`:
 
 ```bash
-corrida=$(cat "$HOME/capturas/uplink10/ultima")
-tail -n 0 -F "$corrida/data.csv" | python3 ver10.py --segundos 60
+bash captura10.sh watch
 ```
+
+`watch` usa el CSV de la última corrida. Puedes indicar otra carpeta como argumento. Ctrl+C cierra el visor y la captura sigue guardando datos.
 
 ## Graficar una corrida terminada
 
