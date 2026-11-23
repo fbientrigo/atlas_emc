@@ -3,6 +3,7 @@
 | Carpeta | Contenido |
 |---|---|
 | [cmb_event_regs_rev29](cmb_event_regs_rev29/) | Export original AirHDL del 17-11-2026. Incluye JSON, RTL, headers C/C++ y documentación generada. |
+| [fifo-acquisition](fifo-acquisition/) | Lectura y guardado de bloques FIFO → RAM del uplink 10 mediante el banco CMB. |
 | [coherent-capture](coherent-capture/) | Fuentes y Makefile de `emp_acq_capture` y sus pruebas, recuperadas del paquete `emp-deploy-final-1117`. Su protocolo BUSY/SEQ corresponde al banco uplink 10. |
 | [CLIs PuzzledLizardWizard](../puzzledWizards/compilados/) | Lector TGC y control PRBS con sus mapas y recetas de compilación. |
 

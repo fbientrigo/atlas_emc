@@ -6,7 +6,7 @@ Abre la [guía de operación en GitHub Pages](https://fbientrigo.github.io/atlas
 | Carpeta | Contenido |
 |---|---|
 | [capture](capture/) | CLI `emp`, lectura directa, monitor, diagnóstico IC y captura en ráfagas. |
-| [airhdl](airhdl/) | Export AirHDL rev29 de CMB y lector de snapshot del uplink 10. |
+| [airhdl](airhdl/) | Export AirHDL rev29 de CMB, [adquisición FIFO](airhdl/fifo-acquisition/) y lector de snapshot del uplink 10. |
 | [puzzledWizards](puzzledWizards/) | Generador, mapas y [CLIs recuperadas de la Trenz](puzzledWizards/compilados/). |
 | [docs/recuperacion](docs/recuperacion/) | Guías, diagnóstico y fuentes del sitio. |
 | [atlas_epos](atlas_epos/) | Herramientas de [AtlasEpos](https://gitlab.cern.ch/atlas-dcs-emp) para preparar overlays desde XSA. |
