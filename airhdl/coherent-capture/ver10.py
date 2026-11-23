@@ -148,7 +148,7 @@ def main():
 
     pending = b""
     dirty = False
-    draw()
+    print(monitor.screen(), flush=True)
     refresh = monotonic() + .5
     try:
         while True:
@@ -158,6 +158,8 @@ def main():
                 if not chunk:
                     if pending.strip():
                         raise ValueError("El CSV terminó con una línea incompleta.")
+                    if monitor.last is None:
+                        raise ValueError("La entrada se cerró sin recibir ninguna ventana de captura.")
                     break
                 lines = (pending + chunk).split(b"\n")
                 pending = lines.pop()
@@ -165,12 +167,12 @@ def main():
                     monitor.consume(line)
                 dirty = True
             if monotonic() >= refresh:
-                if terminal or dirty:
+                if monitor.last is not None and (terminal or dirty):
                     draw()
                 dirty = False
                 refresh = monotonic() + .5
     except KeyboardInterrupt:
-        pass
+        return 130
     except (ValueError, OverflowError) as exc:
         parser.exit(1, f"Error: {exc}\n")
     if dirty:
@@ -178,4 +180,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

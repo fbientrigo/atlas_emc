@@ -47,6 +47,13 @@ git pull --ff-only
 
 El script compila `emp_acq_capture` si hace falta, pide `sudo` y abre una lectura en vivo. Los datos pasan al visor sin guardar un CSV. Con Ctrl+C se cierra esta lectura.
 
+Si vuelve al prompt sin mostrar frames, revisa el mensaje de `emp_acq_capture`. Para probar el visor con datos simulados y comprobar la lectura del FPGA por separado, ejecuta desde la raíz del repo:
+
+```bash
+./airhdl/coherent-capture/quick_watch.sh --simulate
+sudo ./airhdl/coherent-capture/emp_acq_capture --check --check-seconds 3
+```
+
 La vista muestra N a N+3 en crudo. Cuenta las ventanas con desvíos y los bytes distintos en los **últimos 60 segundos** según el reloj de captura. Una ventana con dos bytes distintos suma un desvío y dos bytes. BABA exacto se cuenta aparte. Los contadores recientes expiran incluso si dejan de llegar datos. Las referencias por defecto son `--g0 18:80 --g1 40:0C`. Se pueden pasar otros valores al script.
 
 Si ya hay una captura guardando un CSV, se puede seguir su salida sin abrir un lector adicional. Desde `airhdl/coherent-capture`:
