@@ -121,7 +121,7 @@ def save_outputs(plt, folder, windows, histograms, first, last, seconds, label):
         ("Cambios entre snapshots consecutivos (SEQ + 1)", "changed", "transitions"),
     )
     fig, axes = plt.subplots(3, 1, figsize=(10, 8), sharex=True, layout="constrained")
-    fig.suptitle(f"{label} · estabilidad del byte d0…d6")
+    fig.suptitle(f"{label} · estabilidad de c0 en d0…d6 (cuatro frames por snapshot)")
     for ax, (title, numerator, denominator) in zip(axes, measures):
         values = [[percent(x, getattr(w, denominator)) for x in getattr(w, numerator)] for w in windows]
         heatmap(ax, values, GROUPS, title)
@@ -130,15 +130,16 @@ def save_outputs(plt, folder, windows, histograms, first, last, seconds, label):
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(10, 3.9), layout="constrained")
-    fig.suptitle(f"{label} · comparación de los dos frames completos")
+    fig.suptitle(f"{label} · A frente a B · palabras completas de 32 bits")
     heatmap(ax, [[percent(x, w.rows) for x in w.different_ab] for w in windows],
-            WORDS, "Palabra de A distinta de la misma palabra de B")
+            WORDS, "Porcentaje de snapshots donde A y B difieren, aunque el valor sea estable en el tiempo")
     ax.set_xlabel(xlabel)
     fig.savefig(folder / "03_diferencias_A_B.png", dpi=150)
     plt.close(fig)
 
     fig, axes = plt.subplots(7, 1, figsize=(10, 10), sharex=True, layout="constrained")
-    fig.suptitle(f"{label} · distribución de bytes crudos por grupo y frame")
+    fig.suptitle(f"{label} · c0 de cada grupo, cuatro posiciones por snapshot\n"
+                 "Color: porcentaje del byte en esa posición durante toda la corrida")
     total = sum(w.rows for w in windows)
     for group, (ax, phases) in enumerate(zip(axes, histograms)):
         values = [[percent(hist[value], total) for value in range(256)] for hist in phases]
@@ -149,8 +150,40 @@ def save_outputs(plt, folder, windows, histograms, first, last, seconds, label):
     ticks = (*range(0, 256, 32), 255)
     axes[-1].set_xticks(ticks, labels=[f"{x:02X}" for x in ticks])
     axes[-1].set_xlabel("Byte hexadecimal, sin invertir bits ni aplicar bitslip")
-    fig.colorbar(raster, ax=axes, label="% por frame")
+    fig.colorbar(raster, ax=axes, label="% de snapshots en cada posición")
     fig.savefig(folder / "04_distribucion_bytes.png", dpi=150)
+    plt.close(fig)
+
+    # Show departures from each position's most frequent byte on a useful scale.
+    fig = plt.figure(figsize=(11, 6.5), layout="constrained")
+    grid = fig.add_gridspec(2, 2)
+    axes = (fig.add_subplot(grid[0, :]), fig.add_subplot(grid[1, 0]),
+            fig.add_subplot(grid[1, 1]))
+    colors = ("#0072B2", "#D55E00", "#009E73", "#CC79A7")
+    positions = ("N", "N+1", "N+2", "N+3")
+    for group, phases in enumerate(histograms):
+        for phase, hist in enumerate(phases):
+            _, count = hist.most_common(1)[0]
+            deviation = total - count
+            axes[0].bar(group + (phase - 1.5) * .19, 100 * deviation / total,
+                        width=.18, color=colors[phase],
+                        label=positions[phase] if group == 0 else None)
+            if group in (4, 6):
+                detail = axes[1 if group == 4 else 2]
+                detail.bar(phase, 100 * deviation / total,
+                            width=.18, color=colors[phase],
+                            label=positions[phase])
+    axes[0].set(xlim=(-.65, 6.65), xticks=range(7), xticklabels=GROUPS,
+                ylabel="% distinto del byte más frecuente", title="Todos los grupos")
+    for group, ax in ((4, axes[1]), (6, axes[2])):
+        ax.set(xticks=range(4), xticklabels=positions,
+               ylabel="% distinto del dominante", title=f"d{group} · escala propia")
+    for ax in axes:
+        ax.set_ylim(bottom=0)
+        ax.grid(axis="y", alpha=.2)
+    axes[0].legend(ncols=4, loc="upper center")
+    fig.suptitle(f"{label} · variación de c0 en cada posición del frame")
+    fig.savefig(folder / "05_bytes_minoritarios.png", dpi=160)
     plt.close(fig)
 
     with (folder / "por_intervalo.csv").open("w", encoding="utf-8", newline="") as stream:

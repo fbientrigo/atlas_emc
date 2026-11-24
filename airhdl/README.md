@@ -84,6 +84,8 @@ Pasa la ruta que mostró `captura10.sh estado`:
 
 Los PNG, tablas CSV y resumen quedan en `graficos/`, junto al archivo de entrada. Los valores se muestran tal como vienen del CSV.
 
+En `04_distribucion_bytes.png` cada fila usa solo los cuatro bytes de c0 contenidos en `d0…d6`. Una columna muy brillante indica el valor dominante en esa posición. `05_bytes_minoritarios.png` amplía los bytes que difieren del más frecuente, en especial d4 y d6. `02_estabilidad.png` muestra si la palabra `d` de cuatro bytes cambia entre snapshots. `03_diferencias_A_B.png` compara palabras completas de 32 bits dentro de un mismo snapshot. A y B pueden diferir siempre por el patrón alternante de c0 aunque ninguno varíe entre snapshots.
+
 Para ejecutar los tres análisis en Windows PowerShell desde la raíz del repo:
 
 ```powershell
