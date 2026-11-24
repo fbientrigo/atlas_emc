@@ -57,7 +57,7 @@ Si vuelve al prompt sin mostrar frames, revisa el mensaje de `emp_acq_capture`. 
 sudo ./airhdl/coherent-capture/emp_acq_capture --check --check-seconds 3
 ```
 
-La vista muestra `a0`, `b0`, `d0`, `a1`, `b1` y `d1` en hexadecimal. Las palabras `a` y `b` corresponden a los frames A y B. Las palabras `d` empaquetan los cuatro bytes de c0, que se muestran también por separado, de N a N+3. El visor cuenta las ventanas con desvíos y los bytes distintos en los **últimos 60 segundos** según el reloj de captura. Una ventana con dos bytes distintos suma un desvío y dos bytes. BABA exacto se cuenta aparte. Las referencias por defecto son `--g0 18:80 --g1 40:0C`. Se pueden pasar otros valores a `quick_watch.sh`.
+La vista muestra `a0`, `b0`, `d0`, `a1`, `b1` y `d1` en hexadecimal. Las palabras `a` y `b` corresponden a los frames A y B. Las palabras `d` empaquetan los cuatro bytes de c0, que se muestran también por separado, de N a N+3. El visor cuenta las ventanas con desvíos y los bytes distintos en los **últimos 60 segundos** según el reloj de captura. Una ventana con dos bytes distintos suma un desvío y dos bytes. BABA exacto se cuenta aparte. El visor conserva las referencias históricas `--g0 18:80 --g1 40:0C`. Para el patrón actual usa `quick_watch.sh --g0 C4:00 --g1 0C:40`.
 
 Si ya hay una captura guardando un CSV, se puede seguir su salida sin abrir un lector adicional. Desde `airhdl/coherent-capture`:
 
@@ -82,14 +82,37 @@ Pasa la ruta que mostró `captura10.sh estado`:
 "$HOME/.venvs/emp-plot/bin/python" graficar10.py /RUTA/A/LA/CORRIDA
 ```
 
-El ZIP `graficos.zip` queda junto a `data.csv`. Contiene cuatro PNG (adquisición y saltos, estabilidad AAAA/ABAB en el tiempo, diferencias A/B por palabra y distribución de bytes por fase), tablas CSV y un resumen. Por defecto agrega en intervalos de 60 s. Usa `--intervalo 5` para una prueba corta. El ZIP contiene los resultados derivados y el log, mientras que el CSV crudo queda en la carpeta de la corrida.
+Los PNG, tablas CSV y resumen quedan en `graficos/`, junto al archivo de entrada. Los valores se muestran tal como vienen del CSV.
+
+Para ejecutar los tres análisis en Windows PowerShell desde la raíz del repo:
+
+```powershell
+git pull --ff-only
+py -3 -m pip install "matplotlib>=3.6" numpy
+py -3 .\airhdl\coherent-capture\analizar10.py "C:\Users\Asus\Desktop\datos_1124\data.csv" --g0 C4:00 --g1 0C:40
+```
+
+Se generan carpetas `graficos/`, `resultados_ruido/` y `resultados_crosstalk/`. Las figuras se actualizan al repetir el comando. Los archivos ZIP de ejecuciones anteriores pueden contener figuras antiguas.
+
+## Vecinos y posibles acoplamientos
+
+`crosstalk10.py` estudia g0/c1..c3 y g1/c1..c3. Asume el mapa de 320 Mb/s, con c0 en bits 7:0, c1 en 15:8, c2 en 23:16 y c3 en 31:24 de cada palabra A/B. Cada vecino dispone de dos frames por snapshot. El código excluye READY incompleto y discrepancias entre el c0 de A/B y los primeros bytes de d0/d1.
+
+- `01_vecinos_histogramas.png` compara la distribución del vecino para cada valor de c0.
+- `02_asociacion_bits.png` muestra la diferencia de ocupación de cada bit en puntos porcentuales, con escala fija de −100 a +100.
+- `03_vecinos_tiempo.png` muestra estabilidad respecto a la moda de cada fase A/B y distancia entre distribuciones por minuto.
+- `04_saltos_seq.png` localiza cada salto y muestra cuánto tiempo transcurre entre ellos. `saltos_seq.csv` conserva tiempos UTC y conteos exactos.
+
+La distancia de variación total es 0.5 × suma de diferencias absolutas de probabilidades. Vale cero para distribuciones idénticas y uno para distribuciones sin soporte común. Los CSV conservan histogramas por minuto, fase A/B y estado de c0, con sus denominadores. El estado “otro” conserva los frames cuyo c0 difiere de ambas referencias.
+
+Estos resultados describen asociación. Un patrón alternante puede confundir estado de c0 con fase A/B. Para atribuir un efecto a crosstalk hace falta una captura de control con c0 fijo y otra alternante, manteniendo los patrones vecinos y la configuración. Las modas se estiman de esta corrida y describen variación. Para contar errores físicos hacen falta referencias transmitidas independientes. La dependencia temporal entre frames requiere considerar bloques antes de realizar inferencia estadística.
 
 ## Desvíos del patrón en g0/c0 y g1/c0
 
 `ruido10.py` usa el mismo entorno de Python y Matplotlib:
 
 ```bash
-"$HOME/.venvs/emp-plot/bin/python" ruido10.py /RUTA/A/LA/CORRIDA --g0 18:80 --g1 40:0C
+"$HOME/.venvs/emp-plot/bin/python" ruido10.py /RUTA/A/LA/CORRIDA --g0 C4:00 --g1 0C:40
 ```
 
 Las referencias son los dos bytes crudos observados con mayor frecuencia, en orden temporal. Los resultados se guardan en `resultados_ruido/`, junto al CSV. Usa `--intervalo 5` para una prueba corta.
@@ -100,6 +123,8 @@ Las referencias son los dos bytes crudos observados con mayor frecuencia, en ord
 - `fig3_tiempos.png` muestra el mayor intervalo entre snapshots guardados y las oportunidades omitidas según SEQ.
 - `ruido_g0_g1.png` mantiene el análisis de desvíos, fases y coincidencias.
 
-Cada ventana válida aporta cuatro bytes por canal. Las figuras de valores aplican reverse dentro de cada byte, de MSB a LSB. `histograma_valores.csv` conserva ambas representaciones y los conteos por posición de frame de N a N+3. Los máximos de tiempo se refieren a la separación entre snapshots guardados. El archivo actual carece del registro diagnóstico g8 y de tiempos individuales de lectura.
+Cada ventana válida aporta cuatro bytes por canal. Las figuras usan los bytes del CSV directamente, incluidos C4, 00, 0C y 40. `histograma_valores.csv` conserva los conteos por posición de frame de N a N+3. El histograma agrupa bytes, de modo que un patrón alternante perfecto aporta 50 % de cada valor. Las referencias por defecto de los análisis son C4:00 y 0C:40, correspondientes a la corrida del 23–24 de noviembre. Para corridas anteriores hay que pasar su patrón explícitamente. Los máximos de tiempo se refieren a la separación entre snapshots guardados. El archivo actual carece del registro diagnóstico g8 y de tiempos individuales de lectura.
 
 Un ABAB con la fase opuesta exacta se cuenta aparte. Un desvío de ambos canales en la misma ventana puede afectar frames distintos. El conteo de mismo frame incluye sólo las ventanas donde la fase más cercana es única en ambos canales. Para evaluar coincidencias se compara con el número esperado por independencia dentro de cada intervalo. Esta comparación es descriptiva y los cuatro frames de cada ventana no cubren todo el enlace.
+
+Las figuras usan etiquetas de unidades, ejes comparables y colores accesibles siguiendo las recomendaciones de [Nature sobre preparación de figuras](https://research-figure-guide.nature.com/figures/preparing-figures-our-specifications/).

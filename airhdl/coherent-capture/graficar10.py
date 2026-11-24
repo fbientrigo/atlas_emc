@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 from math import nan
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from zipfile import ZIP_DEFLATED, ZipFile
 
 
 GROUPS = tuple(f"d{i}" for i in range(7))
@@ -196,7 +195,7 @@ def main():
     if args.intervalo < 1:
         parser.error("--intervalo debe ser positivo")
     source = args.corrida / "data.csv" if args.corrida.is_dir() else args.corrida
-    target = source.parent / "graficos.zip"
+    target = source.parent / "graficos"
     try:
         import matplotlib
         matplotlib.use("Agg")
@@ -206,15 +205,9 @@ def main():
             folder = Path(staging)
             windows, histograms, first, last = read_capture(source, args.intervalo)
             save_outputs(plt, folder, windows, histograms, first, last, args.intervalo, source.parent.name)
-            archive = folder / target.name
-            with ZipFile(archive, "w", ZIP_DEFLATED) as output:
-                for path in sorted(folder.iterdir()):
-                    if path != archive:
-                        output.write(path, path.name)
-                capture_log = source.parent / "captura.log"
-                if capture_log.is_file():
-                    output.write(capture_log, capture_log.name)
-            archive.replace(target)
+            target.mkdir(exist_ok=True)
+            for result in folder.iterdir():
+                result.replace(target / result.name)
     except (OSError, ValueError, ImportError) as exc:
         parser.exit(1, f"Error: {exc}\n")
     print(target)

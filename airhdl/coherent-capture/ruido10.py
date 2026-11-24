@@ -123,17 +123,26 @@ def plot(rows, seconds, output, title, plt):
         for category, style in (("desvio", "-"), ("fase", ":")):
             y = [100 * ratio(r[f"g{i}_{category}"], r["validos"]) for r in rows]
             axes[0].plot(t, y, style, color=color, marker=".", label=f"g{i}/c0 · {category}")
+        if sum(r["validos"] for r in rows) and not any(r[f"g{i}_desvio"] for r in rows):
+            axes[0].text(.02, .90 - i * .14, f"g{i}/c0 · 0 desvíos observados",
+                         color=color, transform=axes[0].transAxes)
         baseline = [100 * ratio(r[f"g{i}_desvio"], r["validos"]) for r in rows]
         after = [100 * ratio(r[f"g{i}_desvio_despues_de_desvio"], r[f"g{i}_desvios_previos"])
                  for r in rows]
         axes[2].plot(t, after, ".-", color=color, label=f"g{i}/c0 · tras otro desvío")
         axes[2].plot(t, baseline, ":", color=color, label=f"g{i}/c0 · tasa del intervalo")
+    if not any(r["g0_desvios_previos"] or r["g1_desvios_previos"] for r in rows):
+        axes[2].text(.02, .85, "Sin desvíos previos para evaluar agrupamiento",
+                     transform=axes[2].transAxes)
     axes[1].plot(t, [r["coincidencias"] for r in rows], ".-", label="Misma ventana")
     axes[1].plot(t, [r["coincidencias_mismo_frame"] for r in rows], ".-", label="Mismo frame (fases resolubles)")
     axes[1].plot(t, [expected(r) for r in rows], "--", color="#55616c", label="Esperadas si son independientes")
-    axes[0].set(title="Patrón de referencia", ylabel="% de ventanas válidas")
+    axes[0].set(title="Ventanas distintas del patrón y cambios de fase", ylabel="% de ventanas válidas")
     axes[1].set(title="Desvíos en ambos canales", ylabel="Ventanas por intervalo")
     axes[2].set(title="¿Los desvíos se agrupan?", ylabel="% con desvío", xlabel="Minutos desde el primer snapshot")
+    if not any(r["g0_desvio"] or r["g1_desvio"] or r["g0_fase"] or r["g1_fase"] for r in rows):
+        for ax in axes:
+            ax.set_ylim(0, 1)
     for ax in axes:
         ax.legend(loc="best", ncols=2, fontsize=8)
         ax.grid(axis="y", alpha=.22)
@@ -144,22 +153,17 @@ def plot(rows, seconds, output, title, plt):
     plt.close(fig)
 
 
-def reversed_byte(value):
-    return int(f"{value:08b}"[::-1], 2)
-
-
 def plot_histograms(folder, histograms, patterns, title, plt):
     with (folder / "histograma_valores.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.writer(stream)
-        writer.writerow(["canal", "valor_hex", "total", "N", "N+1", "N+2", "N+3", "porcentaje",
-                         "valor_reverse_hex"])
+        writer.writerow(["canal", "valor_hex", "total", "N", "N+1", "N+2", "N+3", "porcentaje"])
         for group, phases in enumerate(histograms):
             counts = sum(phases, Counter())
             total = sum(counts.values())
             for value, count in sorted(counts.items()):
                 writer.writerow([f"g{group}/c0", f"0x{value:02X}", count,
                                  *(phase[value] for phase in phases),
-                                 f"{100 * count / total:.9g}", f"0x{reversed_byte(value):02X}"])
+                                 f"{100 * count / total:.9g}"])
 
     modes = [
         ("histograma_valores.png", "Ocurrencias · escala logarítmica", "log"),
@@ -168,7 +172,7 @@ def plot_histograms(folder, histograms, patterns, title, plt):
     ]
     for name, ylabel, mode in modes:
         fig, axes = plt.subplots(1, 2, figsize=(12, 4.6), layout="constrained")
-        fig.suptitle(f"{title} · histograma de bytes · reverse\nAzul: referencia   ·   Naranja: otros valores")
+        fig.suptitle(f"{title} · histograma de bytes · valores del CSV\nAzul: referencia   ·   Naranja: otros valores")
         for group, (ax, phases, pattern) in enumerate(zip(axes, histograms, patterns)):
             counts = sum(phases, Counter())
             total = sum(counts.values())
@@ -177,7 +181,7 @@ def plot_histograms(folder, histograms, patterns, title, plt):
             if not counts:
                 ax.text(.5, .5, "Sin ventanas válidas", ha="center", transform=ax.transAxes)
                 continue
-            raw_values = sorted(counts, key=reversed_byte)
+            raw_values = sorted(counts)
             heights = [counts[v] if mode != "percent" else 100 * counts[v] / total for v in raw_values]
             bottom = .7 if mode == "log" else 0
             if mode == "log":
@@ -190,7 +194,7 @@ def plot_histograms(folder, histograms, patterns, title, plt):
             stride = max(1, (len(heights) + 15) // 16)
             shown = sorted(set(range(0, len(heights), stride)) |
                            {i for i, value in enumerate(raw_values) if value in pattern[:2]})
-            ax.set_xticks(shown, labels=[f"0x{reversed_byte(raw_values[i]):02X}" for i in shown],
+            ax.set_xticks(shown, labels=[f"0x{raw_values[i]:02X}" for i in shown],
                           rotation=45 if len(shown) > 7 else 0)
             if len(bars) <= 12:
                 for bar, value in zip(bars, heights):
@@ -215,17 +219,17 @@ def plot_composition(folder, distributions, patterns, steps, title, plt):
         for when, row, total in zip(t, counts, totals):
             for value, count in row.items():
                 x.append(when)
-                y.append(reversed_byte(value))
+                y.append(value)
                 frequency.append(100 * count / total)
-        ax.set(title=f"g{group}/c0", ylabel="Byte · reverse", ylim=(-7, 263))
-        ticks = sorted(set([0, 64, 128, 192, 255]) | {reversed_byte(value) for value in pattern[:2]})
+        ax.set(title=f"g{group}/c0", ylabel="Byte · valores del CSV", ylim=(-7, 263))
+        ticks = sorted(set([0, 64, 128, 192, 255]) | {value for value in pattern[:2]})
         ax.set_yticks(ticks, labels=[f"0x{value:02X}" for value in ticks])
         if frequency:
             points = ax.scatter(x, y, c=frequency, s=14, cmap="viridis",
                                 norm=LogNorm(vmin=min(min(frequency), 10), vmax=100), linewidths=0)
             fig.colorbar(points, ax=ax, label="% de bytes del intervalo")
         bottom = [0] * len(t)
-        segments = [(f"0x{reversed_byte(value):02X}", [row[value] for row in counts], color)
+        segments = [(f"0x{value:02X}", [row[value] for row in counts], color)
                     for value, color in zip(pattern[:2], ("#276a8b", "#4e9683"))]
         segments.append(("Otros", [total - row[pattern[0]] - row[pattern[1]]
                                     for row, total in zip(counts, totals)], "#ba542c"))
@@ -250,20 +254,18 @@ def plot_composition(folder, distributions, patterns, steps, title, plt):
 
 
 def plot_detail(folder, detail, first, title, plt):
-    fig, axes = plt.subplots(4, 1, figsize=(12, 8), sharex=True, layout="constrained")
-    fig.suptitle(f"{title} · detalle de ventanas válidas")
-    for group in range(2):
-        for row, mode in enumerate(("crudo", "reverse")):
-            ax = axes[2 * group + row]
-            for phase in range(4):
-                values = [observed[group][phase] for _, observed in detail]
-                if row:
-                    values = list(map(reversed_byte, values))
-                ax.scatter(range(len(values)), values, label=("N" if phase == 0 else f"N+{phase}"), s=35, marker="osx^"[phase])
-            ax.set_ylabel(f"g{group}/c0\n{mode}")
-            ax.set_ylim(-8, 263)
-            ax.set_yticks([0, 64, 128, 192, 255], labels=["0x00", "0x40", "0x80", "0xC0", "0xFF"])
-            ax.grid(alpha=.18)
+    fig, axes = plt.subplots(2, 1, figsize=(12, 6), sharex=True, layout="constrained")
+    fig.suptitle(f"{title} · cuatro bytes por ventana · valores del CSV")
+    for group, ax in enumerate(axes):
+        for phase in range(4):
+            values = [observed[group][phase] for _, observed in detail]
+            ax.scatter(range(len(values)), values, label=("N" if phase == 0 else f"N+{phase}"),
+                       s=35, marker="osx^"[phase])
+        ax.set_ylabel(f"g{group}/c0")
+        ax.set_ylim(-8, 263)
+        ticks = sorted({0, 255} | {v for _, observed in detail for v in observed[group]})
+        ax.set_yticks(ticks, labels=[f"0x{value:02X}" for value in ticks])
+        ax.grid(alpha=.18)
     if detail:
         axes[0].legend(loc="upper right", ncols=4, fontsize=8)
         axes[-1].set_xticks(range(len(detail)),
@@ -329,8 +331,8 @@ def report(folder, rows, first, times, patterns, seconds):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("corrida", type=Path, help="carpeta de la corrida o data.csv")
-    parser.add_argument("--g0", type=reference, default="18:80", help="referencia cruda observada para g0/c0")
-    parser.add_argument("--g1", type=reference, default="40:0C", help="referencia cruda observada para g1/c0")
+    parser.add_argument("--g0", type=reference, default="C4:00", help="referencia cruda observada para g0/c0")
+    parser.add_argument("--g1", type=reference, default="0C:40", help="referencia cruda observada para g1/c0")
     parser.add_argument("--intervalo", type=int, default=60, help="segundos por intervalo")
     args = parser.parse_args()
     if args.intervalo <= 0:
